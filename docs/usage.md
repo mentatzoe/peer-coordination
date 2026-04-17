@@ -616,7 +616,7 @@ Send voice messages — cc-connect transcribes them automatically.
 ```toml
 [speech]
 enabled = true
-provider = "openai"    # or "groq"
+provider = "openai"    # or "groq", "gemini", "qwen", "local_mcp"
 language = ""          # "zh", "en", or auto-detect
 
 [speech.openai]
@@ -627,6 +627,11 @@ api_key = "sk-xxx"
 # [speech.groq]
 # api_key = "gsk_xxx"
 # model = "whisper-large-v3-turbo"
+
+# [speech.local_mcp]
+# command = "node"
+# entry = "/Users/yourname/.local/share/local-stt-mcp/mcp-server/dist/index.js"
+# model = "base.en"
 ```
 
 ### Install ffmpeg

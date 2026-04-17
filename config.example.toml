@@ -305,7 +305,7 @@ level = "info" # debug, info, warn, error
 
 # [speech]
 # enabled = true
-# provider = "openai"    # "openai", "groq", or "qwen" / "openai"、"groq" 或 "qwen"
+# provider = "openai"    # "openai", "groq", "qwen", "gemini", or "local_mcp"
 # language = ""          # e.g. "zh", "en"; empty = auto-detect / 如 "zh"、"en"；留空自动检测
 #
 # [speech.openai]
@@ -318,6 +318,15 @@ level = "info" # debug, info, warn, error
 # [speech.groq]
 # api_key = "gsk_xxx"
 # model = "whisper-large-v3-turbo"
+#
+# # Alternative: local MCP server (shares one local Whisper backend across bots)
+# # 备选：本地 MCP 服务（让多个 Bot 共用一个本地 Whisper 后端）
+# [speech.local_mcp]
+# command = "node"
+# entry = "/Users/yourname/.local/share/local-stt-mcp/mcp-server/dist/index.js"
+# args = []             # optional extra args / 可选附加参数
+# model = "base.en"     # or "tiny.en" for faster/lighter use / 也可用 "tiny.en"
+# tool = "transcribe"   # optional: defaults to "transcribe"
 
 # =============================================================================
 # Text-to-Speech (Voice Reply) / 文字转语音（语音回复）

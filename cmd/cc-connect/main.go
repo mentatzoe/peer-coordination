@@ -505,6 +505,14 @@ func main() {
 				} else {
 					slog.Warn("speech: gemini provider enabled but api_key is empty")
 				}
+			case "local_mcp":
+				command := cfg.Speech.LocalMCP.Command
+				args := core.JoinCommandArgs(cfg.Speech.LocalMCP.Entry, cfg.Speech.LocalMCP.Args)
+				if len(args) == 0 {
+					slog.Warn("speech: local_mcp provider enabled but no entry/args configured")
+				} else {
+					speechCfg.STT = core.NewLocalSTTMCP(command, args, cfg.Speech.LocalMCP.Model, cfg.Speech.LocalMCP.Tool)
+				}
 			default: // "openai" or unspecified
 				apiKey := cfg.Speech.OpenAI.APIKey
 				baseURL := cfg.Speech.OpenAI.BaseURL
