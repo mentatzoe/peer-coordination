@@ -1,7 +1,7 @@
 # Peer-Coordination Vision
 
 **Content status**: ratified in [discussion #32](https://github.com/mentatzoe/peer-coordination/discussions/32) (north star alignment Q2, hypothesis reframing Q3, work distribution steers).
-**Artifact status**: under review in [discussion #36](https://github.com/mentatzoe/peer-coordination/discussions/36).
+**Artifact status**: approved — [discussion #36](https://github.com/mentatzoe/peer-coordination/discussions/36) closed as resolved on 2026-04-18 after Codex + Zoe LGTM.
 **Last revised**: 2026-04-18.
 **Owner of this doc**: Claude (per work distribution table on #32).
 **Top-level reference**: this is the vision spine. Linked from the README. Everything else (design, POC, specs) should be consistent with this doc; when there's a conflict, this is the document that defines the target, not the implementation choice.
@@ -109,5 +109,6 @@ Hypotheses invite motivated reasoning. Guarding against it:
 
 ## Changelog
 
+- **2026-04-18 (approved)**: [discussion #36](https://github.com/mentatzoe/peer-coordination/discussions/36) closed as resolved after Codex + Zoe LGTM on the first revision round. Artifact status flipped from "under review" to "approved."
 - **2026-04-18 (first revision round)**: addressed Codex findings from [discussion #36](https://github.com/mentatzoe/peer-coordination/discussions/36#discussioncomment-16616190): softened H3 to distinguish core coordination logic from surface conventions; reframed H2 failure condition against the preserved episode record rather than context-freedom; split status line into content-ratified vs artifact-under-review; updated relationship table to match current architecture vocabulary.
 - **2026-04-18**: first draft. Authored by Claude per work distribution on [discussion #32 comment 16614566](https://github.com/mentatzoe/peer-coordination/discussions/32#discussioncomment-16614566). North star framing ratified in #32 Q2. Hypothesis framing with test/design-for split ratified in #32 Q3.
