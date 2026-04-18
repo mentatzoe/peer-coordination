@@ -1,6 +1,6 @@
 # POC — Peer Coordination Proof of Concept
 
-**Status**: Claude-authored sections revised 2026-04-18 per [discussion #37](https://github.com/mentatzoe/peer-coordination/discussions/37) feedback and downstream of the VISION.md revision round. Codex's Architecture → Tech Stack Mapping and Development Phases sections remain stubbed pending Codex's contribution per work distribution on [#32 comment 16614566](https://github.com/mentatzoe/peer-coordination/discussions/32#discussioncomment-16614566).
+**Status**: Co-authored draft revised 2026-04-18 per [discussion #37](https://github.com/mentatzoe/peer-coordination/discussions/37) feedback and downstream of the VISION.md / architecture revision rounds. Claude-authored scope + success/fail sections and Codex-authored Architecture → Tech Stack Mapping + Development Phases sections are now both present; the next step is integrated review on the full document.
 
 **Owners**: Claude (scope, success/fail conditions) + Codex (tech-stack mapping, development phases). Co-authored overall.
 
@@ -30,7 +30,7 @@ The first POC is a **two-agent conversational pilot in a designated Discord chan
 - **Substrate**: Discord, specifically one designated open-floor channel (current candidate: `#open-floor`, channel ID `1494836296336543774`).
 - **Activity domain for the first POC run**: intentionally left open — agents may converse about any topic the operator seeds. The first run is not scoped to software development specifically; H3 asks whether the **core coordination logic** transfers across goal domains, and the first POC can probe that by running different seed topics across sessions.
 - **Duration per session**: operator-bounded. No fixed length. Sessions end when the operator signals, when convergence feels clear, or when a failure mode is observed.
-- **Number of sessions before POC verdict**: TBD with Codex during phases section; early estimate is a handful (3–10), enough to see patterns beyond session-one noise but not so many that we're optimizing for the harness rather than learning from it.
+- **Number of sessions before POC verdict**: phase-bounded rather than fixed up front. Current planning assumption: **3–5 two-peer sessions** as the baseline evidence set, with an **optional 1–2 stretch sessions** if the Gemini extension is attempted. Enough to see patterns beyond session-one noise, but not so many that we optimize for the harness instead of learning from it.
 
 ### What the POC is NOT
 
@@ -98,50 +98,256 @@ Any of these makes the POC not credible and requires a rebuild of the harness.
 ### What counts as a signed-off POC exit
 
 - All three hypotheses have a documented stance (holds / doesn't hold / uncertain with reason).
-- Observations file has enough entries to support the stances (lower bound: N sessions worth of observations, where N is TBD in the phases section).
+- Observations file has enough entries to support the stances (current planning range: 3–5 baseline sessions, plus optional 1–2 stretch sessions if Phase 4 is entered).
 - A decision has been made on whether to proceed to H3 test runs on a second substrate.
 - Operator (Zoe) explicitly ratifies the POC conclusions.
 
 ---
 
-## Architecture → Tech Stack Mapping *(Codex to author)*
+## Architecture → Tech Stack Mapping *(Codex-authored)*
 
-*Per work distribution on #32, Codex owns the architecture-to-tech-stack mapping. Stub placeholder here; Codex to fill in with detail consistent with their `design/architecture.md` draft.*
+The architecture doc defines the POC in three layers. This section maps those layers to the actual moving parts of the first Discord-based probe.
 
-**Expected content:**
+### Layer map
 
-- How each of the three layers (transport / coordination / evaluation) maps onto concrete pieces of the POC:
-  - Layer 1 (transport) → cc-connect Discord platform adapter + `!stop`/`!resume` + open-floor mode + reactions + pinned-rules. Specs 001, 002, 003, 004, 005.
-  - Layer 2 (coordination) → pinned channel rules + emoji palette + internalized heuristics. Gap-fill content TBD.
-  - Layer 3 (evaluation) → observations file + session summaries + drift audit mechanism. Gap-fill content TBD.
-- Which existing specs map onto Layer 1 vs Layer 2 vs Layer 3.
-- Which Layer 2 and Layer 3 content is under-specified (per the layer-gap analysis) and needs new specs.
-- Concrete submodule structure if the POC lives as a submodule of this repo (per Zoe's tactical note on #32).
+| Architecture layer | POC responsibility | Concrete components in this POC | Current state | Main gaps / follow-on needs |
+|---|---|---|---|---|
+| **Layer 1 — Interop / transport substrate** | Put all participants into the same inspectable shared surface; preserve episode record; provide interruption and recovery | Discord channel; `cc-connect` as the Discord ↔ CLI bridge; Claude Code CLI harness; Codex CLI harness; operator account; channel history; pinned message support; reactions; `!stop` / `!resume`; designated open-floor channel binding | Partly available conceptually; implementation work still required downstream | concrete transport specs / implementation in the transport repo; channel binding and recovery behavior; Gemini bridge if stretch phase runs |
+| **Layer 2 — Coordination model** | Make shared norms visible and interpretable without hard-coding a moderator protocol | operator-managed pinned rules; emoji palette; channel-local norms; harness-side inference from shared context; escalation to operator when ambiguity persists | Partly defined in `VISION.md` and `design/architecture.md`; not yet fully materialized as a dedicated artifact | a clearer norms artifact if pinned rules become too ad hoc; possible future Layer 2 spec stream if the norm set hardens |
+| **Layer 3 — Evaluation of emergence and success** | Preserve evidence and judge whether coordination is real, legible, and informative | Discord transcript / preserved episode record; operator notes; [`observations/harness-behaviors.md`](../observations/harness-behaviors.md); post-session drift audit; post-session discussion review; hypothesis stances recorded against H1/H2/H3 | Structurally defined, but still mostly manual | stronger evaluation routine if manual review becomes too loose; possible Layer 3 spec stream for episode-record shape / audit procedure |
 
-*Codex: please append your content below this placeholder and remove the placeholder text. Leave the heading structure as-is for consistency.*
+### Concrete stack by component
+
+#### Shared substrate
+
+- **Discord** is the first substrate, not the framework.
+- The POC assumes one designated open-floor channel as the shared conversational surface.
+- Channel history plus pinned rules form the minimum shared context for both peers and the operator.
+
+#### Bridge / transport layer
+
+- **`cc-connect`** is the communications bridge between Discord and the local agent harnesses.
+- It is responsible for delivery, mention handling, session lifecycle, and substrate-local primitives.
+- It is **not** the agent harness and should stay policy-light.
+
+#### Agent harness layer
+
+- **Claude Code CLI** and **Codex CLI** are the initial harnesses for the two-peer baseline.
+- If attempted, **Gemini CLI** is a harness-diversity stretch, not part of the minimum viable POC.
+- A Gemini stretch run only counts as clean harness-diversity evidence if the transport story is called out honestly; if Gemini uses a different bridge path, the result blends harness and transport effects.
+
+#### Coordination surface
+
+- The coordination layer in this POC is intentionally thin:
+  - pinned rules
+  - emoji palette
+  - operator-visible conversation history
+  - local inference by each harness
+- This is enough to test whether peers can organize without introducing a host or explicit workflow protocol.
+
+#### Evaluation surface
+
+- The canonical episode evidence for the POC is:
+  - the preserved Discord transcript / channel history
+  - the pinned rules active for that run
+  - the operator's interventions
+  - post-session observations in [`observations/harness-behaviors.md`](../observations/harness-behaviors.md)
+  - review comments and conclusions in GitHub Discussions
+- This keeps evaluation post hoc and inspectable, consistent with `VISION.md` and `design/architecture.md`.
+
+### Spec / artifact mapping
+
+This repo does **not** currently have all POC-relevant specs landed on `main`, so the safest way to think about mapping is by capability stream, not just by spec number.
+
+- **Transport-facing capability streams** map to Layer 1:
+  - open-floor routing and interruption
+  - reaction / mention handling
+  - pinned-rules exposure
+  - session binding / recovery
+- **Coordination-facing capability streams** map to Layer 2:
+  - shared rule content
+  - emoji / signal conventions
+  - escalation expectations
+- **Evaluation-facing capability streams** map to Layer 3:
+  - episode-record preservation
+  - observation logging
+  - drift / legibility audit routine
+  - hypothesis verdict write-up
+
+If future spec work is created from this POC, it should be cut along those capability lines rather than forcing everything back into a single monolithic POC spec.
+
+### Recommended submodule shape
+
+Per Zoe's repo-sovereignty steer, the implementation-facing POC should live as a submodule under this repo once there is actual runnable code or config to isolate. Recommended shape:
+
+- `poc/discord-peer-coordination/` as the submodule root for the first runnable Discord probe
+
+Rationale:
+
+- keeps governance/design docs in this repo
+- keeps transport/harness implementation isolated
+- gives the POC a stable path for references from `design/poc.md`, review threads, and later observations
+
+Until that submodule exists, this document should treat the POC as a planned implementation surface rather than pretending the repo already contains the runnable harness.
 
 ---
 
-## Development Phases *(Codex to author)*
+## Development Phases *(Codex-authored)*
 
-*Per work distribution, Codex owns the phases. Stub placeholder; Codex fills in.*
+The POC should progress by **capability gates**, not by raw implementation volume. The point is to learn something credible about H1/H2/H3, not to build out an ever larger Discord bot surface.
 
-**Expected content:**
+### Phase 0 — Artifact alignment and planning
 
-- What phases the POC goes through from current state → signed-off exit.
-- Which existing specs need to land in which phase (e.g., 001 and 003 enable Phase 1; 004 enables Phase 2; etc.).
-- Which gap-fill Layer 2 / Layer 3 specs need to exist for each phase.
-- How many sessions per phase before moving to the next (guard against premature exit; guard against over-iteration).
-- What operator inputs are needed per phase.
-- Explicit gates between phases (when does each phase hand off to the next?).
+**Goal:** ensure the vision, architecture, and POC shape agree before implementation begins.
 
-*Codex: please append your content below this placeholder.*
+**Outputs:**
+
+- approved `VISION.md`
+- converged `design/architecture.md`
+- converged `design/poc.md`
+- named review threads for each artifact
+
+**Operator input needed:**
+
+- document arbitration where Claude and Codex materially disagree
+
+**Gate to next phase:**
+
+- vision and architecture are approved
+- this POC doc is strong enough to guide implementation without obvious scope ambiguity
+
+### Phase 1 — Two-peer substrate baseline
+
+**Goal:** get the minimum two-peer Discord harness running safely enough to observe real sessions.
+
+**Required capabilities:**
+
+- both primary peers can participate in the designated Discord channel
+- shared context is visible to both peers
+- `!stop` / `!resume` or equivalent operator interrupt works
+- episode record is preservable and reviewable after the session
+- pinned rules or equivalent shared coordination artifact is exposed in-channel
+
+**Likely dependency streams:**
+
+- Layer 1 transport work
+- channel binding / recovery behavior
+- baseline open-floor behavior
+
+**Operator input needed:**
+
+- channel selection / channel access
+- confirmation that the interrupt mechanism is acceptable
+- initial pinned-rule set for the first run
+
+**Gate to next phase:**
+
+- at least one dry run completes without transport ambiguity
+- operator can interrupt safely
+- post-session evidence is inspectable from preserved artifacts
+
+### Phase 2 — Two-peer baseline observation run
+
+**Goal:** gather the first real evidence for H1 and H2 on the minimum viable harness.
+
+**Planned session count:**
+
+- **3–5 two-peer sessions** across more than one seeded topic
+
+**What happens in this phase:**
+
+- run the two-peer probe
+- record operator interventions
+- log observations after each session
+- evaluate H1 convergence and H2 legibility against the preserved episode record
+- classify visible Discord couplings as surface conventions vs deeper architectural dependencies
+
+**Operator input needed:**
+
+- seed prompts / topics
+- post-session review participation
+- intervention when required by safety or ambiguity
+
+**Gate to next phase:**
+
+- enough sessions exist to say something non-anecdotal about H1/H2
+- failures, if any, are understood as either harness-credibility failures or genuine hypothesis pressure
+
+### Phase 3 — Credibility repair or confirmation
+
+**Goal:** decide whether the harness is credible enough to continue, and repair only what is necessary for credibility.
+
+**What happens in this phase:**
+
+- fix harness-breaking problems only:
+  - unsafe interrupt behavior
+  - missing or corrupted episode record
+  - evaluation method interfering with the session
+  - transport ambiguity that prevents interpretation of results
+- avoid tuning the system merely to make H1/H2 \"pass\"
+
+**Operator input needed:**
+
+- approval on whether a change is a credibility repair or a hypothesis-distorting optimization
+
+**Gate to next phase:**
+
+- either:
+  - the two-peer POC is judged credible enough to continue, or
+  - the harness is judged uninformative and the POC exits early as a failed probe
+
+### Phase 4 — Optional harness-diversity stretch
+
+**Goal:** run the optional Gemini-including stretch only if the two-peer baseline is already holding together.
+
+**Entry conditions:**
+
+- two-peer baseline is not collapsing
+- a transport path for Gemini is explicitly chosen and documented
+- the team accepts that findings may mix harness and transport effects if Gemini does not ride the same bridge path
+
+**Planned session count:**
+
+- **1–2 stretch sessions max**
+
+**Operator input needed:**
+
+- explicit go / no-go on attempting the stretch
+- confirmation that the added complexity is worth the signal
+
+**Gate to next phase:**
+
+- stretch findings are recorded as either:
+  - useful early H3-adjacent evidence, or
+  - too confounded to interpret cleanly
+
+### Phase 5 — POC exit and handoff
+
+**Goal:** end the POC with explicit conclusions rather than an indefinite pilot.
+
+**Required outputs:**
+
+- documented stance for each hypothesis:
+  - H1 holds / does not hold / uncertain
+  - H2 holds / does not hold / uncertain
+  - H3 is or is not still credibly testable in follow-on
+- sufficient observations to support those stances
+- decision on whether to proceed to a non-Discord H3 test
+- identified Layer 2 / Layer 3 gaps that should become follow-on artifacts or specs
+
+**Operator input needed:**
+
+- explicit ratification of the POC conclusions
+
+**Exit condition:**
+
+- the operator signs off on the hypothesis verdicts and the next-step decision
 
 ---
 
 ## Open Questions (cross-cutting)
 
-1. **How many total POC sessions before calling the experiment done?** Not a hard number, but range. TBD with phases.
+1. **How many total POC sessions before calling the experiment done?** Current planning range: 3–5 two-peer baseline sessions, plus optional 1–2 Gemini stretch sessions if Phase 4 is entered. Exact exit still depends on hypothesis clarity, not on hitting the top of the range mechanically.
 2. **Does the fresh-reader H2 test need to be an uninvolved human specifically, or can it be an agent that wasn't in the session?** Operator call. Using an agent is faster but risks shared training biases; a human is slower but cleaner.
 3. **At what point do we spin up the H3 substrate-transfer test?** Likely after POC signals H1 + H2 hold; but if H3 is designed-for at the architecture level, the test could run in parallel with later POC sessions rather than after.
 4. **How is drift-audit tooling built without violating the "unobtrusive evaluation" steer?** Post-hoc transcript analysis is fine; anything that runs during a session risks observer effect.
@@ -162,6 +368,7 @@ Any of these makes the POC not credible and requires a rebuild of the harness.
 
 ## Changelog
 
+- **2026-04-18 (Codex handoff pass)**: filled the previously stubbed **Architecture → Tech Stack Mapping** and **Development Phases** sections. Added a three-layer → concrete-stack mapping, capability-stream framing instead of overcommitting to spec numbers not yet landed on `main`, recommended submodule shape (`poc/discord-peer-coordination/`), and a phase plan from artifact alignment through optional Gemini stretch and POC exit. Also updated the scope's session-count sentence and the signed-off exit criterion to align with the newly-added phases section, and updated the top status line to reflect that the document is now a full co-authored draft rather than a partial handoff.
 - **2026-04-18 (transport/harness clarification)**: corrected a conflation flagged by Zoe on Discord — cc-connect is the transport/communications bridge, not the agent harness. Distinguished transport (cc-connect) from agent harness (the underlying CLI: Claude Code CLI, Codex CLI, Gemini CLI) in the Primary / Stretch participants descriptions. Reframed the H3-via-harness probe as testing agent-CLI semantics, not "cc-connect-shaped semantics." Added an open question for the Gemini stretch transport path (cc-connect adapter vs alternative bridge), since it blends with the harness-dependency finding if not called out.
 - **2026-04-18 (second revision round)**: revised in response to [#37](https://github.com/mentatzoe/peer-coordination/discussions/37) + downstream of VISION.md revisions (commits [`3ec72dc`](https://github.com/mentatzoe/peer-coordination/commit/3ec72dc), [`358af56`](https://github.com/mentatzoe/peer-coordination/commit/358af56)) + alignment to the latest `design/architecture.md` draft. Changes: added optional Gemini-CLI three-agent stretch participant per Zoe's [#37 comment](https://github.com/mentatzoe/peer-coordination/discussions/37#discussioncomment-16616215); reframed pilot-local assumptions explicitly as H3 "surface conventions" vs "core coordination logic"; updated H2 fresh-reader test to evaluate against the preserved episode record rather than a trailing turn window; updated H3 substrate-dependency audit to classify decisions as surface vs core rather than count substrate-coupling; added H3 harness-dependency probe tied to the stretch session; added complementarity observable to H1 tracking the architecture's Layer 3 failure taxonomy; added cross-references to `design/architecture.md` throughout. Codex-owned sections (Architecture → Tech Stack Mapping, Development Phases) remain stubbed pending Codex's contribution.
 - **2026-04-18**: initial draft by Claude covering Purpose / Scope / Success-Fail / Open Questions. Architecture-to-tech-stack mapping and Development Phases sections stubbed for Codex to complete per #32 work distribution.
