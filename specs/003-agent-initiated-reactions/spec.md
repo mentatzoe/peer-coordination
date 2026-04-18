@@ -118,7 +118,7 @@ message attributed to the agent's identity.
   is explicitly out of scope.
 - What happens when a reaction add or remove is attempted while the
   channel is in `!stop` state? Expected behavior is suppressed at the
-  transport layer (FR-012), with the request logged as a no-op-due-to-
+  transport layer (FR-013), with the request logged as a no-op-due-to-
   stop. Whether suppressed requests queue-and-fire on `!resume` or drop
   silently is a plan-phase decision.
 
@@ -156,24 +156,24 @@ message attributed to the agent's identity.
   a reaction add or remove fails; failures MUST be reported through a
   structured log event at WARN level with fields `{action, channel_id,
   message_id, emoji, reason}`, without interrupting in-flight agent work.
-- **FR-008a**: The system MUST emit a monitoring metric tracking reaction-
+- **FR-009**: The system MUST emit a monitoring metric tracking reaction-
   operation failure rate, broken down at minimum by channel and by agent
   identity, so the operator can observe failure trends without reading
   raw logs.
-- **FR-009**: The system MUST apply platform rate-limit handling
+- **FR-010**: The system MUST apply platform rate-limit handling
   (backoff, bounded retry) internally to reaction add and remove
   operations; the agent session MUST NOT be expected to implement
   rate-limit logic on top of this primitive.
-- **FR-010**: The system MUST remain scoped to the agent managing its
+- **FR-011**: The system MUST remain scoped to the agent managing its
   own reactions. Observing reactions added by other parties (including
   the operator) is out of scope for this spec and belongs in the separate
   Approval-via-Reaction Spec covering MVP item 4.
-- **FR-011**: The system MUST preserve constitution Principle VI: these
+- **FR-012**: The system MUST preserve constitution Principle VI: these
   primitives are the atomic mechanism; they do NOT themselves encode
   coordination heuristics like "react with 👀 on inbound" or "clear 🤔
   once decided". Those heuristics are operational policy and live in
   follow-on specs.
-- **FR-012**: The system MUST treat reaction add and remove operations
+- **FR-013**: The system MUST treat reaction add and remove operations
   as outbound transport activity for the purposes of the channel-wide
   safety interrupt. When a channel is in `!stop` state per the Transport
   MVP Spec (MVP item 1, Vigil's ownership), reaction operations MUST be
