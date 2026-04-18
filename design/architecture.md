@@ -6,7 +6,7 @@
 
 ## Purpose
 
-This document captures the current design-level convergence for the peer-coordination POC.
+This document captures the current design-level convergence for the peer-coordination framework.
 
 It is not a transport spec, not a governance amendment, and not a POC implementation plan. Its job is to make the architecture explicit before follow-on specs are written.
 
@@ -16,8 +16,8 @@ This document defines:
 
 - the three-layer abstraction
 - responsibilities and boundaries for each layer
-- minimum requirements for the initial POC
-- success tests for each layer
+- architectural capability requirements for each layer
+- architectural validation signals for each layer
 - cross-layer design constraints that emerged from Discussion #32 and the independent research spikes
 
 This document does not define:
@@ -41,7 +41,7 @@ The separation matters because the repo is otherwise at risk of collapsing:
 - social policy into governance
 - pilot measurements into permanent principles
 
-The initial POC should be strong enough to justify later portability testing, but it does not need to prove substrate-agnosticism up front.
+Concrete substrate choice, implementation detail, and pilot measurement thresholds belong in the POC document, not here.
 
 ## Layer 1: Interop / Transport Substrate
 
@@ -67,7 +67,7 @@ Layer 1 does **not** decide:
 
 It enables interaction. It does not socially organize it.
 
-### Minimum requirements for the initial POC
+### Architectural capability requirements
 
 - A shared surface where all participating peers and the operator can see the same conversation state.
 - A clear way to distinguish peers and operator-visible authorship.
@@ -75,9 +75,9 @@ It enables interaction. It does not socially organize it.
 - Enough session continuity to preserve context across an ongoing coordination episode.
 - Enough substrate support to expose pinned or otherwise shared rules to all peers in the same environment.
 
-### Success test
+### Architectural validation signals
 
-Layer 1 is successful in the initial POC if:
+Layer 1 is behaving correctly if:
 
 - peers can participate in a shared conversation without hidden routing authority
 - the operator can interrupt or recover the session without ambiguity
@@ -109,7 +109,7 @@ Layer 2 does **not** require:
 
 Layer 2 should stay closer to norms and affordances than to finite-state workflow.
 
-### Minimum requirements for the initial POC
+### Architectural capability requirements
 
 - A thin visible norm set, shared in-channel, that helps peers infer how to collaborate.
 - Space for peers to contribute differently to the current shared activity, whether that activity is coding, planning, discussion, or play.
@@ -117,9 +117,9 @@ Layer 2 should stay closer to norms and affordances than to finite-state workflo
 - A way for ambiguity or conflict to escalate to the operator without pretending the peers can always self-resolve.
 - No requirement that peers express coordination through rigid, explicit protocol acts.
 
-### Success test
+### Architectural validation signals
 
-Layer 2 is successful in the initial POC if:
+Layer 2 is behaving correctly if:
 
 - coordination emerges without a host or hidden selector
 - the resulting interaction remains human-readable
@@ -131,7 +131,7 @@ Layer 2 is successful in the initial POC if:
 
 ### Responsibility
 
-Layer 3 determines how the POC will be judged after the fact.
+Layer 3 determines how coordination episodes should be evaluated after the fact.
 
 It owns:
 
@@ -153,7 +153,7 @@ It does **not**:
 
 Evaluation should primarily happen post hoc from transcripts and associated operator observations.
 
-### Minimum requirements for the initial POC
+### Architectural capability requirements
 
 - A durable observation surface for recording what happened, including failures and operator rescues.
 - A way to assess legibility from the resulting transcript.
@@ -161,11 +161,11 @@ Evaluation should primarily happen post hoc from transcripts and associated oper
 - A way to track operator intervention frequency and why it was needed.
 - A way to feed findings back into the next iteration of the design.
 
-### Success test
+### Architectural validation signals
 
-Layer 3 is successful in the initial POC if:
+Layer 3 is behaving correctly if:
 
-- the POC is falsifiable rather than anecdotal
+- a concrete validation run is falsifiable rather than anecdotal
 - failures and near-misses are captured, not only successes
 - a fresh human reader can understand what happened and why
 - the team can tell the difference between real coordination and parallel output with light mutual acknowledgment
@@ -189,13 +189,9 @@ The operator must retain the ability to interrupt, ratify, or redirect. That doe
 
 The team wants to observe emergent coordination, not distort it through intrusive instrumentation. Evaluation should therefore lean on transcript review, observations, and retrospective analysis.
 
-### POC-first is the right scope
+### Validation should be incremental
 
-The initial specs and implementation work can be substrate-specific if needed. Portability should remain a design consideration, but not a premature burden on every POC artifact.
-
-### The POC should remain repo-sovereign
-
-The POC may live as a submodule under this repository so that governance, design, and pilot work remain discoverable from the same root while still preserving implementation isolation.
+The framework can be validated on one substrate before broader portability claims are made. Portability should remain a design consideration, but not a premature burden on every artifact.
 
 ## Implications for Follow-On Artifacts
 
@@ -203,7 +199,7 @@ This architecture suggests the next artifact types should stay distinct:
 
 - **North star / hypothesis**: project-level intent
 - **Design / architecture**: layer model and constraints
-- **POC document**: scope, success/fail condition, architecture-to-tech-stack mapping, phases
+- **POC document**: concrete substrate choice, success/fail condition, architecture-to-tech-stack mapping, phases, and measurable pilot thresholds
 - **Follow-on specs**: narrower deliverables that fall out of the POC plan rather than being invented in advance
 
 It also implies that roadmap cleanup should happen after the POC phases and missing steps are clearer, not before.
