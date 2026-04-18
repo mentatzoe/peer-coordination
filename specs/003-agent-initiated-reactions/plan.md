@@ -57,17 +57,19 @@ specs/003-agent-initiated-reactions/
 ```text
 cc-connect/
 ├── core/
-│   ├── agent.go                    # Extend AgentSession with Reaction(Add|Remove) methods OR define optional Reactor interface
-│   └── engine.go                   # Route reaction requests from sessions to platform
+│   ├── agent.go (or new reactor.go) # Define optional Reactor interface + supporting types per contracts/agent-session-reactor.md
+│   └── engine.go                    # Route reaction requests from sessions to platform
 ├── platform/
 │   └── discord/
-│       ├── discord.go              # Register Reactor capability
-│       ├── reactions.go            # NEW — add/remove reaction impl via discordgo
-│       └── reactions_test.go       # NEW — unit tests
+│       ├── discord.go               # Register Reactor capability
+│       ├── reactions.go             # NEW — add/remove reaction impl via discordgo
+│       └── reactions_test.go        # NEW — unit tests
 └── tests/
     └── integration/
-        └── reactions_test.go       # NEW — end-to-end test with stub platform
+        └── reactions_test.go        # NEW — end-to-end test with stub platform
 ```
+
+Design decision locked: **optional capability interface** (`core.Reactor`), not interface extension on `AgentSession`. See `contracts/agent-session-reactor.md` for the Go signature.
 
 **Structure Decision**: Additive changes to cc-connect's existing `platform/discord/` package, with a narrow interface extension at the `core/` boundary. No new top-level packages or services. The feature is implemented as a capability interface (`Reactor`) so platforms that don't support reactions (if any) can opt out cleanly — consistent with the "optional capability interfaces" pattern already used in cc-connect (`CardSender`, `InlineButtonSender`, `ProviderSwitcher`).
 

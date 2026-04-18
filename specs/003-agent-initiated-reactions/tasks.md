@@ -27,8 +27,8 @@
 
 **Purpose**: Prepare the cc-connect repo for item-3 work. Minimal because most infra already exists.
 
-- [ ] T001 Create feature branch `003-agent-initiated-reactions` in `mentatzoe/cc-connect` from current `main`. File: `.git/HEAD`.
-- [ ] T002 [P] Confirm `go test ./...`, `go vet ./...`, and `go build ./...` all pass on main before any new code lands. File: CI check on baseline.
+- [ ] T001 Create feature branch `003-agent-initiated-reactions` in `mentatzoe/cc-connect` from current `main`. Target: git branching in the cc-connect repo; no file edits.
+- [ ] T002 [P] Confirm `go test ./...`, `go vet ./...`, and `go build ./...` all pass on cc-connect main before any new code lands. Target: baseline CI check; no file edits.
 
 ---
 
@@ -41,7 +41,7 @@
 - [ ] T003 [P] Add `Reactor` interface + supporting types (`ReactionRequest`, `ReactionDirection`, `ReactionOutcome`, `FailureReason`, `ReactionResult`) per `contracts/agent-session-reactor.md`. File: `core/agent.go` (or new `core/reactor.go` if clearer).
 - [ ] T004 [P] Add capability-detection helper `ReactorFor(platform)` returning `(Reactor, bool)` via type assertion. File: `core/capabilities.go` (may already exist; extend if so).
 - [ ] T005 [P] Export a stable `FailureReason` string set (match `data-model.md` exactly) and add godoc comments linking each reason to its source FR. File: `core/agent.go` or `core/reactor.go`.
-- [ ] T006 **BLOCKED externally**: Wire `InterruptState` lookup from the Transport MVP (Vigil's `001-transport-mvp` work in `mentatzoe/cc-connect`). If `InterruptState` is not yet exposed at the `core/` level, coordinate with Vigil before proceeding. File: integration point TBD.
+- [ ] T006 **BLOCKED externally**: Wire `InterruptState` lookup from the Transport MVP (Vigil's `001-transport-mvp` work in `mentatzoe/cc-connect`). Vigil's PR #29 T004 introduces "engine-side interrupt state helpers for the designated pilot channel in `core/engine.go`"; this task depends on those helpers being exposed as a public `core/` surface (not 001-internal) so 003's reaction path can consume them. Cross-spec contract clarification surfaced as finding #2 on PR #29. File: integration point in `platform/discord/reactions.go`, depending on whatever public lookup Vigil's 001 lands.
 - [ ] T007 [P] Extend the core test-helper stub platform with a `StubReactor` that records `ReactionRequest` calls and returns configurable `ReactionResult` values. File: `core/testhelpers_test.go` or `core/stubs.go`.
 
 **Checkpoint**: Foundation ready — US1 and US2 may now proceed (parallel at the method level, serial at the file level since both touch `platform/discord/reactions.go`).
@@ -100,7 +100,7 @@
 ## Phase 5: Polish & Cross-cutting
 
 - [ ] T025 Implement `ReactionFailureRateMetricEvent` rolling-window emission (schema from `data-model.md`). Window size: start with 60 seconds; make it a configurable knob in `config.toml` with a sensible default. File: `platform/discord/reactions_metric.go` (new) or extension of `reactions.go`.
-- [ ] T026 [P] Update cc-connect documentation (README and/or CLAUDE.md) with a short "Reactions" section pointing at this spec in the peer-coordination repo. File: `README.md` and/or `CLAUDE.md` in cc-connect.
+- [ ] T026 [P] Add a "Reactor capability" section to cc-connect's `CLAUDE.md` under the existing "Optional capability interfaces" guidance, listing `core.Reactor` alongside `CardSender`, `InlineButtonSender`, `ProviderSwitcher`. Include: (a) one-sentence purpose, (b) the platforms that implement it (initially: Discord only), (c) a link to this spec's PR in the peer-coordination repo. Keep it ≤ 15 lines. File: `CLAUDE.md` in cc-connect.
 - [ ] T027 [P] Traceability matrix: verify each FR (FR-001 through FR-013) is exercised by at least one test listed above. Produce a table in `specs/003-agent-initiated-reactions/traceability.md` in this repo (not cc-connect) if any gap is found. File: `specs/003-agent-initiated-reactions/traceability.md` (this repo).
 - [ ] T028 Run full `go test ./... -race` on the cc-connect branch; all pass before merge. File: CI green.
 - [ ] T029 Code review round on the cc-connect PR, with Codex (Vigil) as the independent reviewer per constitution Governance §independent-review. File: PR review comments.

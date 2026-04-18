@@ -19,6 +19,11 @@
 - **Q:** Should the spec define a restricted emoji palette agents are allowed to emit, or stay permissive?
   **A:** Stay permissive (Option A). Any valid emoji is allowed at transport level. Palette conventions (✅👀🤔🚫⏸️) are operational policy per constitution Principle VI and live in follow-on operational specs, not here.
 
+### Session 2026-04-18 (afternoon amendment)
+
+- **Q:** Should the observability log-event field set include session-correlation fields?
+  **A:** Yes (Option A of the self-review findings). FR-008's structured log event expands from the original 5-field set `{action, channel_id, message_id, emoji, reason}` to the 7-field set `{action, channel_id, message_id, emoji, reason, session_id, agent_identity}`. Rationale: correlating failures back to the originating agent session and the specific bot identity is load-bearing for observability, and the fields were already present in `data-model.md`'s `ReactionFailureLogEvent` schema and `tasks.md` T011 — the spec is being aligned with the downstream design rather than the other way around. Zoe and Vigil both approved the amendment (Discord, 2026-04-18 morning).
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Signal lightweight state via emoji (Priority: P1)
@@ -155,7 +160,10 @@ message attributed to the agent's identity.
 - **FR-008**: The system MUST NOT block or fail an agent session because
   a reaction add or remove fails; failures MUST be reported through a
   structured log event at WARN level with fields `{action, channel_id,
-  message_id, emoji, reason}`, without interrupting in-flight agent work.
+  message_id, emoji, reason, session_id, agent_identity}`, without
+  interrupting in-flight agent work. (Expanded from the original 5-field
+  set to include session_id and agent_identity; see Clarifications
+  Session 2026-04-18 afternoon amendment.)
 - **FR-009**: The system MUST emit a monitoring metric tracking reaction-
   operation failure rate, broken down at minimum by channel and by agent
   identity, so the operator can observe failure trends without reading
@@ -203,8 +211,9 @@ message attributed to the agent's identity.
 - **SC-003**: Reaction add/remove failures (deleted target, permission
   denied, invalid emoji, rate-limit saturation, cross-user removal
   attempt, `!stop`-suppressed) surface as structured WARN-level log
-  events with the documented field set, without interrupting the
-  agent's session.
+  events with the documented 7-field set (`action`, `channel_id`,
+  `message_id`, `emoji`, `reason`, `session_id`, `agent_identity`),
+  without interrupting the agent's session.
 - **SC-004**: The failure-rate metric is queryable per channel and per
   agent identity, so the operator can detect a rising failure trend in
   one channel or from one bot without reading logs.
