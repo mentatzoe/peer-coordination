@@ -1,6 +1,6 @@
 # Specification Quality Checklist: Transport MVP
 
-**Purpose**: Validate specification completeness and quality before proceeding to planning  
+**Purpose**: Validate specification completeness and quality before clarification or planning  
 **Created**: 2026-04-18  
 **Feature**: [spec.md](../spec.md)
 
@@ -31,4 +31,6 @@
 
 ## Notes
 
-- Ready for `/speckit.plan`.
+- Narrowed after scope split to preserve designations between `001`, `002`,
+  and `003`
+- Ready for human review and `/speckit.clarify`
