@@ -1,10 +1,13 @@
 <!--
 Sync Impact Report
-- Version change: 1.3.0 → 1.4.0 (MINOR — removes the P1–P4 follow-on-spec roadmap paragraph from the Specification Workflow section; keeps the 5-step promotion path intact and preserves subordination-to-constitution language)
-- Amendment rationale: Zoe executive decision on 2026-04-18 ([discussion #32 comment](https://github.com/mentatzoe/peer-coordination/discussions/32#discussioncomment-16617193)) to move the roadmap out of the constitution so it can change at project speed without requiring a constitutional amendment every time priorities shift. The roadmap's new source of truth is `design/poc.md`'s Development Phases table (and any follow-on planning artifact that supersedes it). Symmetrical with v1.1.0, which originally added the roadmap as a MINOR change.
-- Modified principles: none
+- Version change: 1.4.0 → 1.5.0 (MINOR — aligns the constitution with the newly-landed canonical design artifacts: VISION.md, design/architecture.md, design/poc.md; expands Scope and Deliverables to name them; adds a pointer to ROADMAP.md in the Specification Workflow section; enriches Principle II to reference the three-layer architectural model)
+- Amendment rationale: Zoe feedback on [discussion #40 comment 16617623](https://github.com/mentatzoe/peer-coordination/discussions/40#discussioncomment-16617623) asked for the constitution to be aligned with the now-landed design artifacts (VISION / architecture / POC), not just the P1–P4 roadmap removal. This amendment names those artifacts as canonical-and-subordinate, updates the minimum durable outputs list, points the roadmap reference at ROADMAP.md + design/poc.md, and enriches Principle II with the three-layer model that now formalizes the transport-vs-governance boundary. No principles are added or removed; alignment is reference-level, not content duplication.
+- Modified principles:
+  - II. Transport Is Plumbing, Not Governance — added one sentence referencing the canonical three-layer model in design/architecture.md as the definition of the transport/non-transport boundary
+  - VI. Coordination Is Human-Legible, Not Over-Protocolized — broadened "follow-on specs" to "follow-on specs or POC-level design artifacts such as design/poc.md"
 - Modified sections:
-  - Specification Workflow and Roadmap → renamed to Specification Workflow; P1–P4 roadmap paragraph removed; replacement sentence points out that the roadmap now lives outside this document
+  - Scope and Deliverables — added Canonical Design Artifacts subsection naming VISION.md, design/architecture.md, design/poc.md; expanded the minimum-durable-outputs list to include them and the observations/ surface
+  - Specification Workflow — the roadmap pointer now names ROADMAP.md and design/poc.md Development Phases explicitly
 - Added principles: none
 - Removed principles: none
 - Templates requiring updates:
@@ -14,15 +17,16 @@ Sync Impact Report
   - templates/scratchpad.md ✅ no changes needed
   - templates/document-review-discussion.md ✅ no changes needed
   - AGENTS.md ✅ no changes needed
-  - CLAUDE.md ✅ verified 2026-04-19 — no P1–P4 naming references; the "Transport MVP" mention is about implementation work, not the constitutional roadmap
-  - README.md ✅ verified 2026-04-19 — points to `ROADMAP.md` as the new roadmap SOT, no stale P1–P4 references
+  - CLAUDE.md ✅ verified 2026-04-19 — already references VISION/architecture/POC in its "Current State" and "Reference Material" sections
+  - README.md ✅ verified 2026-04-19 — already links to VISION, architecture, POC, and ROADMAP
 - Follow-up TODOs:
-  - Piece 2 from [discussion #32 comment](https://github.com/mentatzoe/peer-coordination/discussions/32#discussioncomment-16617193): Codex-led roadmap adjustment — adopt `design/poc.md` Development Phases as the new SOT, audit existing vs needed specs, assign ownership.
+  - Piece 2 from [discussion #32 comment 16617193](https://github.com/mentatzoe/peer-coordination/discussions/32#discussioncomment-16617193): Codex-led roadmap adjustment — ROADMAP.md draft already landed; review cycle remains.
 - Prior history:
+  - 1.4.0 (ratified 2026-04-19) — removed the P1–P4 follow-on-spec roadmap from the Specification Workflow section; kept the 5-step promotion path.
   - 1.3.0 (ratified 2026-04-18) — added independent-review expectation for material changes before promotion.
   - 1.2.0 (ratified 2026-04-18) — added the explicit promotion-boundary rule to Principle III and Governance; updated the scratchpad template to match.
   - 1.1.1 (ratified 2026-04-18) — trimmed Principle VI to governance-only language; moved heuristics and mechanism language back to follow-on spec territory.
-  - 1.1.0 (ratified 2026-04-18) — added Principle VI (since trimmed), expanded Principle III scratchpad definition, added P1–P4 roadmap priorities (now removed in 1.4.0), MVP scope clarification (since trimmed).
+  - 1.1.0 (ratified 2026-04-18) — added Principle VI (since trimmed), expanded Principle III scratchpad definition, added P1–P4 roadmap priorities (removed in 1.4.0), MVP scope clarification (since trimmed).
   - 1.0.0 (ratified 2026-04-18) — initial constitution with principles I–V, Scope and Deliverables, Specification Workflow and Roadmap, Governance.
 -->
 
@@ -45,8 +49,11 @@ plumbing, not as the source of coordination policy. Transport may enforce
 selected mechanics such as routing, interruption, reactions, or channel-scoped
 controls, but it MUST NOT become the only place where the collaboration model is
 defined. Governance belongs in this repository; transport repos implement the
-parts that need code. This keeps the standard understandable even when multiple
-transports or runtime setups exist.
+parts that need code. The canonical three-layer model in
+[`design/architecture.md`](../../design/architecture.md) (Layer 1 transport,
+Layer 2 coordination, Layer 3 evaluation) defines the boundary between what
+transport owns and what it does not; transport is Layer 1 only. This keeps the
+standard understandable even when multiple transports or runtime setups exist.
 
 ### III. Scratchpad First, Then Promotion
 Live coordination MAY begin in a scratchpad such as `ideas/peer-coordination.md`
@@ -87,7 +94,8 @@ that.
 Multi-agent collaboration MUST remain legible to the human operator and SHOULD
 prefer heuristic, operator-centered coordination over brittle handshake
 protocols. Specific coordination heuristics, acknowledgment behaviors, and
-loop-management rules are operational and belong in follow-on specs.
+loop-management rules are operational and belong in follow-on specs or
+POC-level design artifacts such as [`design/poc.md`](../../design/poc.md).
 
 ## Scope and Deliverables
 
@@ -103,11 +111,40 @@ This repository defines the peer-coordination standard itself.
   implementation so that downstream repos are consumers of the standard rather
   than parents of it.
 
+### Canonical Design Artifacts
+
+Alongside this constitution, the following design artifacts are canonical and
+subordinate to it:
+
+- **[`VISION.md`](../../VISION.md)** — north-star statement and the falsifiable
+  hypotheses (H1 convergence, H2 legibility, H3 generalizability) that the
+  first POC is organized around.
+- **[`design/architecture.md`](../../design/architecture.md)** — three-layer
+  architectural model (transport / coordination / evaluation) with capability
+  requirements, failure taxonomies, and validation signals per layer.
+- **[`design/poc.md`](../../design/poc.md)** — proof-of-concept scope,
+  participants, KPIs, and development phases for the first Discord-based
+  peer-coordination probe.
+
+Amendments to these artifacts follow the same independent-review and
+operator-directed-promotion expectations as constitutional amendments. When a
+design artifact conflicts with this constitution, the constitution wins once
+amended and ratified; conversely, the constitution is expected to reflect
+canonical framing established in these artifacts via amendment rather than
+drift.
+
+### Minimum durable outputs
+
 The minimum durable outputs of this repo are:
 
 - a ratified constitution
+- the canonical design artifacts named above: `VISION.md`,
+  `design/architecture.md`, `design/poc.md`
 - feature specs for important slices of the standard
-- a live coordination scratchpad while work is active
+- a live coordination scratchpad or equivalent review-discussion surface while
+  work is active
+- a field-journal / observations surface (`observations/`) capturing
+  cross-session learnings that feed back into design and governance
 - explicit records of confirmed decisions, open questions, and next actions
 
 ## Specification Workflow
@@ -123,9 +160,10 @@ Work in this repository MUST follow a simple promotion path:
 
 Follow-on specs MUST stay subordinate to the constitution and MUST NOT silently
 redefine its principles. The current roadmap — which follow-on specs to cut,
-in what order, and who owns what — is maintained outside this document so it
-can change at project speed without requiring a constitutional amendment every
-time priorities shift.
+in what order, and who owns what — is maintained in
+[`ROADMAP.md`](../../ROADMAP.md) and tracks the development phases defined in
+[`design/poc.md`](../../design/poc.md). The roadmap can change at project speed
+without requiring a constitutional amendment every time priorities shift.
 
 ## Governance
 
@@ -157,4 +195,4 @@ Compliance review expectations:
 - Scratchpad conclusions that become durable policy MUST be promoted here
   promptly.
 
-**Version**: 1.4.0 | **Ratified**: 2026-04-18 | **Last Amended**: 2026-04-19
+**Version**: 1.5.0 | **Ratified**: 2026-04-18 | **Last Amended**: 2026-04-19
