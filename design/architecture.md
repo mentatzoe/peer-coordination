@@ -18,14 +18,23 @@ This document defines:
 - responsibilities and boundaries for each layer
 - architectural capability requirements for each layer
 - architectural validation signals for each layer
-- cross-layer design constraints that emerged from Discussion #32 and the independent research spikes
+- cross-layer design constraints derived from the source materials listed below
 
 This document does not define:
 
 - the project north star or hypothesis
 - the POC tech stack and development phases
+- concrete substrate selection, implementation-specific detail, or pilot measurement thresholds
 - detailed Discord behavior or command schemas
 - constitutional amendments
+
+## Source Basis
+
+This document is based on the following inputs:
+
+- [Discussion #32: roadmap separation and gap analysis](https://github.com/mentatzoe/peer-coordination/discussions/32)
+- [non-orchestrated-peer-coordination-codex.md](/Users/zmll/github/peer-coordination/docs/research/non-orchestrated-peer-coordination-codex.md)
+- [non-orchestrated-peer-coordination-claude.md](/Users/zmll/github/peer-coordination/docs/research/non-orchestrated-peer-coordination-claude.md)
 
 ## Design Position
 
@@ -35,13 +44,11 @@ The current working architecture separates peer coordination into three layers:
 2. **Coordination model**
 3. **Evaluation of emergence and success**
 
-The separation matters because the repo is otherwise at risk of collapsing:
+The separation matters because the framework is otherwise at risk of collapsing:
 
 - transport behavior into social policy
 - social policy into governance
 - pilot measurements into permanent principles
-
-Concrete substrate choice, implementation detail, and pilot measurement thresholds belong in the POC document, not here.
 
 ## Layer 1: Interop / Transport Substrate
 
@@ -193,18 +200,8 @@ The team wants to observe emergent coordination, not distort it through intrusiv
 
 The framework can be validated on one substrate before broader portability claims are made. Portability should remain a design consideration, but not a premature burden on every artifact.
 
-## Implications for Follow-On Artifacts
-
-This architecture suggests the next artifact types should stay distinct:
-
-- **North star / hypothesis**: project-level intent
-- **Design / architecture**: layer model and constraints
-- **POC document**: concrete substrate choice, success/fail condition, architecture-to-tech-stack mapping, phases, and measurable pilot thresholds
-- **Follow-on specs**: narrower deliverables that fall out of the POC plan rather than being invented in advance
-
-It also implies that roadmap cleanup should happen after the POC phases and missing steps are clearer, not before.
-
 ## References
 
+- [Discussion #32: roadmap separation and gap analysis](https://github.com/mentatzoe/peer-coordination/discussions/32)
 - [non-orchestrated-peer-coordination-codex.md](/Users/zmll/github/peer-coordination/docs/research/non-orchestrated-peer-coordination-codex.md)
 - [non-orchestrated-peer-coordination-claude.md](/Users/zmll/github/peer-coordination/docs/research/non-orchestrated-peer-coordination-claude.md)
