@@ -1,23 +1,23 @@
 <!--
 Sync Impact Report
-- Version change: 1.1.1 → 1.2.0 (MINOR — adds an explicit promotion-boundary rule to the constitutional layer and updates the scratchpad template to match)
-- Amendment rationale: after the v1.1.1 trim, Zoe approved a follow-on governance rule: scratchpad discussion may stage proposed changes, but durable artifacts are amended only through an explicit operator-directed promotion step. This clarifies the difference between scratchpad convergence and artifact modification, and prevents discussion from being mistaken for ratification. Scratchpad: `ideas/constitution-amendment-review.md`.
-- Modified principles:
-  - III. Scratchpad First, Then Promotion — expanded to state that scratchpad convergence alone does not amend durable artifacts; promotion requires an explicit operator-directed step
+- Version change: 1.2.0 → 1.3.0 (MINOR — adds an explicit independent-review expectation for material changes before promotion)
+- Amendment rationale: Zoe approved the generalized constitutional form of a review-separation rule: material changes should receive independent review from an agent or human other than the primary author. The intent is independence of review, not PR-specific workflow. This strengthens governance review expectations without hard-coding tool-specific process. Scratchpad: `ideas/constitution-amendment-review.md`.
+- Modified principles: none
 - Modified sections:
-  - Governance — amendment procedure clarified so agent alignment is insufficient without an explicit operator-directed promotion step
+  - Governance — compliance review expectations expanded to include independent review by someone other than the primary author for material changes
 - Added principles: none
 - Removed principles: none
 - Templates requiring updates:
   - .specify/templates/plan-template.md ✅ no changes needed
   - .specify/templates/spec-template.md ✅ no changes needed
   - .specify/templates/tasks-template.md ✅ no changes needed
-  - templates/scratchpad.md ✅ updated to encode the promotion boundary in the scratchpad workflow
+  - templates/scratchpad.md ✅ no changes needed
   - AGENTS.md ✅ no changes needed
   - CLAUDE.md ✅ no changes needed
 - Follow-up TODOs:
   - When the Transport MVP Spec is written, it MUST incorporate the 7 coordination heuristics, the react-driven loop-prevention choice, and the "transport MUST NOT block inter-agent replies" rule.
 - Prior history:
+  - 1.2.0 (ratified 2026-04-18) — added the explicit promotion-boundary rule to Principle III and Governance; updated the scratchpad template to match.
   - 1.1.1 (ratified 2026-04-18) — trimmed Principle VI to governance-only language; moved heuristics and mechanism language back to follow-on spec territory.
   - 1.1.0 (ratified 2026-04-18) — added Principle VI (since trimmed), expanded Principle III scratchpad definition, added P1–P4 roadmap priorities, MVP scope clarification (since trimmed).
   - 1.0.0 (ratified 2026-04-18) — initial constitution with principles I–V, Scope and Deliverables, Specification Workflow and Roadmap, Governance.
@@ -166,9 +166,12 @@ Amendments require:
 Compliance review expectations:
 
 - New specs MUST state how they comply with the constitution.
+- Material changes to constitutions, specs, or project guidance SHOULD receive
+  independent review from an agent or human other than the primary author
+  before promotion.
 - Downstream implementation work MUST preserve the transport-versus-governance
   boundary.
 - Scratchpad conclusions that become durable policy MUST be promoted here
   promptly.
 
-**Version**: 1.2.0 | **Ratified**: 2026-04-18 | **Last Amended**: 2026-04-18
+**Version**: 1.3.0 | **Ratified**: 2026-04-18 | **Last Amended**: 2026-04-18

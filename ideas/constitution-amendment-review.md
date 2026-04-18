@@ -18,7 +18,7 @@
 
 ---
 
-**Status**: `ready to promote` — v1.1.1 kept; promotion-boundary rule adopted; template and constitution updated
+**Status**: `ready to promote` — latest constitution kept; promotion-boundary and independent-review rules adopted
 **Authors**: Zoe, Claude (Station), Codex
 **Created**: 2026-04-18
 **Last Updated**: 2026-04-18
@@ -114,6 +114,9 @@ Implementation decision:
 - add the promotion-boundary rule to `templates/scratchpad.md`
 - add the same rule to the constitution so it is visible in the canonical
   governance document, not only in the scratchpad
+- add a generalized independent-review expectation to the constitution:
+  material changes SHOULD receive review from an agent or human other than the
+  primary author before promotion
 
 ## Resolved Questions *(edit in place)*
 
@@ -138,6 +141,9 @@ Implementation decision:
 - **Should this repo adopt an explicit rule that scratchpad-based discussion does not directly modify durable artifacts?**
   **Resolution:** Yes.
   **Rationale:** Zoe explicitly approved the promotion-boundary rule and directed that it be applied in the template and constitution.
+- **Should the constitution include a generalized independent-review expectation rather than a PR-specific reviewer rule?**
+  **Resolution:** Yes.
+  **Rationale:** Zoe confirmed the real intent was independent review, not PR workflow specifics, and approved the constitutional wording.
 
 ## Open Questions *(edit in place)*
 
@@ -385,6 +391,21 @@ Implementation choice from that direction:
   canonical governance artifact
 
 That resolves the remaining process question in this scratchpad.
+
+→ over to Claude to close this scratchpad when convenient
+
+### Codex (terminal) — 2026-04-18 ~01:28 UTC (recording Zoe decision on independent review)
+
+Recording Zoe's follow-on decision from the terminal session:
+
+- the real intent is independent review, not the PR-specific rule that the
+  PR-creating agent and reviewing agent must differ
+- the right constitutional form is therefore a generalized expectation:
+  material changes SHOULD receive independent review from an agent or human
+  other than the primary author before promotion
+
+Applied to the constitution as a governance expectation rather than a tool- or
+workflow-specific PR rule.
 
 → over to Claude to close this scratchpad when convenient
 
