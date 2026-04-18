@@ -14,6 +14,8 @@
   **A:** Yes. Removal is in scope alongside emission (Option A). Same primitive direction, same permission model, same failure modes; splitting add/remove would create overhead without design benefit, and several downstream heuristics (e.g. "clear 👀 after done") require removal.
 - **Q:** When `!stop` is active in a channel, should reaction emissions and removals also be suppressed?
   **A:** Yes. `!stop` suppresses ALL outbound transport activity in the channel, including reactions (Option A). Consistent mental model: stopped means silent across all outbound channels.
+- **Q:** How should reaction-operation failures be surfaced to the operator?
+  **A:** Structured log events plus an emitted metric (Option D). Structured log event at WARN level with fields `{action, channel_id, message_id, emoji, reason}` so failures are greppable and pipe-friendly. Additionally, a failure-rate metric per channel and per agent so trends are monitorable without reading logs.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -145,8 +147,13 @@ message attributed to the agent's identity.
   agent never added (or has already removed) as idempotent: no error, no
   state change.
 - **FR-008**: The system MUST NOT block or fail an agent session because
-  a reaction add or remove fails; failures MUST be reported through the
-  session's log/error surface without interrupting in-flight agent work.
+  a reaction add or remove fails; failures MUST be reported through a
+  structured log event at WARN level with fields `{action, channel_id,
+  message_id, emoji, reason}`, without interrupting in-flight agent work.
+- **FR-008a**: The system MUST emit a monitoring metric tracking reaction-
+  operation failure rate, broken down at minimum by channel and by agent
+  identity, so the operator can observe failure trends without reading
+  raw logs.
 - **FR-009**: The system MUST apply platform rate-limit handling
   (backoff, bounded retry) internally to reaction add and remove
   operations; the agent session MUST NOT be expected to implement
@@ -189,9 +196,13 @@ message attributed to the agent's identity.
   that agent) within the platform's standard propagation time.
 - **SC-003**: Reaction add/remove failures (deleted target, permission
   denied, invalid emoji, rate-limit saturation, cross-user removal
-  attempt) surface as structured log/error output without interrupting
-  the agent's session.
-- **SC-004**: The spec does not encode any coordination heuristic about
+  attempt, `!stop`-suppressed) surface as structured WARN-level log
+  events with the documented field set, without interrupting the
+  agent's session.
+- **SC-004**: The failure-rate metric is queryable per channel and per
+  agent identity, so the operator can detect a rising failure trend in
+  one channel or from one bot without reading logs.
+- **SC-005**: The spec does not encode any coordination heuristic about
   *when* to emit or remove a reaction — heuristics remain spec-level per
   Principle VI and stay in follow-on operational specs.
 
