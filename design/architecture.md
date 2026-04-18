@@ -32,6 +32,7 @@ This document does not define:
 
 This document is based on the following inputs:
 
+- [VISION.md](../VISION.md)
 - [Discussion #32: roadmap separation and gap analysis](https://github.com/mentatzoe/peer-coordination/discussions/32)
 - [non-orchestrated-peer-coordination-codex.md](../docs/research/non-orchestrated-peer-coordination-codex.md)
 - [non-orchestrated-peer-coordination-claude.md](../docs/research/non-orchestrated-peer-coordination-claude.md)
@@ -43,6 +44,8 @@ The current working architecture separates peer coordination into three layers:
 1. **Interop / transport substrate**
 2. **Coordination model**
 3. **Evaluation of emergence and success**
+
+This document operationalizes the approved vision in [VISION.md](../VISION.md): Layer 2 provides the conditions for H1-style convergence, Layer 3 provides the conditions for H2-style legibility assessment, and the cross-layer incremental-validation posture is how the architecture designs for H3 before H3 is tested directly in follow-on work.
 
 The separation matters because the framework is otherwise at risk of collapsing:
 
@@ -217,6 +220,7 @@ The framework can be validated on one substrate before broader portability claim
 
 ## References
 
+- [VISION.md](../VISION.md)
 - [Discussion #32: roadmap separation and gap analysis](https://github.com/mentatzoe/peer-coordination/discussions/32)
 - [non-orchestrated-peer-coordination-codex.md](../docs/research/non-orchestrated-peer-coordination-codex.md)
 - [non-orchestrated-peer-coordination-claude.md](../docs/research/non-orchestrated-peer-coordination-claude.md)
