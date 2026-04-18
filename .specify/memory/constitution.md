@@ -1,10 +1,10 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.0 → 1.3.0 (MINOR — adds an explicit independent-review expectation for material changes before promotion)
-- Amendment rationale: Zoe approved the generalized constitutional form of a review-separation rule: material changes should receive independent review from an agent or human other than the primary author. The intent is independence of review, not PR-specific workflow. This strengthens governance review expectations without hard-coding tool-specific process. Scratchpad: `ideas/constitution-amendment-review.md`.
+- Version change: 1.3.0 → 1.4.0 (MINOR — removes the P1–P4 follow-on-spec roadmap paragraph from the Specification Workflow section; keeps the 5-step promotion path intact and preserves subordination-to-constitution language)
+- Amendment rationale: Zoe executive decision on 2026-04-18 ([discussion #32 comment](https://github.com/mentatzoe/peer-coordination/discussions/32#discussioncomment-16617193)) to move the roadmap out of the constitution so it can change at project speed without requiring a constitutional amendment every time priorities shift. The roadmap's new source of truth is `design/poc.md`'s Development Phases table (and any follow-on planning artifact that supersedes it). Symmetrical with v1.1.0, which originally added the roadmap as a MINOR change.
 - Modified principles: none
 - Modified sections:
-  - Governance — compliance review expectations expanded to include independent review by someone other than the primary author for material changes
+  - Specification Workflow and Roadmap → renamed to Specification Workflow; P1–P4 roadmap paragraph removed; replacement sentence points out that the roadmap now lives outside this document
 - Added principles: none
 - Removed principles: none
 - Templates requiring updates:
@@ -12,14 +12,17 @@ Sync Impact Report
   - .specify/templates/spec-template.md ✅ no changes needed
   - .specify/templates/tasks-template.md ✅ no changes needed
   - templates/scratchpad.md ✅ no changes needed
+  - templates/document-review-discussion.md ✅ no changes needed
   - AGENTS.md ✅ no changes needed
-  - CLAUDE.md ✅ no changes needed
+  - CLAUDE.md ✅ verified 2026-04-19 — no P1–P4 naming references; the "Transport MVP" mention is about implementation work, not the constitutional roadmap
+  - README.md ✅ verified 2026-04-19 — points to `ROADMAP.md` as the new roadmap SOT, no stale P1–P4 references
 - Follow-up TODOs:
-  - When the Transport MVP Spec is written, it MUST incorporate the 7 coordination heuristics, the react-driven loop-prevention choice, and the "transport MUST NOT block inter-agent replies" rule.
+  - Piece 2 from [discussion #32 comment](https://github.com/mentatzoe/peer-coordination/discussions/32#discussioncomment-16617193): Codex-led roadmap adjustment — adopt `design/poc.md` Development Phases as the new SOT, audit existing vs needed specs, assign ownership.
 - Prior history:
+  - 1.3.0 (ratified 2026-04-18) — added independent-review expectation for material changes before promotion.
   - 1.2.0 (ratified 2026-04-18) — added the explicit promotion-boundary rule to Principle III and Governance; updated the scratchpad template to match.
   - 1.1.1 (ratified 2026-04-18) — trimmed Principle VI to governance-only language; moved heuristics and mechanism language back to follow-on spec territory.
-  - 1.1.0 (ratified 2026-04-18) — added Principle VI (since trimmed), expanded Principle III scratchpad definition, added P1–P4 roadmap priorities, MVP scope clarification (since trimmed).
+  - 1.1.0 (ratified 2026-04-18) — added Principle VI (since trimmed), expanded Principle III scratchpad definition, added P1–P4 roadmap priorities (now removed in 1.4.0), MVP scope clarification (since trimmed).
   - 1.0.0 (ratified 2026-04-18) — initial constitution with principles I–V, Scope and Deliverables, Specification Workflow and Roadmap, Governance.
 -->
 
@@ -107,7 +110,7 @@ The minimum durable outputs of this repo are:
 - a live coordination scratchpad while work is active
 - explicit records of confirmed decisions, open questions, and next actions
 
-## Specification Workflow and Roadmap
+## Specification Workflow
 
 Work in this repository MUST follow a simple promotion path:
 
@@ -118,31 +121,11 @@ Work in this repository MUST follow a simple promotion path:
 4. Implement code changes in the downstream repo that owns them.
 5. Feed results, lessons, and unresolved tensions back into this repository.
 
-The current roadmap of follow-on specs is, in priority order:
-
-1. **Transport MVP Spec (P1)** — blocking the first open-floor pilot.
-   Defines the first open-floor pilot capabilities, including open-floor mode,
-   hard interrupt behavior, reactions, approval-via-react, and pinned-rules
-   ingestion. This spec belongs here; implementation belongs in `cc-connect`.
-
-   The Transport MVP Spec MUST preserve Principle VI. Loop prevention,
-   acknowledgment behavior, and interrupt semantics are defined in the spec,
-   consistent with that principle.
-
-2. **Channel Policy and Presence Spec (P2)**
-   Defines channel activation modes, per-channel allowlists, verbosity levels,
-   ambient behavior, and how bots are intentionally present in a guild.
-
-3. **Workspace and Session Binding Spec (P3)**
-   Defines multi-workspace behavior, channel-to-repo binding, workspace init
-   prompts, and recovery behavior when agents enter new channels.
-
-4. **Operations and Rollout Spec (P4)**
-   Defines pilot rollout, safety checks, migration expectations, and how the
-   standard graduates from experimental use to broader adoption.
-
-These follow-on specs MUST stay subordinate to the constitution and MUST NOT
-silently redefine its principles.
+Follow-on specs MUST stay subordinate to the constitution and MUST NOT silently
+redefine its principles. The current roadmap — which follow-on specs to cut,
+in what order, and who owns what — is maintained outside this document so it
+can change at project speed without requiring a constitutional amendment every
+time priorities shift.
 
 ## Governance
 
@@ -174,4 +157,4 @@ Compliance review expectations:
 - Scratchpad conclusions that become durable policy MUST be promoted here
   promptly.
 
-**Version**: 1.3.0 | **Ratified**: 2026-04-18 | **Last Amended**: 2026-04-18
+**Version**: 1.4.0 | **Ratified**: 2026-04-18 | **Last Amended**: 2026-04-19
