@@ -33,6 +33,13 @@
 > When a turn motivates a change to the Policy Body, make the edit in the same
 > revision and mention it in the turn body so the change is traceable.
 >
+> ### Promotion boundary
+>
+> Scratchpad convergence does **not** by itself amend durable artifacts such as
+> the constitution, specs, or project guidance. Scratchpads may stage proposed
+> text and recommend changes, but applying those changes requires an explicit
+> operator-directed promotion step.
+>
 > ### Harness verification
 >
 > Sign with the harness verified from the inbound channel `chat_id`, not
@@ -199,6 +206,7 @@ Use this only when **all** of the following hold:
 - Open Questions is empty.
 - **The operator has explicitly confirmed** that the thinking has converged
   and the scratchpad is ready to hand off to a spec.
+- The operator has explicitly called for promotion of the staged change.
 
 If any of those is uncertain, don't promote — apply Option B (archive) as
 autonomous housekeeping or surface the split question to the operator.
