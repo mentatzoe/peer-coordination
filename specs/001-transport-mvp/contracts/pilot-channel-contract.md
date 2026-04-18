@@ -28,6 +28,9 @@ MVP slice in the designated pilot channel.
   mediated side effects in the pilot channel.
 - Already-sent partial output may remain visible.
 - `!resume` is explicit; the channel does not auto-resume.
+- Interrupt state is exposed through a `core`-level consumer surface so other
+  transport primitives can honor `!stop` without reimplementing pilot-channel
+  state lookup.
 
 ## Reconfiguration Contract
 

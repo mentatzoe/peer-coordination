@@ -38,7 +38,9 @@
   suppression under `!stop`.
 - **Fields**:
   - `channel_id`
-  - `effect_type` — e.g. message send or other transport-mediated side effect
+  - `effect_type` — e.g. message send or other transport-mediated side effect;
+    this is the cross-spec union point for additional suppressed effect types
+    such as reactions
   - `state` — `pending`, `sent`, `suppressed`
   - `origin_agent`
 

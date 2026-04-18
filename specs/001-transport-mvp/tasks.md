@@ -40,7 +40,7 @@ designated pilot channel before deeper code changes.
 **⚠️ CRITICAL**: No user story work should start until this phase is complete.
 
 - [ ] T003 Define pilot-channel configuration parsing and admitted-peer state in `/Users/zmll/github/cc-connect/platform/discord/discord.go`
-- [ ] T004 [P] Add engine-side interrupt state helpers for the designated pilot channel in `/Users/zmll/github/cc-connect/core/engine.go`
+- [ ] T004 [P] Add engine-side interrupt state helpers for the designated pilot channel in `/Users/zmll/github/cc-connect/core/engine.go`, exposing a public `core` consumer surface other transport primitives can consult for `!stop` suppression checks.
 
 **Checkpoint**: Shared pilot-channel state exists; story work can begin.
 
@@ -85,7 +85,7 @@ future turns.
 
 ### Tests for User Story 2
 
-- [ ] T010 [P] [US2] Add unit coverage for interrupt authority, best-effort suppression, and designation-change behavior in `/Users/zmll/github/cc-connect/core/engine_test.go` and `/Users/zmll/github/cc-connect/platform/discord/discord_test.go`
+- [ ] T010 [P] [US2] Add unit coverage for interrupt authority, best-effort suppression, and designation-change behavior in `/Users/zmll/github/cc-connect/core/engine_test.go` and `/Users/zmll/github/cc-connect/platform/discord/discord_test.go`, including the case where designation changes mid-turn and only future routing adopts the new channel.
 - [ ] T011 [P] [US2] Add integration coverage for channel-scoped `!stop` / `!resume` in `/Users/zmll/github/cc-connect/tests/integration/agent_integration_test.go`
 
 ### Implementation for User Story 2
@@ -104,8 +104,8 @@ best-effort cancel semantics.
 
 **Purpose**: Reconcile the implementation handoff with the narrowed spec package.
 
-- [ ] T015 [P] Refresh pilot-readiness notes in `/Users/zmll/github/peer-coordination/.worktrees/transport-mvp-spec/specs/001-transport-mvp/quickstart.md`
-- [ ] T016 Run the operator-visible contract against the final implementation task list in `/Users/zmll/github/peer-coordination/.worktrees/transport-mvp-spec/specs/001-transport-mvp/contracts/pilot-channel-contract.md`
+- [ ] T015 [P] Refresh pilot-readiness notes in `specs/001-transport-mvp/quickstart.md`
+- [ ] T016 Run the operator-visible contract against the final implementation task list in `specs/001-transport-mvp/contracts/pilot-channel-contract.md`
 
 ---
 
