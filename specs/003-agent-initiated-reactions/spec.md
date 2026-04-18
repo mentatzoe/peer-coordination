@@ -16,6 +16,8 @@
   **A:** Yes. `!stop` suppresses ALL outbound transport activity in the channel, including reactions (Option A). Consistent mental model: stopped means silent across all outbound channels.
 - **Q:** How should reaction-operation failures be surfaced to the operator?
   **A:** Structured log events plus an emitted metric (Option D). Structured log event at WARN level with fields `{action, channel_id, message_id, emoji, reason}` so failures are greppable and pipe-friendly. Additionally, a failure-rate metric per channel and per agent so trends are monitorable without reading logs.
+- **Q:** Should the spec define a restricted emoji palette agents are allowed to emit, or stay permissive?
+  **A:** Stay permissive (Option A). Any valid emoji is allowed at transport level. Palette conventions (✅👀🤔🚫⏸️) are operational policy per constitution Principle VI and live in follow-on operational specs, not here.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -133,7 +135,11 @@ message attributed to the agent's identity.
   requesting agent's own prior reaction.
 - **FR-003**: The system MUST accept both unicode emoji (as direct
   characters) and guild custom emoji (in the platform-native reference
-  form) as valid inputs for both add and remove operations.
+  form) as valid inputs for both add and remove operations. The
+  transport layer MUST remain permissive: any emoji the platform itself
+  accepts is allowed here. Restricted palettes, if operators want them,
+  are operational policy and belong in follow-on specs, consistent with
+  Principle VI.
 - **FR-004**: The system MUST record the reaction under the agent's own
   platform identity, not spoofed as the operator or another agent.
 - **FR-005**: The system MUST scope reaction removal to the requesting
