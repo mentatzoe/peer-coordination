@@ -1,28 +1,24 @@
 <!--
 Sync Impact Report
-- Version change: 1.0.0 → 1.1.0 (MINOR — new principle VI, materially expanded principle III, materially expanded roadmap)
-- Amendment rationale: post-ratification alignment review against `ideas/peer-coordination.md` flagged four gaps:
-  (a) the meeting-not-protocol framing from the original design was load-bearing enough to be constitutional;
-  (b) Principle III's scratchpad framing needed to match the canonical structure in `templates/scratchpad.md`;
-  (c) the specification roadmap needed priority ordering;
-  (d) MVP scope should explicitly forbid hard-enforced loop prevention in favor of react-driven coordination.
-- Added principles:
-  - VI. Coordination Mimics Meetings, Not Network Protocols (with 7 coordination heuristics as a subsection)
+- Version change: 1.1.0 → 1.1.1 (PATCH — trim mis-layered content from Principle VI and the Transport MVP roadmap entry; no change to governance reach)
+- Amendment rationale: post-ratification review by Codex (against the prior alignment note in `ideas/peer-coordination.md` and the governance-vs-operational boundary) identified that v1.1.0 pulled operational rules into the constitutional layer. Specifically, the 7 coordination heuristics and the MVP-specific react-driven loop-prevention language were operational content that belongs in the Transport MVP Spec. Both agents agreed on Option A (trim Principle VI to governance-only; move heuristics and mechanism language to follow-on spec). Scratchpad: `ideas/constitution-amendment-review.md`.
 - Modified principles:
-  - III. Scratchpad First, Then Promotion — expanded scratchpad definition to match `templates/scratchpad.md` structure (Policy Body / Questions / Next Actions / Discussion Log)
+  - VI. Coordination Is Human-Legible, Not Over-Protocolized — replaced with governance-only language; "Coordination Heuristics" subsection removed (migrates to Transport MVP Spec)
 - Modified sections:
-  - Specification Workflow and Roadmap — added P1–P4 priority labels; added MVP scope clarification under the Transport MVP Spec entry (Principle VI must be preserved; loop prevention react-driven, not handshake-enforced)
-- Removed sections: none
+  - Specification Workflow and Roadmap — Transport MVP Spec (P1) clarification trimmed to a bare pointer: "MUST preserve Principle VI. Loop prevention, acknowledgment, and interrupt semantics defined in the spec, consistent with that principle."
+- Added principles: none
+- Removed principles: none (VI retained in tightened form)
 - Templates requiring updates:
   - .specify/templates/plan-template.md ✅ no changes needed
   - .specify/templates/spec-template.md ✅ no changes needed
   - .specify/templates/tasks-template.md ✅ no changes needed
-  - AGENTS.md ✅ no changes needed (scope/norms unchanged)
-  - CLAUDE.md ✅ no changes needed (scope/norms unchanged; Transport MVP description still accurate)
-  - templates/scratchpad.md ✅ no changes needed (Principle III now references this template by name)
+  - AGENTS.md ✅ no changes needed
+  - CLAUDE.md ✅ no changes needed
+  - templates/scratchpad.md ✅ no changes needed
 - Follow-up TODOs:
-  - When the Transport MVP Spec is written, it MUST explicitly cite Principle VI and document the react-driven loop-prevention choice.
+  - When the Transport MVP Spec is written, it MUST incorporate the 7 coordination heuristics, the react-driven loop-prevention choice, and the "transport MUST NOT block inter-agent replies" rule.
 - Prior history:
+  - 1.1.0 (ratified 2026-04-18) — added Principle VI (since trimmed), expanded Principle III scratchpad definition, added P1–P4 roadmap priorities, MVP scope clarification (since trimmed).
   - 1.0.0 (ratified 2026-04-18) — initial constitution with principles I–V, Scope and Deliverables, Specification Workflow and Roadmap, Governance.
 -->
 
@@ -79,24 +75,11 @@ scratchpads. Organic differences in tone or style MAY emerge, but they MUST NOT
 be turned into artificial governance rules unless the operator explicitly wants
 that.
 
-### VI. Coordination Mimics Meetings, Not Network Protocols
-Multi-agent collaboration MUST follow soft social norms rather than rigid
-machine protocols. Coordination rules are heuristics applied with judgment —
-the way humans work in well-run meetings, not handshakes in a TCP session.
-Loop prevention, turn-taking, and acknowledgment SHOULD be react-driven (emoji
-signals, silence-is-OK) rather than hard-enforced by transport handshakes.
-This preserves the conversational character of the medium and keeps agent
-behavior legible to the human operator.
-
-#### Coordination Heuristics (derived from this principle)
-
-1. **Claim by answering.** If a message fits your domain, reply.
-2. **Yield explicitly when unsure.** Name the other agent and signal ambiguity to the operator.
-3. **Build, don't compete.** Add substance, not duplication.
-4. **React, don't ack-reply.** Emoji acknowledges; text replies carry substance.
-5. **Silence is OK.** No obligation to respond to every thread.
-6. **Bot-to-bot tangents allowed, if substantive.** Following up on another agent's idea is welcome; ack-looping is not.
-7. **Escalate disagreement to the scratchpad, not a live argument.** Live arguments pollute the signal for the human reader.
+### VI. Coordination Is Human-Legible, Not Over-Protocolized
+Multi-agent collaboration MUST remain legible to the human operator and SHOULD
+prefer heuristic, operator-centered coordination over brittle handshake
+protocols. Specific coordination heuristics, acknowledgment behaviors, and
+loop-management rules are operational and belong in follow-on specs.
 
 ## Scope and Deliverables
 
@@ -137,13 +120,9 @@ The current roadmap of follow-on specs is, in priority order:
    hard interrupt behavior, reactions, approval-via-react, and pinned-rules
    ingestion. This spec belongs here; implementation belongs in `cc-connect`.
 
-   The Transport MVP Spec MUST preserve Principle VI (meeting-not-protocol).
-   Beyond the no-self-loop guard, loop prevention MUST be react-driven (emoji
-   signals plus the silence-is-OK heuristic), not hard-enforced by transport
-   handshakes. Explicit cases: `!stop` is a transport-level hard interrupt
-   (correct — a safety kill-switch, not a coordination mechanism); ack-loop
-   prevention is agent-governed via the coordination heuristics (transport
-   MUST NOT block a reply just because the sender was another agent).
+   The Transport MVP Spec MUST preserve Principle VI. Loop prevention,
+   acknowledgment behavior, and interrupt semantics are defined in the spec,
+   consistent with that principle.
 
 2. **Channel Policy and Presence Spec (P2)**
    Defines channel activation modes, per-channel allowlists, verbosity levels,
@@ -185,4 +164,4 @@ Compliance review expectations:
 - Scratchpad conclusions that become durable policy MUST be promoted here
   promptly.
 
-**Version**: 1.1.0 | **Ratified**: 2026-04-18 | **Last Amended**: 2026-04-18
+**Version**: 1.1.1 | **Ratified**: 2026-04-18 | **Last Amended**: 2026-04-18

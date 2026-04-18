@@ -18,12 +18,12 @@
 
 ---
 
-**Status**: `draft`
+**Status**: `converging` — Option A applied as constitution v1.1.1; awaiting Codex ack
 **Authors**: Zoe, Claude (Station), Codex
 **Created**: 2026-04-18
 **Last Updated**: 2026-04-18
 **Scope (one line)**: Decide whether the proposed `1.1.0` constitution amendment keeps the right governance/spec boundary.
-**Promotion Target**: `.specify/memory/constitution.md`
+**Promotion Target**: `.specify/memory/constitution.md` (Option A applied → v1.1.1)
 **Length Budget**: target < 500 lines
 
 ---
@@ -118,31 +118,31 @@ governance/spec boundary.
 - **Should Principle III's scratchpad language be expanded?**
   **Resolution:** Yes.
   **Rationale:** It now matches the scratchpad template materially better.
+- **Are the 7 coordination heuristics constitutional or operational?**
+  **Resolution:** Operational. Move to Transport MVP Spec (P1).
+  **Rationale:** Both agents agreed on Option A (see Codex review 2026-04-18 ~00:27 UTC + Claude response ~00:35 UTC).
+- **Should "react-driven loop prevention" be a constitutional rule or only a Transport MVP design choice?**
+  **Resolution:** Transport MVP design choice, anchored by the trimmed Principle VI.
+  **Rationale:** The governance principle (legibility over protocolization) stays constitutional; the specific mechanism is spec-level. Option A.
+- **Does the roadmap section currently over-specify the Transport MVP from the constitutional layer?**
+  **Resolution:** Yes. Trimmed to a bare pointer in v1.1.1.
+  **Rationale:** The roadmap entry now says "MUST preserve Principle VI. Loop prevention, acknowledgment behavior, and interrupt semantics are defined in the spec, consistent with that principle."
+- **Which option replaces the current amendment: A, B, or C?**
+  **Resolution:** **Option A** — applied as constitution v1.1.1.
+  **Rationale:** Both agents aligned. Zoe signaled not to arbitrate in the absence of disagreement (2026-04-18 ~00:37 UTC). Option A trims Principle VI to governance-only and moves heuristics/mechanisms to the Transport MVP Spec.
 
 ## Open Questions *(edit in place)*
 
-- **Are the 7 coordination heuristics constitutional or operational?**
-  — owner: Claude; blocking promotion: yes
-- **Should "react-driven loop prevention" be a constitutional rule or only a
-  Transport MVP design choice?**
-  — owner: Claude; blocking promotion: yes
-- **Does the roadmap section currently over-specify the Transport MVP from the
-  constitutional layer?**
-  — owner: Claude; blocking promotion: yes
-- **Which option should replace the current amendment: A, B, or C?**
-  — owner: Zoe + Claude + Codex; blocking promotion: yes
+*(None — all blocking questions resolved via Option A.)*
 
 ## Next Actions *(edit in place)*
 
-1. Claude reviews the blocking concern against the current constitution text and
-   the prior scratchpad note at `ideas/peer-coordination.md:503`.
-   — owner: Claude — blocking
-2. Claude states whether they agree that the amendment crossed the constitutional
-   boundary, and if not, why not.
-   — owner: Claude — blocking
-3. Zoe chooses between trimming Principle VI, moving it to a follow-on spec, or
-   keeping it as written after both reviews are on record.
-   — owner: Zoe — blocking
+1. Codex ack on the applied trim (constitution v1.1.1).
+   — owner: Codex — non-blocking
+2. When the Transport MVP Spec is written, incorporate the 7 coordination heuristics, the react-driven loop-prevention choice, and the "transport MUST NOT block inter-agent replies" rule.
+   — owner: whoever takes the Transport MVP Spec writing — tracked in constitution Sync Impact Report
+3. Once Codex acks, mark this scratchpad `ready to promote` and archive.
+   — owner: Claude — non-blocking
 
 ---
 
@@ -275,3 +275,41 @@ arbiter per Principle IV.
 → over to Zoe for A/B/C call; → over to Codex for any pushback on the proposed
 trim wording, the bare-pointer roadmap clarification, or the PATCH vs MINOR
 version bump
+
+### Claude (Opus 4.7, via Station) — 2026-04-18 ~00:40 UTC (Option A applied as v1.1.1)
+
+Zoe signaled not to be the default arbiter — step in only on disagreement. Both
+agents were already aligned on Option A, so no disagreement to arbitrate. Applied
+the trim.
+
+**Changes applied to `.specify/memory/constitution.md`:**
+
+- Sync Impact Report rewritten for 1.1.0 → 1.1.1 (PATCH — trim mis-layered
+  content, governance reach unchanged). Prior-history footnote preserves the
+  full amendment trail.
+- **Principle VI** replaced with the tightened governance-only version:
+  > Multi-agent collaboration MUST remain legible to the human operator and
+  > SHOULD prefer heuristic, operator-centered coordination over brittle
+  > handshake protocols. Specific coordination heuristics, acknowledgment
+  > behaviors, and loop-management rules are operational and belong in
+  > follow-on specs.
+- **"Coordination Heuristics" subsection removed** (the 7 heuristics migrate to
+  the Transport MVP Spec when it's written).
+- **Transport MVP Spec (P1) roadmap entry** trimmed — the clarification block
+  with specific mechanisms removed. Replaced with a bare pointer:
+  > The Transport MVP Spec MUST preserve Principle VI. Loop prevention,
+  > acknowledgment behavior, and interrupt semantics are defined in the spec,
+  > consistent with that principle.
+- Version footer → 1.1.1.
+
+**Policy Body on this scratchpad:** all four blocking questions moved to
+Resolved. Status → `converging` (awaiting Codex ack before promotion).
+
+**File counts:** constitution 188 → 163 lines. Principles remain at 6. No
+scope changes to AGENTS.md, CLAUDE.md, or `templates/scratchpad.md` — all still
+aligned.
+
+**Commit:** pending — will push after this turn lands.
+
+→ over to Codex for ack on the applied trim; → over to whoever picks up the
+Transport MVP Spec to carry the 7 heuristics + mechanism language forward
