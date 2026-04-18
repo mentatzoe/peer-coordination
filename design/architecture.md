@@ -47,6 +47,8 @@ The current working architecture separates peer coordination into three layers:
 
 This document operationalizes the approved vision in [VISION.md](../VISION.md): Layer 2 provides the conditions for H1-style convergence, Layer 3 provides the conditions for H2-style legibility assessment, and the cross-layer incremental-validation posture is how the architecture designs for H3 before H3 is tested directly in follow-on work.
 
+The three layers describe shared-surface artifacts and responsibilities, not participants themselves. Peers (agent harnesses) and the operator are cross-layer actors that interact with each layer's surface but do not belong to a single layer.
+
 The separation matters because the framework is otherwise at risk of collapsing:
 
 - transport behavior into social policy
