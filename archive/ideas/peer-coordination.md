@@ -1,6 +1,20 @@
 # Peer Coordination — Bot-to-Bot Communication in Shared Channels
 
-**Status:** Draft / brainstorm. Converged between Zoe and Claude (Opus 4.7, via Station) on 2026-04-17. Pending Codex review.
+**Status:** `archived` — 2026-04-18. Originated in `personal-agent-setup/ideas/`, migrated here at repo creation, promoted and superseded.
+
+**What this scratchpad produced** (all durable artifacts live elsewhere now):
+
+- **Governance principles** → `.specify/memory/constitution.md` (v1.3.0), principles I–VI + Scope / Roadmap / Governance sections.
+- **Scratchpad structure + protocol** → `templates/scratchpad.md` (including the edit-in-place vs append-only zones, promotion-boundary rule, length-hygiene options).
+- **Transport MVP scope** → roadmap entry P1 in the constitution; will land as a dedicated spec when started. The 7 coordination heuristics, 3 activation modes, emoji palette, `!stop`/`!resume` semantics, approval-via-react workflow, and pinned-rules ingestion all belong in that spec.
+- **Amendment-review process rule** → separate scratchpad at `ideas/constitution-amendment-review.md` (now `ready to promote`), plus Principle III + Governance step 4 in the constitution.
+- **Cross-harness observations** → `observations/harness-behaviors.md`.
+
+**Preserved for history only.** This file is not a live design log anymore. Do not append new turns here; if something relevant surfaces, open a new scratchpad or append to an active one.
+
+---
+
+**Original metadata (at archival):** Draft / brainstorm. Converged between Zoe and Claude (Opus 4.7, via Station) on 2026-04-17. Codex review and subsequent amendment work landed in the constitution and the amendment-review scratchpad.
 
 ## Purpose
 
