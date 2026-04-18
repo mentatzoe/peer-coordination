@@ -1,7 +1,8 @@
 # Peer-Coordination Vision
 
-**Status**: first ratified draft, 2026-04-18.
-**Ratified in**: [discussion #32](https://github.com/mentatzoe/peer-coordination/discussions/32) (north star alignment Q2, hypothesis reframing Q3, work distribution steers).
+**Content status**: ratified in [discussion #32](https://github.com/mentatzoe/peer-coordination/discussions/32) (north star alignment Q2, hypothesis reframing Q3, work distribution steers).
+**Artifact status**: under review in [discussion #36](https://github.com/mentatzoe/peer-coordination/discussions/36).
+**Last revised**: 2026-04-18.
 **Owner of this doc**: Claude (per work distribution table on #32).
 **Top-level reference**: this is the vision spine. Linked from the README. Everything else (design, POC, specs) should be consistent with this doc; when there's a conflict, this is the document that defines the target, not the implementation choice.
 
@@ -26,7 +27,7 @@ Capture — compactly and durably — the question this project exists to answer
 - **Agentic**: each participant is a full agent with its own reasoning, not a specialized subroutine.
 - **Peer-to-peer**: participants address each other directly, not through a mediator.
 - **Framework, not product**: the output of this project is a way of thinking about peer coordination, tested via one or more POCs. It is not a specific app or deployment.
-- **Instance-agnostic**: a working framework should produce coherent coordination across substrates (Discord, terminal, Slack, etc.) and across goals (software dev, conversation, debate, games).
+- **Instance-agnostic**: a working framework should produce coherent coordination logic across substrates (Discord, terminal, Slack, etc.) and across goals (software dev, conversation, debate, games). Surface conventions — how a pause is signaled, which emoji palette gets used, what command prefixes exist — may legitimately vary by substrate or activity; what transfers is the organizing principle.
 
 ### What the north star is NOT
 
@@ -50,15 +51,15 @@ The north star, reframed as falsifiable claims the POC is organized around.
 > **The emerging coordination pattern remains legible to an uninvolved human reader throughout the session. No drift toward in-group shorthand.**
 
 - **Testable in the initial POC.**
-- **Fails if**: agents develop conventions (emoji combinations, abbreviations, shorthand) that require background context to decode; a fresh human reader can't follow the last N turns without reading earlier context; the Facebook-2017 "i i i i i" failure mode appears.
+- **Fails if**: agents develop conventions (emoji combinations, abbreviations, shorthand) that require background context to decode; given the preserved episode record (channel history + pinned rules + operator turns), a fresh human reader still can't reconstruct why the exchange makes sense; the Facebook-2017 "i i i i i" failure mode appears.
 
 ### H3 — Generalizability
 
-> **The coordination patterns that emerge are not substrate-dependent or goal-dependent. They transfer across substrates (Discord, terminal, other platforms) and across goal domains (software development, creative work, debate, games).**
+> **The core coordination logic that emerges — how peers infer turn-taking, resolve overlap, establish local norms — transfers across substrates (Discord, terminal, other platforms) and across goal domains (software development, creative work, debate, games), even if surface conventions vary by substrate or activity.**
 
 - **Designed-for in the initial POC** (at the architecture level — no hard assumptions that wouldn't transfer).
 - **Tested in follow-on** (actual substrate / goal transfer runs).
-- **Fails if**: patterns that work on Discord don't transfer to a second substrate; patterns that work for software dev don't transfer to a second goal domain; we find hidden dependencies on one substrate's or one domain's features.
+- **Fails if**: the underlying coordination logic doesn't survive substrate or goal transfer — e.g., agents can't organize without orchestration in substrate B even though they could in substrate A; we find hidden dependencies on one substrate's or one domain's features that aren't just surface conventions.
 
 ### Implicit across all three
 
@@ -94,7 +95,7 @@ Hypotheses invite motivated reasoning. Guarding against it:
 | Artifact | Role |
 |---|---|
 | `.specify/memory/constitution.md` | Durable principles + governance. The north star is subordinate to the constitution; no conflict expected but constitution wins if one arises. |
-| `design/architecture.md` *(Codex-owned, in progress)* | Three-layer mental model (transport / coordination / evaluation) with responsibilities, boundaries, minimum requirements, success tests per layer. |
+| `design/architecture.md` *(Codex-owned, in progress)* | Three-layer mental model (transport / coordination / evaluation) with responsibilities, boundaries, architectural capability requirements, failure taxonomies, and validation signals per layer. |
 | `design/poc.md` *(co-authored, Claude starts)* | Concrete POC scope, success/fail conditions rooted in H1/H2/H3, architecture-to-tech-stack mapping, development phases. |
 | Specs (`specs/001-*` through `specs/005-*`) | Deliverable-bound artifacts for specific transport/coordination mechanisms. Subordinate to the architecture doc. |
 | `observations/harness-behaviors.md` | Running field journal of cross-harness behavior observations. Feeds H2/H3 evaluation. |
@@ -108,4 +109,5 @@ Hypotheses invite motivated reasoning. Guarding against it:
 
 ## Changelog
 
-- **2026-04-18**: first ratified draft. Authored by Claude per work distribution on [discussion #32 comment 16614566](https://github.com/mentatzoe/peer-coordination/discussions/32#discussioncomment-16614566). North star framing ratified in #32 Q2. Hypothesis framing with test/design-for split ratified in #32 Q3.
+- **2026-04-18 (first revision round)**: addressed Codex findings from [discussion #36](https://github.com/mentatzoe/peer-coordination/discussions/36#discussioncomment-16616190): softened H3 to distinguish core coordination logic from surface conventions; reframed H2 failure condition against the preserved episode record rather than context-freedom; split status line into content-ratified vs artifact-under-review; updated relationship table to match current architecture vocabulary.
+- **2026-04-18**: first draft. Authored by Claude per work distribution on [discussion #32 comment 16614566](https://github.com/mentatzoe/peer-coordination/discussions/32#discussioncomment-16614566). North star framing ratified in #32 Q2. Hypothesis framing with test/design-for split ratified in #32 Q3.
