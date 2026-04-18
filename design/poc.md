@@ -1,6 +1,6 @@
 # POC — Peer Coordination Proof of Concept
 
-**Status**: initial draft in progress. Claude authoring scope + success/fail; Codex to follow with architecture-to-tech-stack mapping + development phases per work distribution on [discussion #32 comment 16614566](https://github.com/mentatzoe/peer-coordination/discussions/32#discussioncomment-16614566).
+**Status**: Claude-authored sections revised 2026-04-18 per [discussion #37](https://github.com/mentatzoe/peer-coordination/discussions/37) feedback and downstream of the VISION.md revision round. Codex's Architecture → Tech Stack Mapping and Development Phases sections remain stubbed pending Codex's contribution per work distribution on [#32 comment 16614566](https://github.com/mentatzoe/peer-coordination/discussions/32#discussioncomment-16614566).
 
 **Owners**: Claude (scope, success/fail conditions) + Codex (tech-stack mapping, development phases). Co-authored overall.
 
@@ -18,11 +18,12 @@ This is a **probe, not the product**. The POC produces observations that inform 
 
 ### What the POC IS
 
-The first POC is a **two-agent conversational pilot in a designated Discord channel**. Concretely:
+The first POC is a **two-agent conversational pilot in a designated Discord channel**, with a possible three-agent stretch session later. Concretely:
 
-- **Participants**: two peer agents (Dalgos via cc-connect + Claude Code; Vigil via cc-connect + Codex) and one human operator (Zoe, functioning as operator/arbiter per constitution Principle IV).
+- **Primary participants**: two peer agents (Dalgos via cc-connect + Claude Code; Vigil via cc-connect + Codex) and one human operator (Zoe, functioning as operator/arbiter per constitution Principle IV).
+- **Stretch participant (non-blocking, optional)**: a third peer — **Gemini via the Gemini CLI harness** — introduced only if two-agent convergence is holding in later POC sessions. Gemini CLI is meaningfully different from cc-connect in its harness behavior, so a three-peer session doubles as an early probe of **H3 transfer across harnesses on the same substrate** (i.e., tests whether the coordination logic depends on cc-connect-shaped semantics specifically). Not a required outcome per Zoe's steer on [#37](https://github.com/mentatzoe/peer-coordination/discussions/37#discussioncomment-16616215); only pursued if there's signal to pursue it. If two-agent coordination fails first, the three-agent extension is not attempted in this POC.
 - **Substrate**: Discord, specifically one designated open-floor channel (current candidate: `#open-floor`, channel ID `1494836296336543774`).
-- **Activity domain for the first POC run**: intentionally left open — agents may converse about any topic the operator seeds. The first run is not scoped to software development specifically; H3 asks for domain-agnosticism, and the first POC can test that by running on different seed topics across sessions.
+- **Activity domain for the first POC run**: intentionally left open — agents may converse about any topic the operator seeds. The first run is not scoped to software development specifically; H3 asks whether the **core coordination logic** transfers across goal domains, and the first POC can probe that by running different seed topics across sessions.
 - **Duration per session**: operator-bounded. No fixed length. Sessions end when the operator signals, when convergence feels clear, or when a failure mode is observed.
 - **Number of sessions before POC verdict**: TBD with Codex during phases section; early estimate is a handful (3–10), enough to see patterns beyond session-one noise but not so many that we're optimizing for the harness rather than learning from it.
 
@@ -38,11 +39,13 @@ The first POC is a **two-agent conversational pilot in a designated Discord chan
 
 Per Zoe's steer on #32: the POC may freely assume Discord-specifics **in its own implementation**. Portability is a design-time concern at the architecture level, not a per-spec constraint for the POC phase.
 
+These are the specific substrate-coupled choices the POC bakes in:
+
 - Emoji palette (✅👀🤔🚫⏸️) is convention for the POC; operators may adopt it differently on other substrates.
 - `!stop`/`!resume` as channel-wide interrupt is a Discord-suitable mechanism; another substrate may need a different interrupt.
 - Pinned messages as the rule-injection mechanism is Discord-native; another substrate would use whatever its equivalent is (Slack pinned, Telegram pinned, terminal's MOTD, etc.).
 
-These pilot-local assumptions are expected and not violations of H3. H3 asks whether the patterns abstract; it does not ask whether the first implementation generalizes mechanically.
+These pilot-local assumptions are **surface conventions** in the H3 sense (see `VISION.md` H3 and "Instance-agnostic" bullet). They are expected and explicitly allowed to differ on different substrates. What H3 asks is whether the **core coordination logic** — how peers infer turn-taking, resolve overlap, establish local norms — survives without these specific surface conventions, not whether the specific conventions themselves transfer mechanically.
 
 ## Success / Failure Conditions *(Claude-authored, rooted in H1/H2/H3)*
 
@@ -58,22 +61,24 @@ Success is NOT defined as "the agents coordinated well." Success is defined as "
 
 **H1 — Convergence observables** (Layer 2):
 
-- **Operator intervention rate per session.** If trending upward over the POC, H1 is weakening. If trending downward or stable-low, H1 is holding.
+- **Operator intervention rate per session.** If trending upward over the POC, H1 is weakening. If trending downward or stable-low, H1 is holding. Maps to the architecture's **intervention-dependence** failure mode (`design/architecture.md` Layer 3 taxonomy).
 - **Turn-to-coordination time.** How many turns until agents settle into a coordination pattern (not a specific pattern; any pattern that doesn't require operator redirection each turn)? Shorter is better; increasing across sessions would be a negative signal.
-- **Absence of loops / deadlocks.** Sessions that break down into agents-talking-past-each-other or infinite acknowledgment loops are H1 failures.
+- **Absence of loops / deadlocks.** Sessions that break down into agents-talking-past-each-other or infinite acknowledgment loops are H1 failures. Maps to the architecture's **convergence failure** mode.
 - **Presence of explicit yielding / claiming / building (heuristics #1–#3).** Not required to be present in prescribed form, but some observable signal that agents are orienting toward each other.
+- **Complementarity.** Are peers making distinct useful contributions relative to the shared activity, or parallel output with light mutual acknowledgment? Maps to the architecture's **complementarity failure** mode — a session where agents appear coordinated but are each just producing their own thread independently is H1 failing even if operator-intervention rate is low.
 - **Escalation path usage (heuristic #7).** When agents disagree, do they route to scratchpad/discussion or loop in-channel? Routing is H1 holding; looping is H1 failing.
 
 **H2 — Legibility observables** (Layer 3):
 
-- **Fresh-reader test.** A person who hasn't read the session history can read the last N turns and pinned rules and understand what's happening. Conducted by the operator or an uninvolved human post-session. Binary pass/fail per session.
+- **Fresh-reader test.** A person who wasn't in the session can read the **preserved episode record** (channel history + pinned rules + operator turns) and reconstruct why the exchange makes sense. Binary pass/fail per session. Conducted by the operator or an uninvolved human post-session. Note: legibility tests whether the record is sufficient, **not** whether the last N turns are context-free — see `VISION.md` H2.
 - **Drift audit.** Active search for: new emoji uses not in the shared palette; abbreviations that require context to decode; message patterns that only make sense between the specific agents. Zero-tolerance for H2; any drift is a finding, not a failure of the session (data is valuable).
-- **Transcript completeness.** Can the full coordination history be reconstructed from the logs alone, without any hidden channel (DMs, side-chats, model-internal state)? If hidden-channel usage is needed to understand the session, H2 is compromised.
+- **Transcript completeness.** Can the full coordination history be reconstructed from the logs alone, without any hidden channel (DMs, side-chats, model-internal state)? If hidden-channel usage is needed to understand the session, H2 is compromised. Aligns with `design/architecture.md` Layer 1 capability: "Layer 1 preserves the episode record as part of shared conversation state."
 
-**H3 — Generalizability observables** (meta):
+**H3 — Generalizability observables** (meta / cross-layer):
 
-- **Substrate-dependency audit.** Look at every architectural decision in the POC; flag ones that would not work on a different substrate. Count and qualify. Decreasing substrate-dependency over POC iterations is a positive signal.
-- **Follow-on readiness.** At the end of the POC, could we credibly run a second pilot on a non-Discord substrate without rewriting the coordination layer? If yes, H3 is designed-for correctly. If no, we've baked in substrate assumptions.
+- **Substrate-dependency audit.** Look at every architectural decision in the POC; for each one, classify it as either a **surface convention** (allowed to differ per substrate — emoji palette, interrupt syntax, pinning mechanism) or a **core coordination-logic assumption** (should survive substrate transfer — how peers infer turn-taking, resolve overlap, yield initiative). H3 holds iff the core-logic assumptions are substrate-neutral; surface-convention count is not the metric.
+- **Follow-on readiness.** At the end of the POC, could we credibly run a second pilot on a non-Discord substrate with **new surface conventions** but the **same coordination logic**, without rewriting the coordination layer? If yes, H3 is designed-for correctly. If no, we've baked in substrate assumptions at the wrong layer.
+- **Harness-dependency probe (stretch).** If the Gemini-CLI three-agent stretch session runs: does the coordination logic hold when one peer is running a meaningfully different harness on the same substrate? A positive signal here is partial evidence for H3 even before a second-substrate run.
 
 ### Failure conditions
 
@@ -139,12 +144,17 @@ Any of these makes the POC not credible and requires a rebuild of the harness.
 ## References
 
 - [Peer-Coordination Vision](../VISION.md) — north star and hypotheses this POC tests.
+- [Architecture](architecture.md) — three-layer model (transport / coordination / evaluation) with capability requirements and validation signals per layer. POC observables are aligned to this layering and to Layer 3's failure taxonomy.
 - [Constitution](../.specify/memory/constitution.md) — governance spine.
 - [discussion #32](https://github.com/mentatzoe/peer-coordination/discussions/32) — ratification trail.
 - [discussion #33](https://github.com/mentatzoe/peer-coordination/discussions/33) — Codex's research spike.
 - [discussion #34](https://github.com/mentatzoe/peer-coordination/discussions/34) — Claude's research spike.
+- [discussion #35](https://github.com/mentatzoe/peer-coordination/discussions/35) — architecture review (Codex-owned artifact, Claude review applied).
+- [discussion #36](https://github.com/mentatzoe/peer-coordination/discussions/36) — VISION.md review (closed as resolved on 2026-04-18).
+- [discussion #37](https://github.com/mentatzoe/peer-coordination/discussions/37) — this document's review.
 - [`observations/harness-behaviors.md`](../observations/harness-behaviors.md) — running field journal for pilot observations.
 
 ## Changelog
 
+- **2026-04-18 (second revision round)**: revised in response to [#37](https://github.com/mentatzoe/peer-coordination/discussions/37) + downstream of VISION.md revisions (commits [`3ec72dc`](https://github.com/mentatzoe/peer-coordination/commit/3ec72dc), [`358af56`](https://github.com/mentatzoe/peer-coordination/commit/358af56)) + alignment to the latest `design/architecture.md` draft. Changes: added optional Gemini-CLI three-agent stretch participant per Zoe's [#37 comment](https://github.com/mentatzoe/peer-coordination/discussions/37#discussioncomment-16616215); reframed pilot-local assumptions explicitly as H3 "surface conventions" vs "core coordination logic"; updated H2 fresh-reader test to evaluate against the preserved episode record rather than a trailing turn window; updated H3 substrate-dependency audit to classify decisions as surface vs core rather than count substrate-coupling; added H3 harness-dependency probe tied to the stretch session; added complementarity observable to H1 tracking the architecture's Layer 3 failure taxonomy; added cross-references to `design/architecture.md` throughout. Codex-owned sections (Architecture → Tech Stack Mapping, Development Phases) remain stubbed pending Codex's contribution.
 - **2026-04-18**: initial draft by Claude covering Purpose / Scope / Success-Fail / Open Questions. Architecture-to-tech-stack mapping and Development Phases sections stubbed for Codex to complete per #32 work distribution.
