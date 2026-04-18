@@ -96,9 +96,13 @@ Classification of each source on the shared axes I proposed on the discussion:
 - **What transfers**: privacy-preserving coordination between agents with different knowledge domains is a useful pattern if we eventually want peer agents to share working state without sharing full context.
 - **What doesn't**: their scope is federated ML, not conversational coordination. Totally different problem.
 
-### B. Swarm intelligence (biological inspiration)
+### B. Biological inspiration — swarms and slime molds
 
-#### B1. Key principles
+#### B0. Why biology before more CS
+
+Biology has been solving distributed coordination for ~billions of years without anything resembling a central orchestrator. The failure modes and success patterns are empirically well-characterized. Two strands are worth separating: swarm intelligence (many simple individuals) and slime-mold-style distributed self-organization (one organism behaving like a network).
+
+#### B1. Swarm intelligence — key principles
 - **Local interactions produce global behavior** without the individuals knowing the global pattern (stigmergy, flocking rules, ant pheromone trails).
 - **Robustness emerges from redundancy and simple rules** — individuals can fail, the swarm continues.
 - **No single individual holds global state** — the environment itself is the shared state.
@@ -110,11 +114,34 @@ Classification of each source on the shared axes I proposed on the discussion:
 - **Local rules, global behavior.** Our 7 heuristics (claim by answering, yield explicitly, etc.) are local rules. If they produce coherent global coordination, that's swarm-analogous.
 - **Simplicity of individuals.** Swarms work with simple rules. We're in the opposite case — our agents are complex LLMs — but the INVARIANTS we enforce on them should be simple. Complex rules imposed on complex agents is where coordination gets brittle.
 
-#### B3. What doesn't transfer
+#### B3. What doesn't transfer from swarms
 
 - **Swarms don't do language.** They do spatial coordination. Our agents' substrate is text, which has vastly more degrees of freedom. Lessons about spatial convergence don't help with semantic convergence.
 - **Swarms don't negotiate task allocation in human-legible form.** A bee doesn't explain why it's foraging west; it just does. Our agents' actions MUST be legible to humans (Principle VI).
 - **Swarms optimize for a narrow fitness function.** Our agents are general-purpose; there's no analogous fitness gradient.
+
+#### B4. Slime molds — the one-organism-as-network case (added per Zoe's suggestion)
+
+*Physarum polycephalum* — the acellular slime mold — is a distinct and unusually relevant analogue. It's NOT a swarm (it's a single organism), but it behaves as a distributed network:
+
+- **No nervous system, no central control.** The organism is a single cell with many nuclei, spread across a substrate in a tube network.
+- **Problem-solving by gradient response.** In classic experiments, Physarum solves maze shortest-path problems and approximates optimal transport networks (e.g., famously, the Tokyo rail network) simply by growing tubes toward food sources and thickening the tubes that carry the most flow.
+- **The substrate does the computation.** Physarum doesn't model its environment; the environment itself is the computational surface. Signaling molecules diffuse through tubes; successful pathways thicken via positive feedback; unused pathways atrophy.
+
+**Why this is a better analogue than swarms for some of our invariants:**
+
+1. **One-organism-as-network maps to the "single logical entity composed of distributed processes" framing.** Our peer-coordination isn't really two independent agents coordinating — it's more like two lobes of a thinking process sharing a substrate. Swarm framing can mislead us into thinking of agents as autonomous in a way they're not; slime mold framing captures the shared-substrate reality better.
+2. **Positive-feedback thickening matches how conventions strengthen.** When one agent uses 👀 successfully, the other is more likely to use it, the operator sees it work, it becomes a convention. Physarum's successful-pathway-thickening is this same dynamic — reinforced signaling without central sanction.
+3. **Atrophy is active.** Unused pathways actively weaken and disappear. Our heuristics should probably work the same way: if a pattern isn't used, it shouldn't be enforced forever. Contrast with protocol-based systems where deprecation is explicit and costly.
+4. **No internal messaging; environment IS the signal.** Physarum doesn't send messages between tubes; flow through tubes IS the message. Analogous to our design: agents don't message each other through a side-channel; they act on the shared Discord channel and that IS the coordination medium.
+
+**What doesn't transfer from slime mold:**
+
+- Physarum doesn't need to produce human-legible output. Its "reasoning trace" is physical — you can see the tubes. Our agents produce text that humans read, and the constraint that the text stays legible to humans isn't something biology enforces.
+- Slime mold is homogeneous — every part of the organism has the same "behavior rules." Our agents are different (Claude, Codex) with different training, different strengths. More like a heterogeneous ecosystem than a single organism.
+- Physarum is deterministic at the tube level (given substrate + food positions, you get roughly the same network). LLMs are stochastic. Conventions we rely on need to survive sampling noise.
+
+**Notable**: the Physarum model has been formalized as a distributed algorithm with provable convergence to shortest paths (Bonifaci et al. 2012 — included in sources). That's unusual — biology usually resists formalization, and when it yields, the formal model is worth studying. For us: **our heuristics probably have an analogous formal analogue worth discovering**, even if we don't formalize it up front.
 
 ### C. Historical failure case: Facebook negotiation bots (2017)
 
@@ -246,6 +273,10 @@ My angle leaned toward cross-domain analogues (improv, Quaker, swarm) and the le
 - [6 Multi-Agent Orchestration Patterns for Production (2026)](https://beam.ai/agentic-insights/multi-agent-orchestration-patterns-production)
 - [From animal collective behaviors to swarm robotic cooperation](https://pmc.ncbi.nlm.nih.gov/articles/PMC10089591/)
 - [Swarm intelligence — Wikipedia](https://en.wikipedia.org/wiki/Swarm_intelligence)
+- [Physarum polycephalum: the Mazerunner — Bioengineering Hyperbook, McGill](https://bioengineering.hyperbook.mcgill.ca/physarum-polycephalum-slime-mold-the-mazerunner/)
+- [A mathematical model for adaptive transport network in path finding by true slime mold — Tero et al., PubMed](https://pubmed.ncbi.nlm.nih.gov/17069858/)
+- [Physarum Can Compute Shortest Paths — Bonifaci et al., arXiv 1106.0423](https://arxiv.org/abs/1106.0423)
+- [Random network peristalsis in Physarum polycephalum organizes fluid flows across an individual — PNAS](https://www.pnas.org/doi/10.1073/pnas.1305049110)
 - [Deal or no deal? Training AI bots to negotiate — Engineering at Meta (2017)](https://engineering.fb.com/2017/06/14/ml-applications/deal-or-no-deal-training-ai-bots-to-negotiate/)
 - [Did Facebook Shut Down an AI Experiment Because Chatbots Developed Their Own Language? — Snopes](https://www.snopes.com/fact-check/facebook-ai-developed-own-language/)
 - [Yes, And: Improv's Most Important Rule — Backstage](https://www.backstage.com/magazine/article/yes-and-improv-rule-77269/)
