@@ -28,8 +28,8 @@ interrupt behavior.
 **Purpose**: Establish the operator-visible config and doc surface for the
 designated pilot channel before deeper code changes.
 
-- [ ] T001 Add designated pilot-channel configuration examples to `/Users/zmll/github/cc-connect/config.example.toml`
-- [ ] T002 [P] Document the narrowed pilot-channel transport scope in `/Users/zmll/github/cc-connect/docs/discord.md`
+- [X] T001 Add designated pilot-channel configuration examples to `/Users/zmll/github/cc-connect/config.example.toml`
+- [X] T002 [P] Document the narrowed pilot-channel transport scope in `/Users/zmll/github/cc-connect/docs/discord.md`
 
 ---
 
@@ -39,7 +39,7 @@ designated pilot channel before deeper code changes.
 
 **⚠️ CRITICAL**: No user story work should start until this phase is complete.
 
-- [ ] T003 Define pilot-channel configuration parsing and admitted-peer state in `/Users/zmll/github/cc-connect/platform/discord/discord.go`
+- [X] T003 Define pilot-channel configuration parsing and admitted-peer state in `/Users/zmll/github/cc-connect/platform/discord/discord.go`
 - [ ] T004 [P] Add engine-side interrupt state helpers for the designated pilot channel in `/Users/zmll/github/cc-connect/core/engine.go`, exposing a public `core` consumer surface other transport primitives can consult for `!stop` suppression checks.
 
 **Checkpoint**: Shared pilot-channel state exists; story work can begin.
@@ -58,14 +58,14 @@ re-trigger on its own outbound pilot-channel message.
 
 ### Tests for User Story 1
 
-- [ ] T005 [P] [US1] Add Discord unit coverage for pilot-channel fanout, non-pilot fallback, and self-loop suppression in `/Users/zmll/github/cc-connect/platform/discord/discord_test.go`
+- [X] T005 [P] [US1] Add Discord unit coverage for pilot-channel fanout, non-pilot fallback, and self-loop suppression in `/Users/zmll/github/cc-connect/platform/discord/discord_test.go`
 - [ ] T006 [P] [US1] Add integration coverage for open-floor fanout in `/Users/zmll/github/cc-connect/tests/integration/agent_integration_test.go`
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Implement designated pilot-channel fanout and non-pilot fallback in `/Users/zmll/github/cc-connect/platform/discord/discord.go`
-- [ ] T008 [US1] Implement self-loop suppression for agent-authored outbound pilot-channel messages in `/Users/zmll/github/cc-connect/platform/discord/discord.go`
-- [ ] T009 [US1] Update operator-facing pilot fanout examples in `/Users/zmll/github/cc-connect/config.example.toml` and `/Users/zmll/github/cc-connect/docs/discord.md`
+- [X] T007 [US1] Implement designated pilot-channel fanout and non-pilot fallback in `/Users/zmll/github/cc-connect/platform/discord/discord.go`
+- [X] T008 [US1] Implement self-loop suppression for agent-authored outbound pilot-channel messages in `/Users/zmll/github/cc-connect/platform/discord/discord.go`
+- [X] T009 [US1] Update operator-facing pilot fanout examples in `/Users/zmll/github/cc-connect/config.example.toml` and `/Users/zmll/github/cc-connect/docs/discord.md`
 
 **Checkpoint**: The designated pilot channel behaves as open-floor fanout
 without reintroducing transport-side reply arbitration.
@@ -91,8 +91,8 @@ future turns.
 ### Implementation for User Story 2
 
 - [ ] T012 [US2] Implement channel-scoped `!stop` / `!resume` authority and suppression semantics in `/Users/zmll/github/cc-connect/core/engine.go`
-- [ ] T013 [US2] Wire pilot-channel interrupt commands and designation-change handling in `/Users/zmll/github/cc-connect/platform/discord/discord.go`
-- [ ] T014 [US2] Update operator-facing interrupt documentation in `/Users/zmll/github/cc-connect/config.example.toml` and `/Users/zmll/github/cc-connect/docs/discord.md`
+- [X] T013 [US2] Wire pilot-channel interrupt commands and designation-change handling in `/Users/zmll/github/cc-connect/platform/discord/discord.go`
+- [X] T014 [US2] Update operator-facing interrupt documentation in `/Users/zmll/github/cc-connect/config.example.toml` and `/Users/zmll/github/cc-connect/docs/discord.md`
 
 **Checkpoint**: The designated pilot channel can be explicitly stopped and
 resumed without transport rewriting already-running turns beyond the defined
