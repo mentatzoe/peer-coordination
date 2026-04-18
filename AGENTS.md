@@ -2,8 +2,8 @@
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current feature spec:
-`specs/001-transport-mvp/spec.md`
+shell commands, and other important information, read the current plan:
+`specs/001-transport-mvp/plan.md`
 <!-- SPECKIT END -->
 
 ## Purpose

@@ -102,8 +102,9 @@ issue `!resume` and verify normal routing returns.
   operator or an explicitly allowlisted delegate for the pilot channel; the
   default initial pilot configuration MAY contain only the operator.
 - **FR-008**: The system MUST treat `!stop` as an immediate best-effort cancel:
-  not-yet-sent outbound messages in the pilot channel MUST be suppressed, while
-  already-sent partial output MAY remain visible.
+  not-yet-sent outbound messages and other transport-mediated side effects in
+  the pilot channel MUST be suppressed, while already-sent partial output MAY
+  remain visible.
 - **FR-009**: The system MUST keep this feature scoped to transport routing and
   safety semantics; it MUST NOT absorb channel policy declaration, reaction
   workflows, approval gating, or pinned-rules ingestion.
