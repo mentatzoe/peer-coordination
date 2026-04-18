@@ -78,7 +78,9 @@ issue `!resume` and verify normal routing returns.
 ### Edge Cases
 
 - What happens when a user who is not the operator or an explicitly allowlisted
-  delegate attempts to issue `!stop` or `!resume`?
+  delegate attempts to issue `!stop` or `!resume`? Expected behavior is an
+  ignored command with no interrupt-state change; the attempt MAY be logged for
+  operator auditability, but it MUST NOT suspend or resume agent activity.
 
 ## Requirements *(mandatory)*
 

@@ -86,7 +86,7 @@ future turns.
 ### Tests for User Story 2
 
 - [ ] T010 [P] [US2] Add unit coverage for interrupt authority, best-effort suppression, and designation-change behavior in `/Users/zmll/github/cc-connect/core/engine_test.go` and `/Users/zmll/github/cc-connect/platform/discord/discord_test.go`, including the case where designation changes mid-turn and only future routing adopts the new channel.
-- [ ] T011 [P] [US2] Add integration coverage for channel-scoped `!stop` / `!resume` in `/Users/zmll/github/cc-connect/tests/integration/agent_integration_test.go`
+- [ ] T011 [P] [US2] Add integration coverage for channel-scoped `!stop` / `!resume` in `/Users/zmll/github/cc-connect/tests/integration/agent_integration_test.go`, including the case where pilot designation changes while an existing turn completes under the old channel and only future routing adopts the new one.
 
 ### Implementation for User Story 2
 
