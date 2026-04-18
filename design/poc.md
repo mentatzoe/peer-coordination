@@ -227,6 +227,7 @@ The POC should progress by **capability gates**, not by raw implementation volum
 - `!stop` / `!resume` or equivalent operator interrupt works
 - episode record is preservable and reviewable after the session
 - pinned rules or equivalent shared coordination artifact is exposed in-channel
+- **operator interventions are distinguishable by type/reason in the preserved record** (safety stop, clarification, redirect, drift-catch, etc.), per `design/architecture.md` Layer 3 capability ("a way to track operator intervention frequency, type, and reason"). Without this, the Phase 2 intervention-rate observable is hard to interpret — three safety stops read very differently from three directive redirects.
 
 **Likely dependency streams:**
 
@@ -257,10 +258,10 @@ The POC should progress by **capability gates**, not by raw implementation volum
 **What happens in this phase:**
 
 - run the two-peer probe
-- record operator interventions
+- record operator interventions (with type/reason tagging per the capability added above)
 - log observations after each session
 - evaluate H1 convergence and H2 legibility against the preserved episode record
-- classify visible Discord couplings as surface conventions vs deeper architectural dependencies
+- classify visible Discord couplings as surface conventions vs core coordination-logic dependencies **session by session**, in the observations file — running capture here makes the Phase 5 follow-on-readiness assessment tractable instead of retrospective guesswork
 
 **Operator input needed:**
 
@@ -270,7 +271,8 @@ The POC should progress by **capability gates**, not by raw implementation volum
 
 **Gate to next phase:**
 
-- enough sessions exist to say something non-anecdotal about H1/H2
+- at least 3 two-peer sessions completed, each with intervention log + observation notes committed to the repo
+- if convergence remains inconclusive after 5 sessions, exit to Phase 3 for credibility review rather than extending the baseline indefinitely (guards against optimizing for the harness instead of learning from it)
 - failures, if any, are understood as either harness-credibility failures or genuine hypothesis pressure
 
 ### Phase 3 — Credibility repair or confirmation
@@ -284,7 +286,7 @@ The POC should progress by **capability gates**, not by raw implementation volum
   - missing or corrupted episode record
   - evaluation method interfering with the session
   - transport ambiguity that prevents interpretation of results
-- avoid tuning the system merely to make H1/H2 \"pass\"
+- avoid tuning the system merely to make H1/H2 "pass"
 
 **Operator input needed:**
 
@@ -347,11 +349,13 @@ The POC should progress by **capability gates**, not by raw implementation volum
 
 ## Open Questions (cross-cutting)
 
-1. **How many total POC sessions before calling the experiment done?** Current planning range: 3–5 two-peer baseline sessions, plus optional 1–2 Gemini stretch sessions if Phase 4 is entered. Exact exit still depends on hypothesis clarity, not on hitting the top of the range mechanically.
-2. **Does the fresh-reader H2 test need to be an uninvolved human specifically, or can it be an agent that wasn't in the session?** Operator call. Using an agent is faster but risks shared training biases; a human is slower but cleaner.
-3. **At what point do we spin up the H3 substrate-transfer test?** Likely after POC signals H1 + H2 hold; but if H3 is designed-for at the architecture level, the test could run in parallel with later POC sessions rather than after.
-4. **How is drift-audit tooling built without violating the "unobtrusive evaluation" steer?** Post-hoc transcript analysis is fine; anything that runs during a session risks observer effect.
-5. **Gemini stretch transport path.** If the three-agent stretch session is attempted, what's the transport path for Gemini — a new cc-connect adapter for Gemini CLI, or an alternative bridge (Discord MCP from a local Gemini session, custom bot, etc.)? Affects whether findings isolate harness-dependency cleanly or blend it with transport-dependency. To be resolved before the stretch session runs; scoping the adapter effort (and whether it's in this POC or a follow-on) is a phase-planning question for Codex's Development Phases section.
+Each question is annotated with the phase in which it is expected to be resolved, so the phase plan and the open-question list stay in sync.
+
+1. **How many total POC sessions before calling the experiment done?** Current planning range: 3–5 two-peer baseline sessions (Phase 2), plus optional 1–2 Gemini stretch sessions if Phase 4 is entered. Exact exit still depends on hypothesis clarity, not on hitting the top of the range mechanically. *Resolves: superseded by the Phase 2 / Phase 4 gates.*
+2. **Does the fresh-reader H2 test need to be an uninvolved human specifically, or can it be an agent that wasn't in the session?** Operator call. Using an agent is faster but risks shared training biases; a human is slower but cleaner. *Resolves: Phase 2 (operator picks the reviewer type for the first observation run; may change across sessions).*
+3. **At what point do we spin up the H3 substrate-transfer test?** Likely after POC signals H1 + H2 hold; but if H3 is designed-for at the architecture level, the test could run in parallel with later POC sessions rather than after. *Resolves: Phase 5 (POC exit decision on whether to proceed to a non-Discord H3 test).*
+4. **How is drift-audit tooling built without violating the "unobtrusive evaluation" steer?** Post-hoc transcript analysis is fine; anything that runs during a session risks observer effect. *Resolves: Phase 3 (credibility repair explicitly covers "evaluation method interfering with the session").*
+5. **Gemini stretch transport path.** If the three-agent stretch session is attempted, what's the transport path for Gemini — a new cc-connect adapter for Gemini CLI, or an alternative bridge (Discord MCP from a local Gemini session, custom bot, etc.)? Affects whether findings isolate harness-dependency cleanly or blend it with transport-dependency. *Resolves: before Phase 4 entry (Phase 4's entry conditions explicitly require the Gemini transport path to be chosen and documented, and the team to accept any blended-signal consequences honestly).*
 
 ## References
 
@@ -368,6 +372,7 @@ The POC should progress by **capability gates**, not by raw implementation volum
 
 ## Changelog
 
+- **2026-04-18 (Claude integration pass on Codex sections)**: iterated on Codex's handoff pass per Zoe's direction on Discord. Added Phase 1 capability requirement: operator interventions must be tagged by type/reason in the preserved record (connects to architecture.md Layer 3 capability + the H1 intervention-rate observable, which otherwise can't distinguish safety stops from directive redirects). Made Phase 2 substrate-coupling classification a **session-by-session running capture** so Phase 5 follow-on-readiness isn't reconstructed retrospectively. Tightened Phase 2 → Phase 3 gate with concrete session-count thresholds (≥3 completed, force-exit at 5 if inconclusive). Fixed escaped quotes in Phase 3. Annotated each Open Question with the phase where it resolves, keeping the phase plan and the OQ list in sync. Endorsed Codex's capability-stream framing (vs spec-number framing) as the honest choice given current repo state; no revisions to that section.
 - **2026-04-18 (Codex handoff pass)**: filled the previously stubbed **Architecture → Tech Stack Mapping** and **Development Phases** sections. Added a three-layer → concrete-stack mapping, capability-stream framing instead of overcommitting to spec numbers not yet landed on `main`, recommended submodule shape (`poc/discord-peer-coordination/`), and a phase plan from artifact alignment through optional Gemini stretch and POC exit. Also updated the scope's session-count sentence and the signed-off exit criterion to align with the newly-added phases section, and updated the top status line to reflect that the document is now a full co-authored draft rather than a partial handoff.
 - **2026-04-18 (transport/harness clarification)**: corrected a conflation flagged by Zoe on Discord — cc-connect is the transport/communications bridge, not the agent harness. Distinguished transport (cc-connect) from agent harness (the underlying CLI: Claude Code CLI, Codex CLI, Gemini CLI) in the Primary / Stretch participants descriptions. Reframed the H3-via-harness probe as testing agent-CLI semantics, not "cc-connect-shaped semantics." Added an open question for the Gemini stretch transport path (cc-connect adapter vs alternative bridge), since it blends with the harness-dependency finding if not called out.
 - **2026-04-18 (second revision round)**: revised in response to [#37](https://github.com/mentatzoe/peer-coordination/discussions/37) + downstream of VISION.md revisions (commits [`3ec72dc`](https://github.com/mentatzoe/peer-coordination/commit/3ec72dc), [`358af56`](https://github.com/mentatzoe/peer-coordination/commit/358af56)) + alignment to the latest `design/architecture.md` draft. Changes: added optional Gemini-CLI three-agent stretch participant per Zoe's [#37 comment](https://github.com/mentatzoe/peer-coordination/discussions/37#discussioncomment-16616215); reframed pilot-local assumptions explicitly as H3 "surface conventions" vs "core coordination logic"; updated H2 fresh-reader test to evaluate against the preserved episode record rather than a trailing turn window; updated H3 substrate-dependency audit to classify decisions as surface vs core rather than count substrate-coupling; added H3 harness-dependency probe tied to the stretch session; added complementarity observable to H1 tracking the architecture's Layer 3 failure taxonomy; added cross-references to `design/architecture.md` throughout. Codex-owned sections (Architecture → Tech Stack Mapping, Development Phases) remain stubbed pending Codex's contribution.
