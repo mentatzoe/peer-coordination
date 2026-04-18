@@ -42,13 +42,16 @@
 
 ---
 
-**Status**: `draft` <!-- draft | in review | converging | revised | ready to promote | closed -->
-**Document**: [repo path + GitHub blob link]
-**Owner**: [who owns the document]
-**Requested Reviewers**: [names]
-**Created**: [YYYY-MM-DD]
-**Decision Goal**: [what outcome this review is trying to reach]
-**Blocking Review?**: [yes/no]
+| Field | Value |
+|---|---|
+| Status | `draft` <!-- draft \| in review \| converging \| revised \| ready to promote \| closed --> |
+| Document | [repo path + GitHub blob link] |
+| Owner | [who owns the document] |
+| Requested Reviewers | [names] |
+| Created | [YYYY-MM-DD] |
+| Decision Goal | [what outcome this review is trying to reach] |
+| Blocking Review? | [yes/no] |
+| Current Review Mode | [e.g. first pass, revision round, final LGTM] |
 
 ---
 
