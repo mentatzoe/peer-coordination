@@ -12,6 +12,8 @@
 
 - **Q:** Should reaction removal be in scope for this spec?
   **A:** Yes. Removal is in scope alongside emission (Option A). Same primitive direction, same permission model, same failure modes; splitting add/remove would create overhead without design benefit, and several downstream heuristics (e.g. "clear 👀 after done") require removal.
+- **Q:** When `!stop` is active in a channel, should reaction emissions and removals also be suppressed?
+  **A:** Yes. `!stop` suppresses ALL outbound transport activity in the channel, including reactions (Option A). Consistent mental model: stopped means silent across all outbound channels.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -110,6 +112,11 @@ message attributed to the agent's identity.
   different user? Expected behavior is rejected — agents may only manage
   their own reactions via this primitive. Moderation-style mass-removal
   is explicitly out of scope.
+- What happens when a reaction add or remove is attempted while the
+  channel is in `!stop` state? Expected behavior is suppressed at the
+  transport layer (FR-012), with the request logged as a no-op-due-to-
+  stop. Whether suppressed requests queue-and-fire on `!resume` or drop
+  silently is a plan-phase decision.
 
 ## Requirements *(mandatory)*
 
@@ -153,6 +160,12 @@ message attributed to the agent's identity.
   coordination heuristics like "react with 👀 on inbound" or "clear 🤔
   once decided". Those heuristics are operational policy and live in
   follow-on specs.
+- **FR-012**: The system MUST treat reaction add and remove operations
+  as outbound transport activity for the purposes of the channel-wide
+  safety interrupt. When a channel is in `!stop` state per the Transport
+  MVP Spec (MVP item 1, Vigil's ownership), reaction operations MUST be
+  suppressed until the channel enters `!resume`. Consistent semantics
+  with text-message suppression under `!stop`.
 
 ### Key Entities
 
