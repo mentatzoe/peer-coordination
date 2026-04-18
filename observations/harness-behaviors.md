@@ -61,3 +61,19 @@ a follow-on spec and leave a `→ promoted to [link]` note here.
 **Framing:** The coworker register loses out on pipe-liveness signals that the tool register gets for free. Doesn't mean we need to migrate to tool register — but an explicit "received, working" signal would cover the gap without collapsing the register.
 
 **Implication:** Behavior change adopted by Station on 2026-04-18: react 👀 on inbound Discord messages before starting substantive work (search, edit, commit). Quick text-only replies don't need it; the reply is the ack. Maps to the emoji palette from the original Principle VI discussion — fitting that it becomes an actual behavior.
+
+---
+
+## 2026-04-18 — "Silent drop" failure mode when agent drafts text without invoking the Discord reply tool
+
+**Harnesses observed:** Station (Claude Code `--channels` plugin).
+
+**Observation:** Station twice in a 15-minute window produced a response to an inbound Discord message by rendering the reply text in its local/conversation output WITHOUT invoking `mcp__plugin_discord_discord__reply`. From the operator's perspective on Discord, Station appeared silent for 75+ minutes. First instance: response to "Is item 5 what defines the heuristic for cooperation behaviour" (10:31 UTC inbound → no Discord reply until operator pinged at 11:47 UTC). Second instance: response to "What happened to item 2?" (11:49 UTC inbound → no Discord reply until operator pinged at 11:53 UTC).
+
+**Framing:** Station's harness conflates "speaking" (textual output in the conversation) with "sending" (actually transmitting to the inbound channel). Claude-Code-in-channels mode inherits the terminal-session habit of "type a response, done" — but in a Discord-mediated session, the textual output doesn't reach the channel unless the Discord reply tool is explicitly invoked. Not hypothetical: happened twice in this session. Codex's cc-connect harness wouldn't hit this because every outbound message in cc-connect is explicitly a `Send` tool call with no "text-only output" affordance.
+
+**Implication:** Station should treat "responding to a Discord inbound" and "rendering text locally" as distinct operations. Heuristic to adopt: **if an inbound arrived through Discord, the response MUST go out via `mcp__plugin_discord_discord__reply`.** Textual output in the conversation is supplementary (mostly for the terminal operator watching the session live), not a substitute for the Discord reply.
+
+Related to the earlier "pipe-liveness" observation — both stem from the coworker register lacking explicit send/receive surfaces. The earlier `👀`-on-inbound fix catches the "am I being worked on" case; this observation catches the "did the work actually ship" case. Both are symptoms of the same class of bug.
+
+**Candidate mitigation:** add a pre-turn check that when the most recent inbound is a Discord channel message, at least one `mcp__plugin_discord_discord__reply` call must appear in the same turn before considering the response complete. Harness-level enforcement, not agent-level discipline — discipline already failed twice.
