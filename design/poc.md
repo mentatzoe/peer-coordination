@@ -58,9 +58,10 @@ A **session** is a contiguous operator-bounded window in the designated open-flo
 | Session rule | Current decision |
 |---|---|
 | Who can open a session? | Operator only |
-| What opens a session? | Operator seed prompt, channel-open after a long idle, or explicit `!resume` |
+| What opens a session? | Operator seed prompt, first operator post after a long idle, or explicit operator `!resume` |
 | What closes a session? | Explicit operator close, pinned-rules change, or `!stop` |
 | Does `!stop` always close the session? | Yes |
+| What does `!resume` do after `!stop`? | Opens a new session; the prior session stays closed |
 | Idle timeout | 1 hour |
 | If peers keep posting after close | Count as post-session drift, not continuation |
 | Do sessions span multi-day gaps? | No |
@@ -96,6 +97,16 @@ The POC succeeds if it produces enough credible evidence to take a stance on H1 
 | **H2 — Legibility** | Episode-record completeness | **100%** of counted sessions preserve transcript snapshot, pinned-rules reference, intervention log, and summary | Session bundle | We cannot audit what happened after the fact |
 | **H3 — Design-for generalizability** | Surface-vs-core classification coverage | **100%** of major architectural choices classified before POC exit | Session summaries, POC exit record | Substrate/local choices stay mixed with core coordination logic |
 | **H3 — Harness-diversity probe** | Gemini extension on same transport stack | If Phase 3 clears its gate, run **1–2 Gemini sessions** through `cc-connect` | Phase 4 transcript + summaries | We never test whether the logic survives a meaningfully different harness on the same substrate |
+
+### Per-session clear definitions
+
+These definitions make the KPI thresholds above auditable at the session level.
+
+| KPI | A session clears if... |
+|---|---|
+| **H1 — Stable coordination without operator-driven turn-by-turn routing** | all of the following are true in the preserved record: (1) the operator does **not** have to provide directive redirects on a majority of substantive turns; (2) no loop/deadlock persists long enough to require repeated directive redirects to break; (3) neither peer collapses into one-sided dominance such that the other stops being a meaningful participant |
+| **H1 — Complementarity** | the session summary can point to at least one distinct useful contribution from each peer that was taken up, answered, or built on in the shared exchange |
+| **H2 — Fresh-reader pass** | an uninvolved **human** reviewer can read the preserved bundle and produce a short reconstruction of the session goal, each peer's role/contribution, and why the exchange resolved or failed, and the operator judges that reconstruction materially correct |
 
 ### Harness-credibility failures
 
@@ -179,9 +190,11 @@ And at the POC level:
 | Measurement type | Mechanism | Constraint |
 |---|---|---|
 | Count-based KPIs | Deterministic script or structured post-session tally | Must be reproducible from preserved artifacts |
-| Drift audit | Manual review in early sessions, then LLM-assisted post-session audit once rubric exists | Must remain post-session only |
-| Intervention capture | Optional live tagging if low-friction; required immediate post-session annotation | Should not overload the operator during live arbitration |
+| Drift audit | Draft rubric in Phase 2, then manual review in early sessions and optional LLM-assisted post-session audit once the rubric is calibrated | Must remain post-session only |
+| Intervention capture | Optional live tagging if low-friction; required post-session annotation before the next session or within 24 hours of session close, whichever comes first | Should not overload the operator during live arbitration |
 | Final KPI verification | Operator-reviewed rollup with agent audit support | Operator ratifies |
+
+Minimum intervention types for this POC: `safety_stop`, `clarification`, `directive_redirect`, `drift_catch`, `close_or_resume`, `other`.
 
 ### Deferred from this document
 
@@ -199,7 +212,7 @@ Those can harden after the POC rewrite and first implementation pass.
 |---|---|---|---|
 | **0 — Artifact alignment** | Approve `VISION.md`, `design/architecture.md`, and this POC doc | 0 | Documents are converged enough to guide implementation |
 | **1 — Baseline substrate build** | Working Discord channel, `cc-connect` path for Claude/Codex, interrupt path, transcript export, pinned-rules support, session bundle skeleton | 0 live baseline sessions; dry runs allowed | At least one dry run completes safely and leaves a usable artifact bundle |
-| **2 — Evaluation surface build** | Intervention logging, drift-audit rubric, KPI computation path, session summary workflow | 0–1 dry validation runs | Review pipeline exists without intruding on live sessions |
+| **2 — Evaluation surface build** | Intervention logging, draft drift-audit rubric, KPI computation path, session summary workflow | 0–1 dry validation runs | Draft review pipeline exists: intervention-tagging path works, the draft rubric runs end-to-end on a synthetic or prior transcript, and the workflow does not require live-session observation |
 | **3 — Two-peer baseline run** | Run the core two-peer probe and collect the baseline evidence set | **3–5** sessions | Enough evidence to take a non-anecdotal stance on H1/H2; if inconclusive after 5, move to decision rather than extending indefinitely |
 | **4 — Gemini extension** | Add Gemini via `cc-connect` adapter and run the required harness-diversity extension if Phase 3 was credible enough to continue | **1–2** sessions | Either (a) extension yields usable evidence, or (b) extension is judged too confounded / not worth continuing |
 | **5 — Exit and handoff** | Produce final KPI rollup, hypothesis stances, and next-step decision | 0 new sessions | Operator ratifies `observations/poc-exit.md` |
@@ -216,7 +229,7 @@ Only the unresolved questions that still materially affect implementation stay h
 
 1. **`cc-connect` containment mechanics** — submodule, subtree, or full move under this repo?
 2. **Transcript export mechanism** — what exact path/tool will produce the canonical transcript snapshot per session?
-3. **Drift-audit rubric** — what are the exact fields and scoring rules for `drift-audit.json` once the first one or two sessions exist?
+3. **Drift-audit rubric calibration** — after the draft rubric is in place for Phase 2, what exact scoring refinements should be locked after the first one or two real sessions?
 
 ## References
 
@@ -231,6 +244,7 @@ Only the unresolved questions that still materially affect implementation stay h
 
 ## Changelog
 
+- **2026-04-18 (Codex follow-up after #38 review)**: defined what it means for H1/H2 KPI rows to clear at the per-session level; made the fresh-reader reviewer explicitly human; resolved `!resume` and long-idle session-opening semantics; changed Phase 2 to ship a draft drift-audit rubric so the phase gates stay linear; defined the post-session annotation window and minimum intervention-type taxonomy.
 - **2026-04-18 (Codex holistic rewrite)**: rewrote the document into a single co-authored structure. Replaced prose status with a table; made the participant vs shared-surface split explicit; added concrete KPI tables; resolved session-definition, operator-presence, Gemini-in-scope, and Layer 3 scoping decisions from discussion #37; replaced the earlier spec/artifact mapping with a component-and-phase model; trimmed Open Questions to unresolved implementation choices only.
 - **2026-04-18 (transport/harness clarification)**: corrected the transport vs harness distinction and added the Gemini harness-diversity framing.
 - **2026-04-18 (Claude baseline draft + Codex handoff pass)**: initial co-authored draft assembled from Claude's scope/success-fail sections and Codex's first mapping/phases pass before the holistic rewrite.
