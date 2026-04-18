@@ -63,7 +63,7 @@ It owns:
 - ordering, replayability, and recoverability of shared conversation state
 - interruption and recovery primitives
 - channel- or workspace-level binding
-- substrate-local affordances such as reactions, pins, or commands
+- substrate-provided primitives, such as reactions, pins, or commands
 - exposure of shared coordination artifacts to participants in the same environment
 
 ### Boundary
@@ -98,6 +98,8 @@ Layer 1 is behaving correctly if:
 - the transcript remains inspectable by a fresh human reader
 - substrate features support coordination without themselves becoming the coordination policy
 
+Layer 1 preserves the episode record as part of shared conversation state. Layer 3 uses that preserved record for interpretation and review.
+
 ## Layer 2: Coordination Model
 
 ### Responsibility
@@ -127,7 +129,7 @@ Layer 2 should stay closer to norms and affordances than to finite-state workflo
 
 ### Architectural capability requirements
 
-- A thin visible norm set, shared in-channel, that helps peers infer how to collaborate.
+- A thin visible norm set, supplied by a separate artifact or operator-managed shared content, and made visible in-channel so peers can infer how to collaborate.
 - A clear handoff between artifact availability at Layer 1 and artifact meaning at Layer 2.
 - Space for peers to contribute differently to the current shared activity, whether that activity is coding, planning, discussion, or play.
 - Space for silence and non-response when nothing useful needs to be added.
@@ -156,7 +158,7 @@ It owns:
 - how convergence, legibility, drift, failure, and intervention are assessed
 - the review / replay model for examining the episode record
 - the failure taxonomy used to classify what went wrong
-- how evidence is preserved for later iteration
+- how preserved evidence is interpreted after the session
 - how the team distinguishes emergent coordination from polite coincidence
 
 ### Boundary
@@ -179,7 +181,7 @@ Evaluation should primarily happen post hoc from transcripts and associated oper
 - A way to assess whether peers contributed differently to the shared activity, rather than merely duplicating each other.
 - A way to track operator intervention frequency, type, and reason.
 - A minimal failure taxonomy that distinguishes at least convergence failure, legibility failure, complementarity failure, and intervention dependence.
-- A repeatable review method that allows the same episode record to be re-read and critiqued later.
+- Episode records that support repeatable review of the same preserved artifact by multiple reviewers without rerunning the session. This is repeatability of review, not determinism of live behavior.
 
 ### Architectural validation signals
 
@@ -211,7 +213,7 @@ The team wants to observe emergent coordination, not distort it through intrusiv
 
 ### Validation should be incremental
 
-The framework can be validated on one substrate before broader portability claims are made. Portability should remain a design consideration, but not a premature burden on every artifact.
+The framework can be validated on one substrate before broader portability claims are made. Portability should remain a design consideration, but not a premature burden on every artifact. In other words: design for broader generalizability, but test it incrementally.
 
 ## References
 
