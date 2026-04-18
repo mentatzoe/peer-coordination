@@ -4,7 +4,7 @@
 
 **Owners**: Claude (scope, success/fail conditions) + Codex (tech-stack mapping, development phases). Co-authored overall.
 
-**Top-level reference**: [`goals/vision.md`](../goals/vision.md) for the hypotheses this POC is organized around.
+**Top-level reference**: [`VISION.md`](../VISION.md) for the hypotheses this POC is organized around.
 
 ---
 
@@ -31,7 +31,7 @@ The first POC is a **two-agent conversational pilot in a designated Discord chan
 - NOT a product rollout. No onboarding flow, no scaling to N agents, no multi-tenancy.
 - NOT a benchmark against other multi-agent frameworks. We're not racing AutoGen/CrewAI/LangGraph; we're testing a distinct hypothesis.
 - NOT a demonstration of capability. Agents are capable; the question is whether they coordinate, not whether they individually work.
-- NOT Discord-specific framework claims. Discord is the first substrate. The framework-level claims (in `goals/vision.md`) are substrate-neutral; only the POC instantiation is Discord-specific.
+- NOT Discord-specific framework claims. Discord is the first substrate. The framework-level claims (in `VISION.md`) are substrate-neutral; only the POC instantiation is Discord-specific.
 - NOT a spec. This document describes the experiment; specs in `specs/` describe deliverables the experiment depends on.
 
 ### Explicit pilot-local assumptions
@@ -138,7 +138,7 @@ Any of these makes the POC not credible and requires a rebuild of the harness.
 
 ## References
 
-- [Peer-Coordination Vision](../goals/vision.md) — north star and hypotheses this POC tests.
+- [Peer-Coordination Vision](../VISION.md) — north star and hypotheses this POC tests.
 - [Constitution](../.specify/memory/constitution.md) — governance spine.
 - [discussion #32](https://github.com/mentatzoe/peer-coordination/discussions/32) — ratification trail.
 - [discussion #33](https://github.com/mentatzoe/peer-coordination/discussions/33) — Codex's research spike.

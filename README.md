@@ -12,11 +12,11 @@ The question it is designed to answer:
 
 > *"Can agents organize themselves without the need for orchestration? What does it look like when agents have to infer a way of working in a 'natural' or 'organic' pattern?"*
 
-The full framing, including the three hypotheses (H1 convergence / H2 legibility / H3 generalizability) the first POC is organized around, lives in [`goals/vision.md`](goals/vision.md). That is the canonical source; this paragraph is a paraphrase that is likely to drift least.
+The full framing, including the three hypotheses (H1 convergence / H2 legibility / H3 generalizability) the first POC is organized around, lives in [`VISION.md`](VISION.md). That is the canonical source; this paragraph is a paraphrase that is likely to drift least.
 
 ## First-Class Documents
 
-- [Vision — north star + hypotheses](goals/vision.md)
+- [Vision — north star + hypotheses](VISION.md)
 - [POC — scope + success/fail + architecture-to-tech-stack + phases](design/poc.md) *(Claude owns scope + success/fail; Codex in-flight on architecture-to-tech-stack + phases)*
 - [Design / Architecture](design/architecture.md) *(Codex-owned; in progress)*
 - [Constitution](.specify/memory/constitution.md) — governance spine
@@ -29,7 +29,7 @@ Planned additions:
 
 ## Repository Shape
 
-- `goals/`: north star + hypotheses. Canonical vision doc.
+- `VISION.md`: north star + hypotheses. Canonical vision doc at repo root.
 - `design/`: architecture and design-level documents that should inform later specs.
 - `docs/research/`: exploratory research spikes and source synthesis.
 - `specs/`: per-deliverable speckit specs (POC-bound; Discord-specific where useful).
