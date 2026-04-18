@@ -1,6 +1,6 @@
 # Feature Specification: Transport MVP
 
-**Feature Branch**: `transport-mvp-spec`  
+**Feature Branch**: `001-transport-mvp`  
 **Created**: 2026-04-18  
 **Status**: Draft  
 **Input**: User description: "Specify the Transport MVP for peer coordination, covering open-floor mode, channel-wide stop/resume, agent-initiated emoji reacts, approval-via-react, pinned-rules ingestion, and the governance boundary that heuristics remain spec-level while preserving Principle VI."
