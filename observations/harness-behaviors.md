@@ -77,3 +77,22 @@ a follow-on spec and leave a `→ promoted to [link]` note here.
 Related to the earlier "pipe-liveness" observation — both stem from the coworker register lacking explicit send/receive surfaces. The earlier `👀`-on-inbound fix catches the "am I being worked on" case; this observation catches the "did the work actually ship" case. Both are symptoms of the same class of bug.
 
 **Candidate mitigation:** add a pre-turn check that when the most recent inbound is a Discord channel message, at least one `mcp__plugin_discord_discord__reply` call must appear in the same turn before considering the response complete. Harness-level enforcement, not agent-level discipline — discipline already failed twice.
+
+---
+
+## 2026-04-18 — Reaction events completely invisible to the native Discord plugin
+
+**Harnesses observed:** Station (Claude Code `--channels` plugin, specifically `claude-plugins-official/discord@0.0.4`).
+
+**Observation:** When Zoe added emoji reactions to Station's messages in the designated open-floor channel, Station received **no signal at all** — neither an inbound event nor any metadata on the message when subsequently fetched. Verified both push and pull paths live during the session:
+
+- **Push (inbound events)**: zero events between Zoe's text messages over several turns where Zoe was actively reacting. No empty-body events, no reaction-typed events, nothing.
+- **Pull (`mcp__plugin_discord_discord__fetch_messages`)**: fetched the last 10 messages from the channel; the returned payload for each message contains only `author`, `text`, `timestamp`, `message_id` — no `reactions` array, no count, no emoji field.
+
+This is a **stronger** claim than the prior SESSION-HANDOFF note ("empty-body events arrive"): the behavior is complete invisibility, not partial data. Either the prior observation was from a different harness (possibly Vigil via cc-connect) or the plugin behavior changed between sessions. Today's observation is the tested ground truth.
+
+**Framing:** The plugin offers `mcp__plugin_discord_discord__react` for outbound reactions (agent-to-Discord) but no symmetric inbound path for user-to-agent reactions. This breaks symmetry and rules out any reaction-based UX primitive (✅ approve, 👀 seen, 🚫 reject, 🤔 pushback) as a human-in-the-loop signal until fixed.
+
+**Implication:** Blocks the peer-coordination POC's planned approval-via-react MVP item (transport-layer capability #4) and the emoji-palette workflow more broadly. Upstream issue filed at [`anthropics/claude-plugins-official#1477`](https://github.com/anthropics/claude-plugins-official/issues/1477) with two proposed fix shapes (push-path inbound event or pull-path `reactions` array on `fetch_messages`).
+
+**Workaround until resolved:** explicit text confirmation is the reliable channel for anything semantically meaningful. Continue to ignore any empty-body inbound that does manage to come through (currently none observed on Station).

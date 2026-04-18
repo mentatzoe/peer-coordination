@@ -58,7 +58,7 @@ Short-lived pointer doc. Purpose: help a post-compact (or fresh) session pick up
 
 - **Silent-drop bug**: Station sometimes renders a Discord reply as local text output without actually invoking `mcp__plugin_discord_discord__reply`. Three occurrences today. Mitigation: always verify an `mcp__plugin_discord_discord__reply` tool call appears in the same turn as responding to a Discord inbound. Documented in `observations/harness-behaviors.md`.
 - **Dalgos session-stuck bug** (cc-connect side): long-running Bash tool calls can wedge the session lock such that subsequent messages queue up as "busy" and only the 2h idle timeout unsticks them. Documented in chat + observations; issue to be filed on `mentatzoe/cc-connect`.
-- **Empty-body Discord events**: reactions on Station's messages arrive as empty-body inbound events; the MCP doesn't pass through the emoji. Always ask for explicit text confirmation when ambiguous.
+- **Reactions are invisible to Station (native Discord plugin)**: verified on 2026-04-18 — reactions surface neither as inbound events nor in `fetch_messages` payloads. Complete signal loss, not partial. Upstream issue: [`anthropics/claude-plugins-official#1477`](https://github.com/anthropics/claude-plugins-official/issues/1477). Workaround: always ask for explicit text confirmation. (Supersedes the earlier "empty-body events" note, which was either from Vigil/cc-connect or outdated.)
 
 ## Promotion Boundary (in force)
 
