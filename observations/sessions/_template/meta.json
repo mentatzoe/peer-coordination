@@ -1,0 +1,11 @@
+{
+  "session_id": "[FILL IN: YYYY-MM-DD-short-slug]",
+  "opened_at": "[FILL IN: ISO-8601 timestamp]",
+  "closed_at": "[FILL IN: ISO-8601 timestamp or null]",
+  "close_reason": "[FILL IN: operator_close | pinned_rules_change | stop_no_resume | idle_timeout | cancelled]",
+  "participants": ["[FILL IN: peer-1]", "[FILL IN: peer-2]", "[FILL IN: operator]"],
+  "pinned_rules_ref": "[FILL IN: commit-hash OR {\"inline\": \"raw content\"}]",
+  "substrate": "discord",
+  "channel_id": "[FILL IN: discord-channel-snowflake]",
+  "transcript_source": "[FILL IN: export | reauthored | hybrid]"
+}
