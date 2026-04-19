@@ -13,7 +13,7 @@ Verify that the Discord transport now honors:
 
 1. Configure the Discord platform with:
    - a valid `token`
-   - `allow_from` that includes the operator
+   - `allow_from` with the operator listed first
    - `guild_id` if using per-guild slash registration
    - the new bound `channel_id`
 2. Start `cc-connect` against the Phase 1 project config.
@@ -28,6 +28,8 @@ Expected: no runtime dispatch into the peer-coordination session.
 2. Post from a peer in the **bound** channel before the operator opens a
 session.
 Expected: no implicit session open.
+Suggested setup: include that peer's Discord user ID in `allow_from` after the
+operator so this check is validating the session gate rather than raw auth.
 
 3. Post the operator seed in the **bound** channel.
 Expected: a session opens and normal dispatch begins.
