@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import json
-import shutil
-import subprocess
 import tempfile
 import unittest
 from pathlib import Path
 
+from tests.peer_session.test_support import seed_pinned_rules, seed_template, write_defaults
 from tools.peer_session.bundle_init import initialize_bundle
 
 
@@ -14,9 +13,9 @@ class InitializeBundleTest(unittest.TestCase):
     def test_initialize_bundle_creates_session_directory_and_fills_mechanical_meta(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             repo_root = Path(tmp)
-            self._seed_template(repo_root)
-            self._seed_pinned_rules(repo_root)
-            defaults_path = self._write_defaults(repo_root)
+            seed_template(repo_root)
+            seed_pinned_rules(repo_root)
+            defaults_path = write_defaults(repo_root)
 
             bundle_dir = initialize_bundle(
                 repo_root,
@@ -47,44 +46,71 @@ class InitializeBundleTest(unittest.TestCase):
             self.assertIn("opened_at", meta)
             self.assertIn("pinned_rules_ref", meta)
             self.assertNotIn("transcript_source", meta)
+            self.assertEqual(meta["closed_at"], "[FILL IN: ISO-8601 timestamp or null]")
+            self.assertEqual(
+                meta["close_reason"],
+                "[FILL IN: operator_close | pinned_rules_change | stop_no_resume]",
+            )
 
-    def _seed_template(self, repo_root: Path) -> None:
-        template_src = Path(__file__).resolve().parents[2] / "observations" / "sessions" / "_template"
-        template_dst = repo_root / "observations" / "sessions" / "_template"
-        template_dst.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(template_src, template_dst)
+    def test_initialize_bundle_cli_overrides_win_over_defaults(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            seed_template(repo_root)
+            seed_pinned_rules(repo_root)
+            defaults_path = write_defaults(repo_root)
 
-    def _seed_pinned_rules(self, repo_root: Path) -> None:
-        rules_dir = repo_root / "pinned-rules"
-        rules_dir.mkdir(parents=True, exist_ok=True)
-        (rules_dir / "current.md").write_text("# Rules\n\n- Keep it legible.\n")
+            bundle_dir = initialize_bundle(
+                repo_root,
+                "2026-04-20-dry-run-overrides",
+                defaults_path=defaults_path,
+                peer_handles=["vigil", "dalgos"],
+                operator_handle="station",
+                channel_id="999999999999999999",
+            )
 
-        subprocess.run(["git", "init"], cwd=repo_root, check=True, capture_output=True)
-        subprocess.run(
-            ["git", "config", "user.name", "Test User"],
-            cwd=repo_root,
-            check=True,
-            capture_output=True,
-        )
-        subprocess.run(
-            ["git", "config", "user.email", "test@example.com"],
-            cwd=repo_root,
-            check=True,
-            capture_output=True,
-        )
-        subprocess.run(["git", "add", "pinned-rules/current.md"], cwd=repo_root, check=True, capture_output=True)
-        subprocess.run(["git", "commit", "-m", "seed pinned rules"], cwd=repo_root, check=True, capture_output=True)
+            meta = json.loads((bundle_dir / "meta.json").read_text())
+            self.assertEqual(meta["channel_id"], "999999999999999999")
+            self.assertEqual(
+                meta["participants"],
+                [
+                    {"handle": "vigil", "role": "peer"},
+                    {"handle": "dalgos", "role": "peer"},
+                    {"handle": "station", "role": "operator"},
+                ],
+            )
 
-    def _write_defaults(self, repo_root: Path) -> Path:
-        defaults_path = repo_root / "observations" / "sessions" / "defaults.toml"
-        defaults_path.write_text(
-            'operator_handle = "zoe"\n'
-            'peer_handles = ["codex", "claude"]\n'
-            'substrate = "discord"\n'
-            'channel_id = "123456789012345678"\n'
-        )
-        return defaults_path
+    def test_initialize_bundle_uses_inline_snapshot_when_pinned_rules_are_dirty(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            seed_template(repo_root)
+            seed_pinned_rules(repo_root)
+            defaults_path = write_defaults(repo_root)
+            pinned_rules = repo_root / "pinned-rules" / "current.md"
+            pinned_rules.write_text("# Rules\n\n- Dirty override.\n")
 
+            bundle_dir = initialize_bundle(
+                repo_root,
+                "2026-04-20-dry-run-dirty-rules",
+                defaults_path=defaults_path,
+            )
+
+            meta = json.loads((bundle_dir / "meta.json").read_text())
+            self.assertEqual(meta["pinned_rules_ref"], {"inline": "# Rules\n\n- Dirty override.\n"})
+
+    def test_initialize_bundle_fails_when_required_template_file_is_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            seed_template(repo_root)
+            seed_pinned_rules(repo_root)
+            defaults_path = write_defaults(repo_root)
+            (repo_root / "observations" / "sessions" / "_template" / "summary.md").unlink()
+
+            with self.assertRaisesRegex(FileNotFoundError, "template missing required files: summary.md"):
+                initialize_bundle(
+                    repo_root,
+                    "2026-04-20-dry-run-missing-template",
+                    defaults_path=defaults_path,
+                )
 
 if __name__ == "__main__":
     unittest.main()

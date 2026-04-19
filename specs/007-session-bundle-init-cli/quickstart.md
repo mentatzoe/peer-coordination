@@ -74,3 +74,12 @@ After a successful run:
 The initialized bundle is now ready to be completed during and after the
 session. `peer-session init` is finished once the directory exists and the
 mechanical metadata is truthfully populated.
+
+## 7. Scope boundary
+
+V1 deliberately exposes `init` only.
+
+- There is no overwrite mode.
+- There is no `setup`, `validate`, or judge-prep command yet.
+- Future artifact-first commands can be added under the same `peer-session`
+  surface without changing the meaning of the bundle created by `init`.

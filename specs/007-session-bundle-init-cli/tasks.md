@@ -29,7 +29,7 @@
 - [X] T005 [P] Implement defaults-file loading and CLI override resolution helpers in `tools/peer_session/defaults.py`.
 - [X] T006 [P] Implement pinned-rules provenance helpers in `tools/peer_session/git_refs.py`.
 - [X] T007 [P] Implement session-id validation, template file-set validation, and bundle-copy primitives in `tools/peer_session/bundle_init.py`.
-- [ ] T008 [P] Add shared temp-repo / temp-bundle test helpers in `tests/peer_session/`.
+- [X] T008 [P] Add shared temp-repo / temp-bundle test helpers in `tests/peer_session/`.
 
 **Checkpoint**: CLI scaffolding, defaults resolution, pinned-rules provenance helpers, and bundle-copy validation all exist; user-story behavior can now be implemented safely.
 
@@ -60,14 +60,14 @@
 
 ### Tests for User Story 2
 
-- [ ] T014 [P] [US2] Add defaults-overlay and CLI-override precedence tests in `tests/peer_session/test_bundle_init.py`.
-- [ ] T015 [P] [US2] Add tests in `tests/peer_session/test_bundle_init.py` covering template required-file validation, pending-field preservation, and omission of `meta.json.transcript_source`.
+- [X] T014 [P] [US2] Add defaults-overlay and CLI-override precedence tests in `tests/peer_session/test_bundle_init.py`.
+- [X] T015 [P] [US2] Add tests in `tests/peer_session/test_bundle_init.py` covering template required-file validation, pending-field preservation, and omission of `meta.json.transcript_source`.
 
 ### Implementation for User Story 2
 
-- [ ] T016 [US2] Implement effective defaults resolution and participant construction in `tools/peer_session/defaults.py` and `tools/peer_session/bundle_init.py`.
-- [ ] T017 [US2] Implement required-template-file checks and placeholder-preserving `meta.json` transformation in `tools/peer_session/bundle_init.py`.
-- [ ] T018 [US2] Document local defaults setup and initialized-bundle expectations in `observations/sessions/README.md` and `specs/007-session-bundle-init-cli/quickstart.md`.
+- [X] T016 [US2] Implement effective defaults resolution and participant construction in `tools/peer_session/defaults.py` and `tools/peer_session/bundle_init.py`.
+- [X] T017 [US2] Implement required-template-file checks and placeholder-preserving `meta.json` transformation in `tools/peer_session/bundle_init.py`.
+- [X] T018 [US2] Document local defaults setup and initialized-bundle expectations in `observations/sessions/README.md` and `specs/007-session-bundle-init-cli/quickstart.md`.
 
 **Checkpoint**: a fresh bundle clearly shows what the tool filled automatically versus what still needs human/session-time authoring.
 
@@ -79,22 +79,22 @@
 
 ### Tests for User Story 3
 
-- [ ] T019 [P] [US3] Add pinned-rules provenance tests in `tests/peer_session/test_bundle_init.py` covering clean commit-hash resolution and dirty-file inline-snapshot fallback.
-- [ ] T020 [P] [US3] Add CLI-surface tests in `tests/peer_session/test_cli.py` confirming the v1 command set is `init` only and exposes future-extensible help text cleanly.
+- [X] T019 [P] [US3] Add pinned-rules provenance tests in `tests/peer_session/test_bundle_init.py` covering clean commit-hash resolution and dirty-file inline-snapshot fallback.
+- [X] T020 [P] [US3] Add CLI-surface tests in `tests/peer_session/test_cli.py` confirming the v1 command set is `init` only and exposes future-extensible help text cleanly.
 
 ### Implementation for User Story 3
 
-- [ ] T021 [US3] Implement truthful `pinned_rules_ref` resolution in `tools/peer_session/git_refs.py` and integrate it into `tools/peer_session/bundle_init.py`.
-- [ ] T022 [US3] Keep the v1 CLI surface narrow-but-extensible in `tools/peer_session/cli.py` and `tools/peer_session/__init__.py`.
-- [ ] T023 [US3] Document the init-only scope and future artifact-first extension boundary in `specs/007-session-bundle-init-cli/quickstart.md`.
+- [X] T021 [US3] Implement truthful `pinned_rules_ref` resolution in `tools/peer_session/git_refs.py` and integrate it into `tools/peer_session/bundle_init.py`.
+- [X] T022 [US3] Keep the v1 CLI surface narrow-but-extensible in `tools/peer_session/cli.py` and `tools/peer_session/__init__.py`.
+- [X] T023 [US3] Document the init-only scope and future artifact-first extension boundary in `specs/007-session-bundle-init-cli/quickstart.md`.
 
 **Checkpoint**: `peer-session` stays repo-owned and extensible, while the initialized bundle records pinned-rules provenance truthfully.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T024 [P] Run the targeted CLI test suite with `python3 -m unittest discover -s tests/peer_session` and record the verification command/results for review.
-- [ ] T025 [P] Review the final implementation for contract alignment against `specs/001-session-bundle-skeleton/spec.md` and log any necessary fast-follow separately rather than silently mutating unrelated bundle rules.
-- [ ] T026 Add or update `specs/007-session-bundle-init-cli/analyze.md` once tasks and implementation are complete.
+- [X] T024 [P] Run the targeted CLI test suite with `python3 -m unittest discover -s tests/peer_session` and record the verification command/results for review.
+- [X] T025 [P] Review the final implementation for contract alignment against `specs/001-session-bundle-skeleton/spec.md` and log any necessary fast-follow separately rather than silently mutating unrelated bundle rules.
+- [X] T026 Add or update `specs/007-session-bundle-init-cli/analyze.md` once tasks and implementation are complete.
 
 ## Dependencies & Execution Order
 
