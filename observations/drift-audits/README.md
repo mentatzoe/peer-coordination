@@ -41,10 +41,10 @@ A reviewer can always check out the referenced commit and read `observations/dri
 - Calibration triggers per FR-016: when two independent auditors produce `load_bearing_findings_count` values differing by more than ±1 on a ≤200-turn session, that's a signal to tighten the rubric. Commit the clarification; re-run the audit.
 - Each rubric version remains reachable via its commit hash as long as `main` history is preserved.
 
-## Operator-only authoring (Phase 1)
+## Operator-only authoring
 
-- Agents do NOT commit to `observations/drift-audits/` autonomously in Phase 1. Agents may propose rubric changes via discussion threads or via drift-audit output annotations; operator ratifies and commits.
-- Rationale: analogous to pinned-rules in spec 003 — peers should not be able to modify their own evaluation criteria. Applies Principle IV (operator as final arbiter).
+- Agents do NOT commit to `observations/drift-audits/` autonomously. Agents may propose rubric changes via discussion threads or via drift-audit output annotations; operator ratifies and commits.
+- Rationale: analogous to pinned-rules in spec 003 — peers should not be able to modify their own evaluation criteria. Applies Constitution Principle IV (operator as final arbiter). Durable constraint, not phase-scoped.
 
 ## Cross-references
 

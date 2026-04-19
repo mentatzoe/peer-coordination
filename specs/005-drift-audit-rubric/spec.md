@@ -34,7 +34,7 @@ As the operator, after a Phase 3 session's bundle is assembled, I need to apply 
 **Acceptance Scenarios**:
 
 1. **Given** a completed session bundle with `transcript.md`, `meta.json` (including `pinned_rules_ref`), and `interventions.json`, **When** the operator runs the drift-audit procedure per this spec, **Then** the resulting `drift-audit.json` conforms to the schema defined here and any findings cite specific transcript turn timestamps.
-2. **Given** two auditors (e.g., operator and a cross-reviewing agent) apply the rubric to the same bundle, **When** they compare outputs, **Then** their `load_bearing_findings_count` agrees to within a tolerance the rubric defines (see FR-013).
+2. **Given** two auditors (e.g., operator and a cross-reviewing agent) apply the rubric to the same bundle, **When** they compare outputs, **Then** their `load_bearing_findings_count` agrees to within a tolerance the rubric defines (see FR-016).
 
 ### User Story 2 — Rubric supports calibration from real sessions (Priority: P1)
 
@@ -109,7 +109,7 @@ As a reviewer computing the H2 fresh-reader KPI, I need the drift-audit output t
 
 **Calibration + agreement:**
 
-- **FR-015**: When manual and LLM-assisted audits disagree on a specific finding, the operator's manual judgment is authoritative. The LLM output is preserved in `drift-audit.json` with the operator's override annotations; the audit is then tagged `audited_by: hybrid`.
+- **FR-015**: When manual and LLM-assisted audits disagree on a specific finding, the operator's manual judgment is authoritative. The final `drift-audit.json` records only the ratified result (post-override) and is tagged `audited_by: hybrid` to indicate the mixed provenance. The LLM draft is NOT preserved inside the output artifact; the audit trail lives in git history (the committed `drift-audit.json` is the record of the ratified state) and in any operator notes kept alongside the session bundle. If preserving the full override trail for a specific session becomes useful, author a supplementary note under `observations/sessions/<session-id>/` rather than extending the drift-audit schema.
 - **FR-016**: The rubric MUST support a cross-auditor-agreement tolerance: if two independent auditors (operator + cross-reviewing agent) produce `load_bearing_findings_count` values within ±1 on a session of ≤200 turns, that counts as agreement. Larger divergences trigger a rubric-calibration review.
 
 **Scope boundaries:**
