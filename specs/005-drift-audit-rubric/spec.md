@@ -151,12 +151,33 @@ As a reviewer computing the H2 fresh-reader KPI, I need the drift-audit output t
 - Does NOT depend on any unspecified Phase 2 intervention-tagging mechanism — reads intervention log as context, not as a driver.
 - Blocks: Phase 2 gate (evaluation-pipeline-exists) cannot clear until the rubric is in place and has been mock-run against a synthetic or prior transcript.
 
-## Clarifications applied (self-resolved 2026-04-19)
+## Clarifications
 
-Per the operator directive authorizing autonomous speckit progression, the following decisions were self-resolved inline. Cross-reviewer may amend retroactively.
+### Session 2026-04-19
 
-1. **Category enum scope** (FR-004): picked the five minimum categories that match `design/poc.md`'s H2 legibility observables list, plus `other` as an escape hatch. Alternatives (finer subcategories, severity-only with no category) rejected — the category enum provides explainability without forcing premature ontology.
-2. **Turn reference scheme** (FR-006): reuses spec 001's canonical turn key (ISO-8601 timestamp, unique within session). Alternatives (sequential turn IDs, character offsets into transcript.md) rejected for consistency with spec 001.
-3. **Rubric location** (FR-013): `observations/drift-audits/RUBRIC.md` — scope-local to the evaluation surface, analogous to `pinned-rules/current.md` pattern. Alternative (`specs/005-drift-audit-rubric/rubric.md`) rejected because specs are design artifacts, not runtime-referenced content.
-4. **Verdict determinism** (FR-007): automatic from findings, not auditor-assigned. Removes judgment-stacking risk where an auditor can game the verdict independent of findings.
-5. **Operator-wins on disagreement** (FR-015): manual judgment beats LLM judgment by default; aligns with Constitution Principle IV (operator as final arbiter).
+Per the operator directive authorizing autonomous speckit progression, the following ambiguities were surfaced by the `/speckit.clarify` taxonomy scan and self-resolved inline rather than asking the operator. Cross-reviewer may amend retroactively via follow-up commits.
+
+- Q: What is the drift category enum scope? → A: Five minimum categories aligned with `design/poc.md`'s H2 legibility observables (`undeclared_emoji`, `undeclared_abbreviation`, `private_shorthand`, `hidden_channel_reference`, `off_palette_load_bearing`) plus `other` as escape hatch. Alternatives (finer subcategories, severity-only without categories) rejected — explicit categories provide explainability without forcing premature ontology. (FR-004)
+- Q: What turn-reference scheme does `findings[].turn_ref` use? → A: Spec 001's canonical turn key (ISO-8601 timestamp, unique within session per FR-009). Alternatives (sequential turn IDs, character offsets) rejected for consistency with spec 001. (FR-006)
+- Q: Where does the rubric content live? → A: `observations/drift-audits/RUBRIC.md` — scope-local to the evaluation surface, analogous to the `pinned-rules/current.md` pattern. Alternative (`specs/005-drift-audit-rubric/rubric.md`) rejected because specs are design artifacts, not runtime-referenced content. (FR-013)
+- Q: How is the verdict computed? → A: Deterministically from findings per FR-007; not auditor-assigned. Prevents judgment-stacking where an auditor could game the verdict independent of findings. (FR-007)
+- Q: Who wins when manual and LLM-assisted audits disagree? → A: Operator manual judgment is authoritative per Constitution Principle IV (operator as final arbiter); LLM output preserved with operator override annotations. (FR-015)
+
+### Clarify coverage report (2026-04-19)
+
+| Category | Status | Note |
+|---|---|---|
+| Functional Scope & Behavior | Clear | 3 user stories, 18 FRs, FR-017/FR-018 out-of-scope boundary |
+| Domain & Data Model | Clear | `Drift-audit output`, `Rubric`, `Finding`, `Auditor` entities defined |
+| Interaction & UX Flow | Clear | Manual, LLM-assisted, hybrid paths all covered in US1–3 |
+| Non-Functional Quality — Performance | Clear | SC-005: ≤15 operator-minutes per session target |
+| Non-Functional Quality — Observability | Clear | `drift-audit.json` output schema is the observability artifact |
+| Non-Functional Quality — Security/Privacy | Clear | Transcripts already redacted upstream per spec 001 FR-015; rubric reads but does not introduce new secrets |
+| Integration & External Dependencies | Clear | Dependencies on spec 001, 003, design docs enumerated |
+| Edge Cases & Failure Handling | Clear | 6 edge cases in spec; FR-012 handles incomplete bundles |
+| Constraints & Tradeoffs | Clear | Five clarifications above document tradeoffs explicitly |
+| Terminology & Consistency | Clear | Key Entities section defines canonical terms |
+| Completion Signals | Clear | 5 SCs with measurable criteria |
+| Misc / Placeholders | Clear | No TODO markers, no NEEDS CLARIFICATION markers |
+
+No critical ambiguities remain after the self-resolved pass. Spec is ready to proceed to `/speckit.plan`.
