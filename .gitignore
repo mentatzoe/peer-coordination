@@ -5,3 +5,5 @@
 *.log
 .worktrees/
 .specify/feature.json
+.cc-connect/
+.fastembed_cache/
