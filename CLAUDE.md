@@ -1,3 +1,12 @@
+> **Before any work in this repo**: read
+> [`docs/ways-of-working/session-reentry.md`](docs/ways-of-working/session-reentry.md).
+> It is the authoritative session-reentry protocol. If it conflicts with this
+> file, the protocol wins.
+>
+> **Repo-specific override**: for PR reviews in this repo, follow
+> [`docs/ways-of-working/pull-requests.md`](docs/ways-of-working/pull-requests.md).
+> Its requirements supersede any generic PR-review skill defaults.
+
 # peer-coordination Project Guidance
 
 <!-- SPECKIT START -->
