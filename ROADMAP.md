@@ -24,7 +24,7 @@ It uses the approved development phases in [`design/poc.md`](design/poc.md) as t
 - This roadmap is a **planning artifact**, not a constitutional section.
 - This roadmap is a **normalized work view**, not a restatement of the POC doc.
 - This roadmap tracks real repo state. Right now, most of the work on `main` is design-level, not implementation-spec complete.
-- Ownership should be explicit. Where no owner is confirmed yet, the roadmap says `Open`.
+- The roadmap names **stable area leads**. Task-level and per-session staffing updates live in [discussion #41](https://github.com/mentatzoe/peer-coordination/discussions/41), not in this document.
 
 ## Current state
 
@@ -48,11 +48,11 @@ The main gap is that the repo now has the **design and evaluation shape**, but n
 | **Foundation artifacts** | Execution | 0 | Complete | `VISION.md`, `design/architecture.md`, `design/poc.md` | none inside this slice | Claude + Codex + Zoe |
 | **Roadmap reset** | Maintenance | 0 | In progress | approved POC phases and artifact set | standalone roadmap artifact, review, closure | Codex |
 | **Constitution cleanup** | Maintenance | adjacent maintenance | In progress | executive decision from discussion #32 | remove roadmap section from constitution and clean references | Claude |
-| **Baseline substrate build** | Execution | 1 | Not started | session definition, transport/harness assumptions, L1/L2 requirements | `cc-connect` containment decision, Discord channel binding, interrupt path, transcript export, pinned-rules support, session bundle skeleton | Open |
-| **Evaluation surface build** | Execution | 2 | Not started | KPI framework, artifact bundle, intervention taxonomy, exit criteria | draft drift-audit rubric, drift-audit workflow, intervention tagging mechanism, intervention log shape, KPI computation path, session summary workflow | Open |
-| **Two-peer baseline run** | Execution | 3 | Blocked on 1–2 | baseline session count, H1/H2 evidence rules, operator model | runnable harness, preserved session bundles, completed baseline sessions | Zoe + Open implementation support |
-| **Gemini extension** | Execution | 4 | Blocked on 3 | in-scope condition, preferred `cc-connect` adapter path | Gemini adapter decision and implementation, 1–2 extension sessions if baseline is credible | Open |
-| **POC exit and handoff** | Execution | 5 | Blocked on 3–4 | exit criteria, required artifacts, hypothesis stance structure | KPI rollup, `observations/poc-exit.md`, operator ratification | Zoe + Open analysis support |
+| **Baseline substrate build** | Execution | 1 | Not started | session definition, transport/harness assumptions, L1/L2 requirements | `cc-connect` containment decision, Discord channel binding, interrupt path, transcript export, pinned-rules support, session bundle skeleton | Codex (transport / substrate), Claude (session artifacts) |
+| **Evaluation surface build** | Execution | 2 | Not started | KPI framework, artifact bundle, intervention taxonomy, exit criteria | draft drift-audit rubric, drift-audit workflow, intervention tagging mechanism, intervention log shape, KPI computation path, session summary workflow | Claude (evaluation pipeline), Codex (schema / tagging), Zoe (summary UX design) |
+| **Two-peer baseline run** | Execution | 3 | Blocked on 1–2 | baseline session count, H1/H2 evidence rules, operator model | runnable harness, preserved session bundles, completed baseline sessions | Zoe (operator), responder assigned per session |
+| **Gemini extension** | Execution | 4 | Blocked on 3 | in-scope condition, preferred `cc-connect` adapter path | Gemini adapter decision and implementation, 1–2 extension sessions if baseline is credible | Gemini (adapter ownership after bootstrap), Codex (guidance), Zoe (dispatch) |
+| **POC exit and handoff** | Execution | 5 | Blocked on 3–4 | exit criteria, required artifacts, hypothesis stance structure | KPI rollup, `observations/poc-exit.md`, operator ratification | Claude (first-pass synthesis), Codex (audit), Zoe (ratification) |
 
 ## What is still missing
 
@@ -65,11 +65,11 @@ is meant to stay **slice-local** and **handoff-based**.
 
 | Slice | Lead owner | Boundary | Handover contract |
 |---|---|---|---|
-| **Baseline substrate build** | Open | Own the shared runtime surface only: bridge path, session controls, transcript export, pinned-rules support, and session-bundle skeleton. Does **not** own evaluation logic or hypothesis judgment. | Hand off a runnable dry-run-capable substrate to the Evaluation Surface and Two-Peer Baseline slices, with the required artifact outputs preserved. |
-| **Evaluation surface build** | Open | Own the review / measurement surfaces only: draft drift-audit rubric, intervention-tagging path, summary workflow, KPI computation path. Does **not** own transport or pilot-session execution. | Hand off a usable post-session review pipeline to the Two-Peer Baseline and POC Exit slices. |
-| **Two-peer baseline run** | Zoe + Open implementation support | Own live session execution, operator intervention, and evidence capture for baseline sessions. Does **not** silently redesign the framework mid-run. | Hand off counted session bundles and operator observations to POC Exit / Handoff, and to Gemini Extension only if the credibility gate is met. |
-| **Gemini extension** | Open | Own the incremental harness-diversity extension only if Phase 3 is credible enough to continue. Does **not** reopen already-settled baseline requirements. | Hand off extension-session bundles or a documented no-go / confounded-result decision to POC Exit / Handoff. |
-| **POC exit and handoff** | Zoe + Open analysis support | Own final synthesis only: KPI rollup, hypothesis stances, next-step recommendation. Does **not** absorb unfinished implementation work back into the same slice. | Hand off `observations/poc-exit.md` and the resulting next-cut recommendation back into roadmap / spec planning. |
+| **Baseline substrate build** | Codex (transport / substrate), Claude (session artifacts) | Own the shared runtime surface only: bridge path, session controls, transcript export, pinned-rules support, and session-bundle skeleton. Does **not** own evaluation logic or hypothesis judgment. | Hand off a runnable dry-run-capable substrate to the Evaluation Surface and Two-Peer Baseline slices, with the required artifact outputs preserved. |
+| **Evaluation surface build** | Claude (evaluation pipeline), Codex (schema / tagging), Zoe (summary UX design) | Own the review / measurement surfaces only: draft drift-audit rubric, intervention-tagging path, summary workflow, KPI computation path. Does **not** own transport or pilot-session execution. | Hand off a usable post-session review pipeline to the Two-Peer Baseline and POC Exit slices. |
+| **Two-peer baseline run** | Zoe (operator), responder assigned per session | Own live session execution, operator intervention, and evidence capture for baseline sessions. Does **not** silently redesign the framework mid-run. | Hand off counted session bundles and operator observations to POC Exit / Handoff, and to Gemini Extension only if the credibility gate is met. |
+| **Gemini extension** | Gemini (adapter ownership after bootstrap), Codex (guidance), Zoe (dispatch) | Own the incremental harness-diversity extension only if Phase 3 is credible enough to continue. Does **not** reopen already-settled baseline requirements. | Hand off extension-session bundles or a documented no-go / confounded-result decision to POC Exit / Handoff. |
+| **POC exit and handoff** | Claude (first-pass synthesis), Codex (audit), Zoe (ratification) | Own final synthesis only: KPI rollup, hypothesis stances, next-step recommendation. Does **not** absorb unfinished implementation work back into the same slice. | Hand off `observations/poc-exit.md` and the resulting next-cut recommendation back into roadmap / spec planning. |
 
 ### Missing implementation-facing artifacts
 
@@ -83,13 +83,12 @@ is meant to stay **slice-local** and **handoff-based**.
 | Intervention tagging mechanism | required so the operator can capture intervention type/reason without ad hoc drift | Open |
 | KPI rollup path | required for POC exit and hypothesis stance-taking | Open |
 
-### Missing ownership decisions
+### Remaining staffing questions
 
 | Slice | Current state |
 |---|---|
-| Transport / bridge implementation | Open |
-| Evaluation-surface implementation | Open |
-| Session operations / runtime support | Zoe operates the pilot; implementation support still Open |
+| Gemini bootstrap path | Open: Gemini owns the adapter after bootstrap, but the initial bootstrap path still needs a concrete decision when Phase 4 approaches |
+| Per-session responder assignment | Lives outside the roadmap; chosen by Zoe per session based on the slice currently under stress |
 
 ## Recommended next cuts
 
