@@ -3,8 +3,9 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the active plans in
-`specs/*/plan.md`, especially `specs/002-cc-connect-relocation/plan.md` for the
-current Codex-owned Phase 1 slice
+`specs/*/plan.md`, especially `specs/006-discord-transcript-export/plan.md` for
+the current Codex-owned Phase 1 slice and
+`specs/002-cc-connect-relocation/plan.md` for the contained-workspace context
 <!-- SPECKIT END -->
 
 ## Purpose
