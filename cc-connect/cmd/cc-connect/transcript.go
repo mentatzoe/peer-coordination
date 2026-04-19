@@ -23,6 +23,7 @@ type transcriptBundleMeta struct {
 	Substrate        string         `json:"substrate"`
 	ChannelID        string         `json:"channel_id"`
 	TranscriptSource string         `json:"transcript_source"`
+	UpdatedAt        string         `json:"updated_at"`
 }
 
 type transcriptFetcher interface {
@@ -150,6 +151,7 @@ func exportTranscriptForBundleWithOverrides(sessionDir string, fetcher transcrip
 	}
 	meta.TranscriptSource = "export"
 	meta.raw["transcript_source"] = "export"
+	stampTranscriptUpdate(meta)
 	return saveTranscriptBundleMeta(sessionDir, meta)
 }
 
@@ -166,6 +168,7 @@ func setTranscriptSource(sessionDir, source string) error {
 	}
 	meta.TranscriptSource = source
 	meta.raw["transcript_source"] = source
+	stampTranscriptUpdate(meta)
 	return saveTranscriptBundleMeta(sessionDir, meta)
 }
 
@@ -215,6 +218,7 @@ func loadTranscriptBundleMeta(sessionDir string) (*transcriptBundleMeta, error) 
 		Substrate:        stringField(raw, "substrate"),
 		ChannelID:        stringField(raw, "channel_id"),
 		TranscriptSource: stringField(raw, "transcript_source"),
+		UpdatedAt:        stringField(raw, "updated_at"),
 	}
 	if v, ok := raw["closed_at"]; ok && v != nil {
 		switch s := v.(type) {
@@ -235,6 +239,15 @@ func loadTranscriptBundleMeta(sessionDir string) (*transcriptBundleMeta, error) 
 		return nil, errors.New("meta.json missing channel_id")
 	}
 	return meta, nil
+}
+
+func stampTranscriptUpdate(meta *transcriptBundleMeta) {
+	if meta.raw == nil {
+		meta.raw = map[string]any{}
+	}
+	updatedAt := time.Now().UTC().Format(time.RFC3339)
+	meta.UpdatedAt = updatedAt
+	meta.raw["updated_at"] = updatedAt
 }
 
 func saveTranscriptBundleMeta(sessionDir string, meta *transcriptBundleMeta) error {

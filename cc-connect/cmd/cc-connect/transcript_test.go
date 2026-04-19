@@ -31,6 +31,7 @@ func (f *fakeTranscriptFetcher) FetchChannelMessages(channelID string, after, be
 }
 
 func TestExportTranscriptForBundle_WritesTranscriptAndExportSource(t *testing.T) {
+	originalUpdatedAt := "2026-04-19T09:59:00Z"
 	sessionDir := newTranscriptBundleDir(t, transcriptBundleMeta{
 		SessionID:        "2026-04-19-demo",
 		OpenedAt:         "2026-04-19T10:00:00Z",
@@ -38,6 +39,7 @@ func TestExportTranscriptForBundle_WritesTranscriptAndExportSource(t *testing.T)
 		Substrate:        "discord",
 		ChannelID:        "channel-1",
 		TranscriptSource: "reauthored",
+		UpdatedAt:        originalUpdatedAt,
 	})
 
 	fetcher := &fakeTranscriptFetcher{
@@ -74,6 +76,15 @@ func TestExportTranscriptForBundle_WritesTranscriptAndExportSource(t *testing.T)
 	if meta.TranscriptSource != "export" {
 		t.Fatalf("transcript_source = %q, want export", meta.TranscriptSource)
 	}
+	if meta.UpdatedAt == "" {
+		t.Fatal("updated_at = empty, want RFC3339 timestamp")
+	}
+	if meta.UpdatedAt == originalUpdatedAt {
+		t.Fatalf("updated_at = %q, want value updated after export", meta.UpdatedAt)
+	}
+	if _, err := time.Parse(time.RFC3339, meta.UpdatedAt); err != nil {
+		t.Fatalf("updated_at = %q, want RFC3339 timestamp: %v", meta.UpdatedAt, err)
+	}
 }
 
 func TestExportTranscriptForBundle_FailsClosedOnFetchError(t *testing.T) {
@@ -98,6 +109,7 @@ func TestExportTranscriptForBundle_FailsClosedOnFetchError(t *testing.T) {
 }
 
 func TestSetTranscriptSource_UpdatesMetadata(t *testing.T) {
+	originalUpdatedAt := "2026-04-19T10:00:00Z"
 	sessionDir := newTranscriptBundleDir(t, transcriptBundleMeta{
 		SessionID:        "2026-04-19-demo",
 		OpenedAt:         "2026-04-19T10:00:00Z",
@@ -105,6 +117,7 @@ func TestSetTranscriptSource_UpdatesMetadata(t *testing.T) {
 		Substrate:        "discord",
 		ChannelID:        "channel-1",
 		TranscriptSource: "export",
+		UpdatedAt:        originalUpdatedAt,
 	})
 
 	if err := setTranscriptSource(sessionDir, "hybrid"); err != nil {
@@ -114,6 +127,15 @@ func TestSetTranscriptSource_UpdatesMetadata(t *testing.T) {
 	meta := readTranscriptBundleMeta(t, sessionDir)
 	if meta.TranscriptSource != "hybrid" {
 		t.Fatalf("transcript_source = %q, want hybrid", meta.TranscriptSource)
+	}
+	if meta.UpdatedAt == "" {
+		t.Fatal("updated_at = empty, want RFC3339 timestamp")
+	}
+	if meta.UpdatedAt == originalUpdatedAt {
+		t.Fatalf("updated_at = %q, want value updated after source change", meta.UpdatedAt)
+	}
+	if _, err := time.Parse(time.RFC3339, meta.UpdatedAt); err != nil {
+		t.Fatalf("updated_at = %q, want RFC3339 timestamp: %v", meta.UpdatedAt, err)
 	}
 }
 
