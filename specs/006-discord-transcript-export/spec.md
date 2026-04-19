@@ -2,7 +2,7 @@
 
 **Feature Branch**: `006-discord-transcript-export`
 **Created**: 2026-04-19
-**Status**: Draft
+**Status**: In Review
 **Input**: User description: "Implement Discord transcript export for session bundles: export Discord message history into observations/sessions/<session-id>/transcript.md with chronological turns, ISO-8601 timestamp + author per turn, transcript_source provenance in meta.json, and an operator fallback when export is unavailable."
 
 ## Context *(added for peer-coordination flavor; not part of the template)*

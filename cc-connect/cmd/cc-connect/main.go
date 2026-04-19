@@ -88,6 +88,9 @@ func main() {
 		case "doctor":
 			runDoctor(os.Args[2:])
 			return
+		case "transcript":
+			runTranscript(os.Args[2:])
+			return
 		}
 	}
 
@@ -1232,6 +1235,10 @@ Commands:
     list             List all sessions (pipe-friendly)
     show <id>        Show session messages (-n N for last N)
 
+  transcript         Export and annotate session bundle transcripts
+    export           Export Discord history into a session bundle transcript
+    source           Set transcript_source on an existing session bundle
+
   agent-sid          Print the agent session ID for the current session
 
   relay              Cross-project message relay
@@ -1269,6 +1276,10 @@ Examples:
   cc-connect daemon logs -f           Follow daemon logs
   cc-connect send -m "hello"          Send a message to the active session
   cc-connect cron list                List all scheduled tasks
+  cc-connect transcript export --session-dir ../observations/sessions/2026-04-19-demo
+                                       Export Discord history into transcript.md
+  cc-connect transcript source --session-dir ../observations/sessions/2026-04-19-demo --source hybrid
+                                       Mark a repaired transcript as hybrid
   cc-connect feishu setup             Setup Feishu/Lark bot credentials
   cc-connect weixin setup             Setup Weixin (ilink) with QR or --token
   cc-connect update                   Update to the latest version
