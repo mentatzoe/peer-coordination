@@ -12,23 +12,27 @@ JSON files can't carry inline comments, so schema documentation lives here.
 
 ```
 {
-  "session_id": "<YYYY-MM-DD-short-slug>",      // must match directory name
-  "opened_at": "<ISO-8601 timestamp>",          // when the operator opened the session
-  "closed_at": "<ISO-8601 timestamp or null>",  // null if session cancelled before close
-  "close_reason": "<one of: operator_close | pinned_rules_change | stop_no_resume | idle_timeout | cancelled>",
-  "participants": ["<handle-1>", "<handle-2>", "<operator-handle>"],
+  "session_id": "<YYYY-MM-DD-short-slug>",
+  "opened_at": "<ISO-8601 timestamp, >=second precision>",
+  "closed_at": "<ISO-8601 timestamp or null>",
+  "close_reason": "<one of: operator_close | pinned_rules_change | stop_no_resume>",
+  "participants": [
+    { "handle": "<handle-1>", "role": "peer" },
+    { "handle": "<handle-2>", "role": "peer" },
+    { "handle": "<operator-handle>", "role": "operator" }
+  ],
   "pinned_rules_ref": "<commit-hash>" | { "inline": "<raw pinned-rules content>" },
-  "substrate": "discord",                       // default; only substrate in Phase 1
-  "channel_id": "<discord-channel-snowflake>",  // required when substrate is discord
+  "substrate": "discord",
+  "channel_id": "<discord-channel-snowflake>",
   "transcript_source": "<export | reauthored | hybrid>"
 }
 ```
 
 Fields:
 - `session_id`: MUST match the directory name exactly.
-- `opened_at` / `closed_at`: ISO-8601. `closed_at` is null only for cancelled sessions.
-- `close_reason`: one of the five enum values (see spec FR-010).
-- `participants`: peer identities + operator. Keep handles stable across sessions for trend analysis.
+- `opened_at` / `closed_at`: ISO-8601 with at least second precision. `closed_at` is `null` only if the session ended without an explicit close trigger.
+- `close_reason`: one of the three enum values matching the POC session model (`design/poc.md`'s "What closes a session?" list). `idle_timeout` is **not** a close reason in the POC model — idle gates operator re-open, it does not close sessions on its own.
+- `participants`: array of objects, each with `handle` and `role`. Role semantics live at the schema boundary so Phase 2 rollups and Phase 4 (variable peer count) can distinguish peers from operator without guessing by position. Role is one of `peer` or `operator`. Keep handles stable across sessions for trend analysis.
 - `pinned_rules_ref`: prefer a commit hash if the pinned rules live in git; inline snapshot is the fallback.
 - `substrate`: always `discord` in Phase 1. Additional substrates will come in later phases.
 - `channel_id`: Discord channel snowflake the session ran in.
@@ -39,16 +43,18 @@ Fields:
 ```
 [
   {
-    "at": "<ISO-8601 timestamp>",
+    "at": "<ISO-8601 timestamp, >=second precision>",
     "type": "<one of: safety_stop | clarification | directive_redirect | drift_catch | close_or_resume | other>",
     "reason": "<free-text operator note>",
-    "target_turn": "<optional: transcript turn identifier>"
+    "target_turn": "<optional: ISO-8601 timestamp string of a transcript turn>"
   },
   ...
 ]
 ```
 
 Type taxonomy is fixed per `design/poc.md` measurement model; do not invent new types without spec amendment.
+
+`target_turn`, when present, MUST be the ISO-8601 timestamp of a turn in `transcript.md`. Turn timestamps are unique within a session per FR-009, so the timestamp is the canonical turn key — no separate `turn_id` scheme is needed.
 
 - `safety_stop` — any `!stop` or equivalent halting action taken for safety reasons.
 - `clarification` — operator asks a peer to clarify or restate something.

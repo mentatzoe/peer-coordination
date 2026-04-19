@@ -1,9 +1,13 @@
 {
   "session_id": "[FILL IN: YYYY-MM-DD-short-slug]",
-  "opened_at": "[FILL IN: ISO-8601 timestamp]",
+  "opened_at": "[FILL IN: ISO-8601 timestamp, >=second precision]",
   "closed_at": "[FILL IN: ISO-8601 timestamp or null]",
-  "close_reason": "[FILL IN: operator_close | pinned_rules_change | stop_no_resume | idle_timeout | cancelled]",
-  "participants": ["[FILL IN: peer-1]", "[FILL IN: peer-2]", "[FILL IN: operator]"],
+  "close_reason": "[FILL IN: operator_close | pinned_rules_change | stop_no_resume]",
+  "participants": [
+    { "handle": "[FILL IN: peer-1 handle]", "role": "peer" },
+    { "handle": "[FILL IN: peer-2 handle]", "role": "peer" },
+    { "handle": "[FILL IN: operator handle]", "role": "operator" }
+  ],
   "pinned_rules_ref": "[FILL IN: commit-hash OR {\"inline\": \"raw content\"}]",
   "substrate": "discord",
   "channel_id": "[FILL IN: discord-channel-snowflake]",

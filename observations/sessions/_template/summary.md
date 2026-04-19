@@ -8,10 +8,13 @@
 
 ## Per-peer contribution
 
-- **[FILL IN: peer-1 handle]**: [FILL IN: what distinct useful contribution did this peer make?]
-- **[FILL IN: peer-2 handle]**: [FILL IN: what distinct useful contribution did this peer make?]
+*Add one bullet per peer that participated in the session (2 peers in the Phase 3 baseline; 3 when the Gemini extension runs; N in general). Include operator contributions only if the operator explicitly participated as a content contributor beyond their arbiter role.*
 
-*Complementarity test: each peer should have at least one distinct contribution that was taken up, answered, or built on. If both peers produced parallel independent content with only light mutual acknowledgment, H1 complementarity did not clear — document that honestly.*
+- **[FILL IN: peer handle]**: [FILL IN: what distinct useful contribution did this peer make?]
+- **[FILL IN: peer handle]**: [FILL IN: what distinct useful contribution did this peer make?]
+- *[add more bullets as needed — repeatable, not fixed at two]*
+
+*Complementarity test: each peer should have at least one distinct contribution that was taken up, answered, or built on. If peers produced parallel independent content with only light mutual acknowledgment, H1 complementarity did not clear — document that honestly.*
 
 ## Observed coordination patterns
 
