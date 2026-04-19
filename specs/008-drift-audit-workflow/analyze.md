@@ -113,3 +113,30 @@ The 4 LOW findings (C2, C3, F1, F2) are best absorbed during T005–T014 authori
 3. Open PR per `docs/ways-of-working/pull-requests.md` once T015 (this analyze pass, now complete) + T016/T017 consistency checks land during Polish.
 
 This report is the T015 output. T016/T017 still pending and will run during the Polish phase to confirm no drift introduced during implement.
+
+---
+
+## Polish addendum — T016 / T017 results (2026-04-20)
+
+### T016 — Amend-commit format vs spec 001 FR-014
+
+- **Spec 001 FR-014 format**: `session bundle amend: <session-id> — <reason>`
+- **Spec 008 contract C4 format**: `session bundle amend: <session-id> — drift-audit[ <taxonomy-token>] @ <rubric-short-sha>`
+
+**Verdict**: ✓ consistent. Spec 008 fills spec 001's `<reason>` slot with a structured sub-grammar (`drift-audit[ <taxonomy-token>] @ <rubric-short-sha>`). No redefinition of FR-014's base convention; no drift.
+
+### T017 — `drift-audit.json` field usage vs spec 005 data-model
+
+Fields this slice references during implementation (in `observations/drift-audits/WORKFLOW.md`): `rubric_version`, `session_id`, `pinned_rules_ref`, `audited_at`, `audited_by`, `auditor`, `findings`, `load_bearing_findings_count`, `verdict`.
+
+All 9 fields are defined in [spec 005 data-model.md](../005-drift-audit-rubric/data-model.md) `Drift-Audit Output` happy-path schema. No new fields introduced. Enum values for `audited_by` (`manual` / `hybrid` / `llm_assisted`) and `severity` (`info` / `warn` / `finding`) match spec 005's enums exactly.
+
+**Verdict**: ✓ consistent. No schema extension, no enum drift.
+
+### Minor convention drift found and fixed during polish
+
+- **Issue**: initial WORKFLOW.md Path B Step 5a merge used `"<primary-id>, <cross-reviewer-id>"` (comma-separated) for the combined `auditor` field. Spec 005's data-model example uses `+` as the combiner (`zoe+llm:claude-opus`).
+- **Resolution**: updated WORKFLOW.md to use `+` in both the within-tolerance merge path and the arbitrated-divergence path, matching spec 005's suggested convention.
+- **Scope**: minor convention alignment; free-text schema accepts either, but matching the spec 005 example reduces cross-slice drift risk and makes the `auditor` field consistent across Phase 2 and Phase 3 artifacts.
+
+No additional MEDIUM or HIGH findings surfaced during implement. Ready for PR per T018.

@@ -142,7 +142,7 @@ echo "|primary($PC) - cross($CC)| = $DIFF"
 The primary auditor merges the two drafts into a single `drift-audit.json`:
 
 - `findings`: union of primary + cross, deduplicated by `(category, turn_ref, severity)`, ordered by `turn_ref` ascending
-- `auditor`: `"<primary-id>, <cross-reviewer-id>"` (comma-separated; spec 005's free-text schema accepts this)
+- `auditor`: `"<primary-id>+<cross-reviewer-id>"` (`+`-combined per spec 005's hybrid convention, e.g. `zoe+llm:claude-opus`)
 - `audited_by`: `"manual"` if both auditors are human, `"hybrid"` if one is the LLM-judge
 - other fields: as in Path A Step 3
 
@@ -163,7 +163,7 @@ No taxonomy token — agreed two-auditor is the default within-tolerance case (s
 When `$DIFF` > 1, the operator reviews both drafts, decides which findings stand, and authors the final `drift-audit.json`:
 
 - `findings`: operator-selected set (can include subsets from either draft, or a fresh synthesis)
-- `auditor`: `"<operator-id> (arbitrating <primary-id>/<cross-reviewer-id>)"`
+- `auditor`: `"<operator-id> (arbitrating <primary-id>+<cross-reviewer-id>)"` (`+`-combined per spec 005 convention inside the arbitration parenthesis)
 - `audited_by`: `"manual"` or `"hybrid"` depending on who produced the drafts
 - other fields: as in Path A Step 3
 

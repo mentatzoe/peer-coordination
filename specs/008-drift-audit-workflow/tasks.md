@@ -31,7 +31,7 @@ This slice has **no source code**. Paths refer to:
 
 **Purpose**: Verify the prerequisite spec artifacts are in place so downstream tasks can reference them without guessing.
 
-- [ ] T001 Verify `specs/008-drift-audit-workflow/` contains spec.md, plan.md, research.md, data-model.md, contracts/workflow-contracts.md, quickstart.md, and checklists/requirements.md; confirm all committed on branch `008-drift-audit-workflow`
+- [X] T001 Verify `specs/008-drift-audit-workflow/` contains spec.md, plan.md, research.md, data-model.md, contracts/workflow-contracts.md, quickstart.md, and checklists/requirements.md; confirm all committed on branch `008-drift-audit-workflow`
 
 ---
 
@@ -41,9 +41,9 @@ This slice has **no source code**. Paths refer to:
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 Create `observations/drift-audits/WORKFLOW.md` skeleton at runtime location — frontmatter (version, scope, spec cross-ref), section stubs for Paths A/B/C to be filled by US1/US2/US3, prerequisite list, halt-condition placeholder, and a "Cross-references" block linking to `specs/008-drift-audit-workflow/spec.md`, `specs/008-drift-audit-workflow/quickstart.md`, `contracts/workflow-contracts.md`, and `observations/drift-audits/RUBRIC.md`
-- [ ] T003 [P] Create `observations/drift-audits/COMMIT-TAXONOMY.md` documenting the amend-commit token vocabulary from research.md R1 + R6: the standard `session bundle amend: <id> — drift-audit [ <token>] @ <short-sha>` format, the four taxonomy tokens (absent / `[arbitrated]` / `two-auditor-upgrade` / `re-run, supersedes <old-sha>`), grep examples, and a pointer to spec 001 FR-014's bundle-amend convention
-- [ ] T004 Update `observations/drift-audits/README.md` — add a "Workflow" subsection near the top linking to the new `WORKFLOW.md` and `COMMIT-TAXONOMY.md`, plus a one-line note that the workflow is specified in `specs/008-drift-audit-workflow/`
+- [X] T002 Create `observations/drift-audits/WORKFLOW.md` skeleton at runtime location — frontmatter (version, scope, spec cross-ref), section stubs for Paths A/B/C to be filled by US1/US2/US3, prerequisite list, halt-condition placeholder, and a "Cross-references" block linking to `specs/008-drift-audit-workflow/spec.md`, `specs/008-drift-audit-workflow/quickstart.md`, `contracts/workflow-contracts.md`, and `observations/drift-audits/RUBRIC.md`
+- [X] T003 [P] Create `observations/drift-audits/COMMIT-TAXONOMY.md` documenting the amend-commit token vocabulary from research.md R1 + R6: the standard `session bundle amend: <id> — drift-audit [ <token>] @ <short-sha>` format, the four taxonomy tokens (absent / `[arbitrated]` / `two-auditor-upgrade` / `re-run, supersedes <old-sha>`), grep examples, and a pointer to spec 001 FR-014's bundle-amend convention
+- [X] T004 Update `observations/drift-audits/README.md` — add a "Workflow" subsection near the top linking to the new `WORKFLOW.md` and `COMMIT-TAXONOMY.md`, plus a one-line note that the workflow is specified in `specs/008-drift-audit-workflow/`
 
 **Checkpoint**: Foundation ready — user story implementation can now begin.
 
@@ -57,10 +57,10 @@ This slice has **no source code**. Paths refer to:
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Author Path A (single-auditor procedure) in `observations/drift-audits/WORKFLOW.md` — step-by-step covering: rubric-version pinning, running RUBRIC.md §4 against the bundle, authoring `drift-audit.json` against spec 005's schema, committing as session-bundle amend per C4 with no taxonomy token. Draw from `specs/008-drift-audit-workflow/quickstart.md` Path A but trim spec-facing framing so auditors can use it directly without the spec-level context. Also include a one-paragraph note on **idempotency** per FR-010: re-running the workflow on the same inputs produces byte-identical `drift-audit.json` modulo the `audited_at` timestamp, inherited from spec 005's canonical-form serialization per `research.md` R3 — no new normalization rule needed here.
-- [ ] T006 [US1] Author "Halt conditions" section in `observations/drift-audits/WORKFLOW.md` — enumerate the C1 pre-conditions (bundle presence, `meta.json` fields, `interventions.json` presence, RUBRIC.md committed SHA) and what to do when each fails, referencing FR-018 for non-silent-failure discipline.
-- [ ] T007 [US1] Author "Post-commit sanity checks" section in `observations/drift-audits/WORKFLOW.md` — the 4-command block from quickstart.md (jq validity, rubric_version resolves, load_bearing_findings_count matches, commit discoverable via `git log -1`). Position as "run after every committed audit."
-- [ ] T008 [US1] Append entry to `observations/drift-audits/CHANGELOG.md` recording that workflow v1 (single-auditor path) is available, with a link to `WORKFLOW.md` and the spec 008 cross-reference.
+- [X] T005 [US1] Author Path A (single-auditor procedure) in `observations/drift-audits/WORKFLOW.md` — step-by-step covering: rubric-version pinning, running RUBRIC.md §4 against the bundle, authoring `drift-audit.json` against spec 005's schema, committing as session-bundle amend per C4 with no taxonomy token. Draw from `specs/008-drift-audit-workflow/quickstart.md` Path A but trim spec-facing framing so auditors can use it directly without the spec-level context. Also include a one-paragraph note on **idempotency** per FR-010: re-running the workflow on the same inputs produces byte-identical `drift-audit.json` modulo the `audited_at` timestamp, inherited from spec 005's canonical-form serialization per `research.md` R3 — no new normalization rule needed here.
+- [X] T006 [US1] Author "Halt conditions" section in `observations/drift-audits/WORKFLOW.md` — enumerate the C1 pre-conditions (bundle presence, `meta.json` fields, `interventions.json` presence, RUBRIC.md committed SHA) and what to do when each fails, referencing FR-018 for non-silent-failure discipline.
+- [X] T007 [US1] Author "Post-commit sanity checks" section in `observations/drift-audits/WORKFLOW.md` — the 4-command block from quickstart.md (jq validity, rubric_version resolves, load_bearing_findings_count matches, commit discoverable via `git log -1`). Position as "run after every committed audit."
+- [X] T008 [US1] Append entry to `observations/drift-audits/CHANGELOG.md` recording that workflow v1 (single-auditor path) is available, with a link to `WORKFLOW.md` and the spec 008 cross-reference.
 
 **Checkpoint**: At this point, User Story 1 is fully functional — a single operator can run the workflow end-to-end on a closed bundle and produce a committed audit. This is a shippable Phase 2 artifact.
 
@@ -74,9 +74,9 @@ This slice has **no source code**. Paths refer to:
 
 ### Implementation for User Story 2
 
-- [ ] T009 [US2] Author Path B (two-auditor reconciliation procedure) in `observations/drift-audits/WORKFLOW.md` — cover: shared rubric-version pinning, independent draft production (primary + cross-reviewer), tolerance check against spec 005 FR-016, within-tolerance merge path (Step 5a in quickstart), above-tolerance operator-arbitration path (Step 5b), commit format for each branch per C5.
-- [ ] T010 [US2] Document the LLM-judge-as-cross-reviewer assumption in `observations/drift-audits/WORKFLOW.md` — one short section noting: in POC staffing (per spec 008 Assumptions), two-auditor mode commonly means one human operator + one LLM judge running RUBRIC.md §7's prompt template; independence is operator-attested per FR-005; enabled from Phase 3 session 3+ per spec 005 §7.
-- [ ] T011 [US2] Add an "Arbitration ledger" reference row in `observations/drift-audits/COMMIT-TAXONOMY.md` — example: `git log --all --grep='\[arbitrated\]' --format='%H %s'` with a one-line note that the ledger is the calibration-signal surface spec 005 §6.3 counts against.
+- [X] T009 [US2] Author Path B (two-auditor reconciliation procedure) in `observations/drift-audits/WORKFLOW.md` — cover: shared rubric-version pinning, independent draft production (primary + cross-reviewer), tolerance check against spec 005 FR-016, within-tolerance merge path (Step 5a in quickstart), above-tolerance operator-arbitration path (Step 5b), commit format for each branch per C5.
+- [X] T010 [US2] Document the LLM-judge-as-cross-reviewer assumption in `observations/drift-audits/WORKFLOW.md` — one short section noting: in POC staffing (per spec 008 Assumptions), two-auditor mode commonly means one human operator + one LLM judge running RUBRIC.md §7's prompt template; independence is operator-attested per FR-005; enabled from Phase 3 session 3+ per spec 005 §7.
+- [X] T011 [US2] Add an "Arbitration ledger" reference row in `observations/drift-audits/COMMIT-TAXONOMY.md` — example: `git log --all --grep='\[arbitrated\]' --format='%H %s'` with a one-line note that the ledger is the calibration-signal surface spec 005 §6.3 counts against.
 
 **Checkpoint**: At this point, US1 and US2 both work independently — single-auditor and two-auditor paths each produce correctly-tokenized committed audits.
 
@@ -90,9 +90,9 @@ This slice has **no source code**. Paths refer to:
 
 ### Implementation for User Story 3
 
-- [ ] T012 [US3] Author Path C (re-audit + upgrade procedure) in `observations/drift-audits/WORKFLOW.md` — cover: identifying the trigger (rubric evolution vs mode upgrade vs both), pinning the new rubric version, running Path A or Path B to produce the new artifact (full replacement, not delta, per C6), commit format with the `re-run, supersedes <old-sha>` and/or `two-auditor-upgrade` tokens, prior-audit retrieval via `git show`.
-- [ ] T013 [US3] Document the POC-exit rubric-version sweep cross-slice dependency in `observations/drift-audits/WORKFLOW.md` — a short "Triggers" subsection within Path C noting both (a) explicit operator request is always valid, and (b) the POC-exit synthesis slice (not yet specced) produces a sweep artifact identifying stale bundles; this workflow only guarantees the data is available per FR-012 + C6.
-- [ ] T014 [US3] Add the `re-run, supersedes <old-sha>` and `two-auditor-upgrade` token examples (including the combined case) to `observations/drift-audits/COMMIT-TAXONOMY.md` if T003 left them as placeholders.
+- [X] T012 [US3] Author Path C (re-audit + upgrade procedure) in `observations/drift-audits/WORKFLOW.md` — cover: identifying the trigger (rubric evolution vs mode upgrade vs both), pinning the new rubric version, running Path A or Path B to produce the new artifact (full replacement, not delta, per C6), commit format with the `re-run, supersedes <old-sha>` and/or `two-auditor-upgrade` tokens, prior-audit retrieval via `git show`.
+- [X] T013 [US3] Document the POC-exit rubric-version sweep cross-slice dependency in `observations/drift-audits/WORKFLOW.md` — a short "Triggers" subsection within Path C noting both (a) explicit operator request is always valid, and (b) the POC-exit synthesis slice (not yet specced) produces a sweep artifact identifying stale bundles; this workflow only guarantees the data is available per FR-012 + C6.
+- [X] T014 [US3] Add the `re-run, supersedes <old-sha>` and `two-auditor-upgrade` token examples (including the combined case) to `observations/drift-audits/COMMIT-TAXONOMY.md` if T003 left them as placeholders.
 
 **Checkpoint**: All three user stories are now independently functional. Path A is the MVP, Path B extends to counted-session independent review, Path C enables rubric evolution and upgrade without history loss.
 
@@ -102,9 +102,9 @@ This slice has **no source code**. Paths refer to:
 
 **Purpose**: Consistency checks and PR-readiness per `docs/ways-of-working/pull-requests.md`.
 
-- [ ] T015 Run `/speckit-analyze` on `specs/008-drift-audit-workflow/` and address any blocking findings; required before PR per `docs/ways-of-working/pull-requests.md` artifact-consistency gate
-- [ ] T016 [P] Cross-slice consistency check — diff the amend-commit format in `contracts/workflow-contracts.md` C4 against spec 001 FR-014 to confirm no accidental redefinition; if drift is found, log in analyze.md rather than silently patching
-- [ ] T017 [P] Cross-slice consistency check — confirm `drift-audit.json` field usage in this slice matches spec 005's data-model.md (no implicit schema extensions); if drift, log in analyze.md
+- [X] T015 Run `/speckit-analyze` on `specs/008-drift-audit-workflow/` and address any blocking findings; required before PR per `docs/ways-of-working/pull-requests.md` artifact-consistency gate
+- [X] T016 [P] Cross-slice consistency check — diff the amend-commit format in `contracts/workflow-contracts.md` C4 against spec 001 FR-014 to confirm no accidental redefinition; if drift is found, log in analyze.md rather than silently patching
+- [X] T017 [P] Cross-slice consistency check — confirm `drift-audit.json` field usage in this slice matches spec 005's data-model.md (no implicit schema extensions); if drift, log in analyze.md
 - [ ] T018 Open PR for branch `008-drift-audit-workflow` per `docs/ways-of-working/pull-requests.md` once analyze completes, linking the governing discussion (TBD — may be opened at PR time if a fresh review thread is desired, or tied to existing discussion #41 staffing)
 
 ---
