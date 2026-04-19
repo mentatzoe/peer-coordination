@@ -34,6 +34,10 @@ policy.
   when its code is physically contained under this repo.
 - Avoid artificial behavioral rules for agents where observed organic drift is
   sufficient.
+- For spec slices and slice-owned follow-on patches, follow the Speckit
+  git-hook branch workflow when available, and merge via PR by default. See
+  `docs/ways-of-working/pull-requests.md`. Direct-to-`main` is reserved for
+  trivial fixes or explicit operator instruction.
 
 ## Speckit Flow
 
