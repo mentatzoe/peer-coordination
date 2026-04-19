@@ -263,6 +263,81 @@ If you enable `progress_style = "card"`, Discord shows one editable progress emb
 
 ---
 
+## Session Bundle Transcript Export
+
+If you are using the peer-coordination session-bundle workflow, `cc-connect`
+can export a completed Discord session into
+`observations/sessions/<session-id>/transcript.md`.
+
+### Prerequisites
+
+- the session bundle directory already exists with a valid `meta.json`
+- `meta.json` includes:
+  - `substrate: "discord"`
+  - `channel_id`
+  - `opened_at`
+  - `closed_at` (preferred) or `null`
+
+The export command uses `opened_at` / `closed_at` as the default session
+window. If you need to trim surrounding chatter, you can override the bounds at
+export time.
+
+### Preferred export path
+
+```bash
+cd cc-connect
+
+go run -tags no_web ./cmd/cc-connect transcript export \
+  --config ./config.toml \
+  --project my-project \
+  --session-dir ../observations/sessions/2026-04-19-demo
+```
+
+Optional window overrides:
+
+```bash
+go run -tags no_web ./cmd/cc-connect transcript export \
+  --config ./config.toml \
+  --project my-project \
+  --session-dir ../observations/sessions/2026-04-19-demo \
+  --after 2026-04-19T10:01:00Z \
+  --before 2026-04-19T10:04:30Z
+```
+
+On success:
+
+- `transcript.md` is rewritten in chronological order
+- each turn is rendered as `timestamp · author`
+- `meta.json.transcript_source` is set to `export`
+
+### Fallback / repair path
+
+If export fails or the fetched history is incomplete, the command fails closed
+and tells the operator to use the fallback path instead of silently claiming a
+good transcript.
+
+Record the final provenance explicitly:
+
+```bash
+go run -tags no_web ./cmd/cc-connect transcript source \
+  --session-dir ../observations/sessions/2026-04-19-demo \
+  --source reauthored
+```
+
+Use:
+
+- `reauthored` for a fully manual transcript
+- `hybrid` for exported transcript plus operator repair/completion
+
+### Turn-reference contract
+
+Transcript turns are rendered with UTC ISO-8601 timestamps. If multiple source
+messages would otherwise collide, the export path preserves uniqueness at the
+timestamp string level so downstream artifacts such as `interventions.json` and
+`drift-audit.json` can still anchor to exactly one turn.
+
+---
+
 ## FAQ
 
 ### Q: Bot can't read message content?
