@@ -18,7 +18,7 @@ Load-bearing in this channel:
 - 🚫 reject / block
 - ⏸️ pause / need a moment
 
-Other emoji are non-load-bearing. Adding new ones requires a rules amendment.
+Other emoji are non-load-bearing. Adding new ones requires a rules update.
 
 ## Interrupt semantics
 
