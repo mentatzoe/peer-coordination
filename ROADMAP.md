@@ -48,7 +48,7 @@ The main gap is that the repo now has the **design and evaluation shape**, but n
 | **Foundation artifacts** | Execution | 0 | Complete | `VISION.md`, `design/architecture.md`, `design/poc.md` | none inside this slice | Claude + Codex + Zoe |
 | **Roadmap reset** | Maintenance | 0 | In progress | approved POC phases and artifact set | standalone roadmap artifact, review, closure | Codex |
 | **Constitution cleanup** | Maintenance | adjacent maintenance | In progress | executive decision from discussion #32 | remove roadmap section from constitution and clean references | Claude |
-| **Baseline substrate build** | Execution | 1 | Not started | session definition, transport/harness assumptions, L1/L2 requirements | `cc-connect` containment decision, Discord channel binding, interrupt path, transcript export, pinned-rules support, session bundle skeleton | Codex (transport / substrate), Claude (session artifacts) |
+| **Baseline substrate build** | Execution | 1 | In progress | session definition, transport/harness assumptions, L1/L2 requirements, contained `cc-connect/` workspace | Discord channel binding, interrupt path, transcript export, pinned-rules support, session bundle skeleton | Codex (transport / substrate), Claude (session artifacts) |
 | **Evaluation surface build** | Execution | 2 | Not started | KPI framework, artifact bundle, intervention taxonomy, exit criteria | draft drift-audit rubric, drift-audit workflow, intervention tagging mechanism, intervention log shape, KPI computation path, session summary workflow | Claude (evaluation pipeline), Codex (schema / tagging), Zoe (summary UX design) |
 | **Two-peer baseline run** | Execution | 3 | Blocked on 1–2 | baseline session count, H1/H2 evidence rules, operator model | runnable harness, preserved session bundles, completed baseline sessions | Zoe (operator), responder assigned per session |
 | **Gemini extension** | Execution | 4 | Blocked on 3 | in-scope condition, preferred `cc-connect` adapter path | Gemini adapter decision and implementation, 1–2 extension sessions if baseline is credible | Gemini (adapter ownership after bootstrap), Codex (guidance), Zoe (dispatch) |
@@ -75,7 +75,7 @@ is meant to stay **slice-local** and **handoff-based**.
 
 | Needed artifact / deliverable | Why it is needed | Status |
 |---|---|---|
-| `cc-connect` containment decision | determines where the probe implementation lives and how it is versioned against this repo | Open |
+| contained `cc-connect/` workspace | resolves where the probe implementation lives and how it is versioned against this repo | Landed |
 | Transcript export path | required for the canonical episode bundle | Open |
 | Session bundle skeleton under `observations/sessions/` | required before counted sessions can start | Open |
 | Draft drift-audit rubric | required for Phase 2 to exit cleanly | Open |
@@ -94,10 +94,9 @@ is meant to stay **slice-local** and **handoff-based**.
 
 The next useful cuts should stay close to the roadmap and the POC phases:
 
-1. Confirm where the runnable probe work lives relative to `cc-connect`.
-2. Cut the minimum implementation-facing artifact(s) needed for **Baseline substrate build**.
-3. Cut the minimum evaluation artifact(s) needed for **Evaluation surface build**.
-4. Only then start counted baseline sessions.
+1. Finish the remaining **Baseline substrate build** outputs on top of the landed `cc-connect/` workspace.
+2. Cut the minimum implementation-facing artifact(s) needed for **Evaluation surface build**.
+3. Only then start counted baseline sessions.
 
 ## Notes
 

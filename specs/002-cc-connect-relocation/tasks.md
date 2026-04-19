@@ -21,8 +21,8 @@ implemented and verified independently.
 **Purpose**: Freeze the import inputs and destination conventions before moving
 repo history.
 
-- [ ] T001 Capture the source fork commit and chosen import method in `specs/002-cc-connect-relocation/research.md`
-- [ ] T002 [P] Add the final verification/handoff checklist scaffold to `specs/002-cc-connect-relocation/quickstart.md`
+- [x] T001 Capture the source fork commit and chosen import method in `specs/002-cc-connect-relocation/research.md`
+- [x] T002 [P] Add the final verification/handoff checklist scaffold to `specs/002-cc-connect-relocation/quickstart.md`
 
 ---
 
@@ -32,11 +32,11 @@ repo history.
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Import the current `mentatzoe/cc-connect` fork history into `cc-connect/`
-- [ ] T004 [P] Update root discovery guidance to point at `cc-connect/` in `README.md`
-- [ ] T005 [P] Update collaborator/runtime guidance to point at `cc-connect/` in `CLAUDE.md`
-- [ ] T006 [P] Update implementation-surface references to `cc-connect/` in `ROADMAP.md`
-- [ ] T007 Add the provenance and boundary note in `cc-connect/README.peer-coordination.md`
+- [x] T003 Import the current `mentatzoe/cc-connect` fork history into `cc-connect/`
+- [x] T004 [P] Update root discovery guidance to point at `cc-connect/` in `README.md`
+- [x] T005 [P] Update collaborator/runtime guidance to point at `cc-connect/` in `CLAUDE.md`
+- [x] T006 [P] Update implementation-surface references to `cc-connect/` in `ROADMAP.md`
+- [x] T007 Add the provenance and boundary note in `cc-connect/README.peer-coordination.md`
 
 **Checkpoint**: `cc-connect/` exists as a contained workspace and active docs no
 longer depend on a standalone local clone as the primary implementation surface
@@ -52,9 +52,9 @@ work without relying on an external checkout.
 find `cc-connect/`, identify the relevant transport surfaces, and build the main
 entrypoint.
 
-- [ ] T008 [US1] Verify the required Phase 1 transport surfaces exist in `cc-connect/agent/`, `cc-connect/platform/discord/`, and `cc-connect/cmd/cc-connect/`
-- [ ] T009 [US1] Remove or rewrite any remaining active standalone-clone instructions in `README.md`, `CLAUDE.md`, and `ROADMAP.md`
-- [ ] T010 [US1] Run `go build ./cmd/cc-connect` from `cc-connect/cmd/cc-connect/` and fix any relocation fallout in `cc-connect/`
+- [x] T008 [US1] Verify the required Phase 1 transport surfaces exist in `cc-connect/agent/`, `cc-connect/platform/discord/`, and `cc-connect/cmd/cc-connect/`
+- [x] T009 [US1] Remove or rewrite any remaining active standalone-clone instructions in `README.md`, `CLAUDE.md`, and `ROADMAP.md`
+- [x] T010 [US1] Run `go build ./cmd/cc-connect` from `cc-connect/cmd/cc-connect/` and fix any relocation fallout in `cc-connect/`
 
 **Checkpoint**: User Story 1 is complete when the contained workspace is
 discoverable from root docs and the primary `cc-connect` entrypoint builds.
@@ -70,9 +70,9 @@ and a durable handoff trail.
 into `cc-connect/`, understand where it came from, and verify the relevant
 transport checks.
 
-- [ ] T011 [US2] Finalize source fork / upstream / maintenance-boundary wording in `cc-connect/README.peer-coordination.md`
-- [ ] T012 [US2] Record the canonical re-entry path and implementation audit path in `specs/002-cc-connect-relocation/quickstart.md`
-- [ ] T013 [US2] Run targeted checks in `cc-connect/platform/discord/`, `cc-connect/agent/claudecode/`, `cc-connect/agent/codex/`, and `cc-connect/agent/gemini/`
+- [x] T011 [US2] Finalize source fork / upstream / maintenance-boundary wording in `cc-connect/README.peer-coordination.md`
+- [x] T012 [US2] Record the canonical re-entry path and implementation audit path in `specs/002-cc-connect-relocation/quickstart.md`
+- [x] T013 [US2] Run targeted checks in `cc-connect/platform/discord/`, `cc-connect/agent/claudecode/`, `cc-connect/agent/codex/`, and `cc-connect/agent/gemini/`
 
 **Checkpoint**: User Story 2 is complete when provenance is explicit and the
 POC-relevant transport surfaces have been verified from the contained workspace.
@@ -88,9 +88,9 @@ implementation.
 `cc-connect/` is implementation-only while the root artifacts remain
 authoritative for governance/design.
 
-- [ ] T014 [US3] Add or tighten implementation-not-policy wording in `README.md` and `cc-connect/README.peer-coordination.md`
-- [ ] T015 [US3] Audit active docs for remaining governance/transport ambiguity in `AGENTS.md`, `README.md`, `CLAUDE.md`, `ROADMAP.md`, and `specs/002-cc-connect-relocation/spec.md`
-- [ ] T016 [US3] Update `specs/002-cc-connect-relocation/plan.md` and `specs/002-cc-connect-relocation/research.md` if implementation changed the chosen mechanics or boundary assumptions
+- [x] T014 [US3] Add or tighten implementation-not-policy wording in `README.md` and `cc-connect/README.peer-coordination.md`
+- [x] T015 [US3] Audit active docs for remaining governance/transport ambiguity in `AGENTS.md`, `README.md`, `CLAUDE.md`, `ROADMAP.md`, and `specs/002-cc-connect-relocation/spec.md`
+- [x] T016 [US3] Update `specs/002-cc-connect-relocation/plan.md` and `specs/002-cc-connect-relocation/research.md` if implementation changed the chosen mechanics or boundary assumptions
 
 **Checkpoint**: User Story 3 is complete when the active repo surface makes the
 boundary legible without requiring operator clarification.
@@ -101,8 +101,8 @@ boundary legible without requiring operator clarification.
 
 **Purpose**: Final consistency and audit readiness
 
-- [ ] T017 [P] Re-run root-doc traceability checks across `AGENTS.md`, `README.md`, `CLAUDE.md`, and `ROADMAP.md`
-- [ ] T018 [P] Refresh the final verification/handoff notes in `specs/002-cc-connect-relocation/quickstart.md`
+- [x] T017 [P] Re-run root-doc traceability checks across `AGENTS.md`, `README.md`, `CLAUDE.md`, and `ROADMAP.md`
+- [x] T018 [P] Refresh the final verification/handoff notes in `specs/002-cc-connect-relocation/quickstart.md`
 
 ---
 

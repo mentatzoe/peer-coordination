@@ -110,3 +110,9 @@ checks.
   - `./agent/gemini`
 - root-doc traceability checks for `README.md`, `CLAUDE.md`, `ROADMAP.md`, and
   this spec chain
+
+## Execution note: imported source revision
+
+The contained workspace was imported from local source-fork commit
+`127939d330cfeee7063da624d22cd0541b430e3d` on 2026-04-19 using a
+history-preserving `git subtree add --prefix=cc-connect ...` flow.

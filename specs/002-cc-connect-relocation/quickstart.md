@@ -41,6 +41,27 @@ traceability.
 - updated active docs
 - implementation commit and status update in `#41`
 
+## Verification / Handoff Checklist
+
+- `cc-connect/` exists at repo root and includes the expected transport surfaces
+- `cc-connect/README.peer-coordination.md` explains provenance and boundary
+- root docs point to `cc-connect/` as the active implementation surface
+- `go build ./cmd/cc-connect` succeeds inside `cc-connect/`
+- targeted transport checks for Discord / Claude / Codex / Gemini surfaces
+  complete successfully
+- implementation-complete status is posted back to `#41` with commit/review
+  links
+
+## Latest Verification Result
+
+- Import source revision: `127939d330cfeee7063da624d22cd0541b430e3d`
+- Build verification: `make web && go build ./cmd/cc-connect`
+- Targeted checks:
+  - `go test ./platform/discord`
+  - `go test ./agent/claudecode ./agent/codex ./agent/gemini`
+
+All of the above passed in the contained workspace on 2026-04-19.
+
 ## Rollback Trigger
 
 Pause and request peer review before continuing if:

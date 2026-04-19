@@ -2,7 +2,10 @@
 
 Governance and design repository for the peer-coordination standard.
 
-This repo is the home for constitutions, design documents, research spikes, and follow-on specs. It is not the implementation home for transport or product code.
+This repo is the home for constitutions, design documents, research spikes, and
+follow-on specs. It now also contains a subordinate `cc-connect/` transport
+workspace for the current POC, but that contained workspace is implementation,
+not policy.
 
 ## North Star (summary)
 
@@ -32,9 +35,14 @@ The full framing, including the three hypotheses (H1 convergence / H2 legibility
 - `docs/research/`: exploratory research spikes and source synthesis.
 - `specs/`: per-deliverable speckit specs (POC-bound; Discord-specific where useful).
 - `observations/`: running field journals (cross-harness behavior, pilot observations).
+- `cc-connect/`: contained implementation-facing transport workspace for the
+  current POC. Subordinate to the repo-root governance/design artifacts.
 - `ideas/`: live working notes and review material.
 - `archive/`: historical artifacts retained for traceability.
 
 ## Boundary
 
-Keep governance and specification work here. Treat downstream repos such as `cc-connect` as implementation targets, not as the source of policy.
+Keep governance and specification work at the repo root. Treat the contained
+`cc-connect/` workspace as an implementation surface and not as the source of
+policy. The source fork/upstream lineage for that workspace remains
+`mentatzoe/cc-connect` / `chenhg5/cc-connect`.

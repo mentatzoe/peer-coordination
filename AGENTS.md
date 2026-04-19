@@ -10,14 +10,17 @@ current Codex-owned Phase 1 slice
 ## Purpose
 
 This repository defines the multi-agent coordination standard itself.
-It is a governance and specification repo, not the implementation home for
-transport or product code.
+Its repo root is the governance/specification surface. A contained
+`cc-connect/` workspace may live here as a subordinate implementation surface
+for the current POC, but that does not make transport code the source of
+policy.
 
 ## Scope Boundaries
 
 - Keep constitutions, specs, scratchpads, and decision records here.
-- Treat downstream repos such as `cc-connect` and `personal-agent-setup` as
-  implementation targets or consumers of this standard.
+- Treat the contained `cc-connect/` workspace as an implementation target inside
+  this repo, and downstream repos such as `personal-agent-setup` as consumers
+  of this standard.
 - Do not silently move governance decisions back into downstream repos.
 
 ## Working Norms
@@ -27,7 +30,8 @@ transport or product code.
 - Prefer explicit documentation of confirmed decisions, open questions,
   manual steps, and next actions.
 - Keep the distinction between governance and transport clear:
-  `cc-connect` is transport/session plumbing, not the source of policy.
+  `cc-connect` is transport/session plumbing, not the source of policy, even
+  when its code is physically contained under this repo.
 - Avoid artificial behavioral rules for agents where observed organic drift is
   sufficient.
 

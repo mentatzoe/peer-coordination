@@ -49,7 +49,10 @@ implementation itself.
 
 ## Related Repos
 
-- **`mentatzoe/cc-connect`** (private fork of `chenhg5/cc-connect`) — transport layer. All transport MVP code changes for peer coordination land here, not in this repo. Local clone at `~/github/cc-connect/` with `origin=mentatzoe`, `upstream=chenhg5`.
+- **`mentatzoe/cc-connect`** (private fork of `chenhg5/cc-connect`) — source fork
+  for the contained `cc-connect/` workspace now living under this repo. Active
+  Phase 1 transport MVP changes land in `cc-connect/` here; lineage remains
+  `origin=mentatzoe`, `upstream=chenhg5`.
 - **`personal-agent-setup`** — agent configuration hub. The scratchpad originated there and was archived to `archive/from-personal-agent-setup/` when this repo was created.
 - **`vault-keeper`** — Dalgos's target project; reference for file-level multi-agent conventions (`docs/multi-agent-parallel-work.md`).
 
@@ -58,6 +61,9 @@ implementation itself.
 - Scratchpad at `ideas/peer-coordination.md` — canonical design log, multi-turn conversation between Zoe, Claude (Station), and Codex (Vigil).
 - Archive at `archive/from-personal-agent-setup/specs/003-peer-coordination-constitution/` — prior speckit attempt scoped incorrectly to `personal-agent-setup`; preserved for reference, not active.
 - Sequencing, ownership, and current-next work now live in [`ROADMAP.md`](ROADMAP.md). The older Transport MVP table that used to sit here was a 2026-04-17 snapshot and is no longer authoritative.
+- Active transport implementation surface: contained `cc-connect/` workspace at
+  repo root. Historical references to `~/github/cc-connect/` are now lineage,
+  not the primary work surface.
 
 - Pilot channel: Discord `#open-floor` (`1494836296336543774`), mention-only until MVP #1/#2 land, then flips to open-floor mode.
 - Dalgos cc-connect config: mention-only, `guild_id` set, `respond_to_at_everyone_and_here = false`, `work_dir=/Users/zmll/github/vault-keeper`.
