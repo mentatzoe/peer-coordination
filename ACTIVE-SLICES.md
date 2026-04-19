@@ -22,7 +22,6 @@ stale rather than silently trusted.
 
 | Slice / patch | Owner | Worktree | Branch | Phase | Status | Last confirmed | Do-not-touch surfaces | Notes |
 |---|---|---|---|---|---|---|---|---|
-| `session-reentry-protocol` | Codex | `.worktrees/session-reentry-protocol` | `codex-session-reentry-protocol` | implement | active | 2026-04-19 | `docs/ways-of-working/session-reentry.md`, `ACTIVE-SLICES.md`, `AGENTS.md`, `CLAUDE.md`, `docs/ways-of-working/pull-requests.md` | First-pass landing patch for discussion #55 |
 | `007-session-bundle-init-cli` | Codex | `.worktrees/session-bundle-init-cli` | `007-session-bundle-init-cli` | plan complete; tasks next | active | 2026-04-19 | `.worktrees/session-bundle-init-cli/specs/007-session-bundle-init-cli/**`, `.worktrees/session-bundle-init-cli/AGENTS.md` | Clarify complete; planning artifacts written; implementation not started |
 | `002-cc-connect-relocation` | Codex | `.worktrees/cc-connect-relocation-impl` | `codex-002-cc-connect-relocation-impl` | implement follow-on | parked | 2026-04-19 | `.worktrees/cc-connect-relocation-impl/cc-connect/**`, `.worktrees/cc-connect-relocation-impl/specs/002-cc-connect-relocation/**` | Existing isolated Codex worktree; update on next touch if ownership/status changes |
 

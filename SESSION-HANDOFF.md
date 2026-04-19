@@ -70,6 +70,11 @@ From the `007` worktree, proceed to `/speckit.plan`.
 
 The slice is ready for planning; no more clarify questions are pending.
 
+## Recent completions
+
+- **Session re-entry protocol**: landed and merged via PR [#57](https://github.com/mentatzoe/peer-coordination/pull/57). It is now part of the repo baseline, not an active slice.
+- **Automatic fresh-session bootstrap in `cc-connect`**: landed and merged via PR [#59](https://github.com/mentatzoe/peer-coordination/pull/59). The host checkout was rebuilt and restarted on 2026-04-19, and the new fresh-session behavior was validated live on both Vigil and Dalgos. Treat this as shipped unless a new regression appears.
+
 ## Relevant discussion context
 
 - **Discussion #53** — bundle-init CLI location / shape
