@@ -57,15 +57,7 @@ implementation itself.
 
 - Scratchpad at `ideas/peer-coordination.md` — canonical design log, multi-turn conversation between Zoe, Claude (Station), and Codex (Vigil).
 - Archive at `archive/from-personal-agent-setup/specs/003-peer-coordination-constitution/` — prior speckit attempt scoped incorrectly to `personal-agent-setup`; preserved for reference, not active.
-- Transport MVP (in `mentatzoe/cc-connect`):
-
-  | # | Item | Owner |
-  |---|------|-------|
-  | 1 | `!stop` / `!resume` transport detection | Vigil (Codex) |
-  | 2 | Open-floor mode + no-self-loop guard | Vigil (Codex) |
-  | 3 | Agent-initiated emoji reacts | Dalgos (Claude) |
-  | 4 | Approval-via-react workflow | Dalgos (Claude) |
-  | 5 | Pinned-rules ingestion at session start | Dalgos (Claude), second pass |
+- Sequencing, ownership, and current-next work now live in [`ROADMAP.md`](ROADMAP.md). The older Transport MVP table that used to sit here was a 2026-04-17 snapshot and is no longer authoritative.
 
 - Pilot channel: Discord `#open-floor` (`1494836296336543774`), mention-only until MVP #1/#2 land, then flips to open-floor mode.
 - Dalgos cc-connect config: mention-only, `guild_id` set, `respond_to_at_everyone_and_here = false`, `work_dir=/Users/zmll/github/vault-keeper`.
