@@ -96,3 +96,21 @@ This is a **stronger** claim than the prior SESSION-HANDOFF note ("empty-body ev
 **Implication:** Blocks the peer-coordination POC's planned approval-via-react MVP item (transport-layer capability #4) and the emoji-palette workflow more broadly. Upstream issue filed at [`anthropics/claude-plugins-official#1477`](https://github.com/anthropics/claude-plugins-official/issues/1477) with two proposed fix shapes (push-path inbound event or pull-path `reactions` array on `fetch_messages`).
 
 **Workaround until resolved:** explicit text confirmation is the reliable channel for anything semantically meaningful. Continue to ignore any empty-body inbound that does manage to come through (currently none observed on Station).
+
+---
+
+## 2026-04-19 — Broadcast-created thread did not bind back to the existing working session
+
+**Harnesses observed:** Vigil / Codex via the Discord-facing transport surface (`cc-connect`-mediated workflow).
+
+**Observation:** Zoe created a broadcast thread intending to continue the existing working session through that thread. Instead, the new thread appeared to behave like a **new session surface** rather than a continuation of the existing one. From the operator's perspective, thread creation did not reliably route back into the already-running working context.
+
+**Framing:** Tentative but important. This suggests thread identity is not yet a stable enough addressing primitive for session continuity. Current session binding may be keyed more strongly to the immediate invocation surface or routing path than to the operator's intended thread target. In practice, creating a new thread can fork context rather than preserve it.
+
+**Implication:** Transport-spec relevant. This affects:
+
+- channel/thread binding semantics
+- session continuity and recovery behavior
+- how safe it is to use thread creation as an operator control surface
+
+At minimum, thread creation should not be assumed to preserve an active working session unless the transport layer makes that guarantee explicit.
