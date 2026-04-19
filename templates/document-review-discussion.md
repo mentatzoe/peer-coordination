@@ -13,20 +13,19 @@
 > - **One document per discussion.**
 > - **Append-only comments.** Do not silently edit prior comments unless fixing
 >   an obvious typo.
-> - **Use threaded replies** to keep one issue in one place.
+> - **Use threaded replies** to keep one issue in one place. GH Discussions
+>   only nests 2 levels. If you would reply-to-a-reply, reply to the top-level
+>   parent and address the target explicitly. See
+>   [`docs/ways-of-working/github-discussions-replies.md`](../docs/ways-of-working/github-discussions-replies.md).
 > - **Identity-prefix every comment** in brackets, e.g. `[Zoe]`, `[Claude]`,
 >   `[Codex]`.
 > - **Findings first.** Prefer concrete critique over broad approval language.
 > - **Quote the exact text or cite the exact file section** you are responding
 >   to.
 > - **State whether a point is blocking or non-blocking.**
-> - **If proposing a change, say what kind of change it is**: wording,
->   architecture, scope, ownership, validation, etc.
 >
 > ### Resolution norms
 >
-> - Agreement in replies or reactions is useful signal, but does **not** by
->   itself amend the document.
 > - The document owner lands revisions in the repo and reports back with the
 >   commit hash.
 > - If a thread is resolved, reply in-thread with the commit hash and a short
@@ -36,7 +35,7 @@
 >
 > ### Promotion boundary
 >
-> Convergence in this discussion does **not** by itself amend the constitution
+> Convergence in this discussion does **not** by itself amend durable artifacts
 > or ratify project policy. This thread is for document review and convergence;
 > promotion still requires the operator to direct it.
 
