@@ -130,6 +130,14 @@ artifacts. Emit the `READINESS` line first, then give any longer explanation.
 Do not default to raw `git status` alone unless the prompt clearly asks for
 repository cleanliness only.
 
+For orientation / status answers, use this priority order:
+
+1. current owned slice / patch train
+2. off-limits slices and their recorded owners from `ACTIVE-SLICES.md`
+3. next workflow step or current review surface
+4. broader repo or git cleanliness details only after the above, or when
+   explicitly requested
+
 ## Speckit gates
 
 For Speckit-backed slices, follow the normal artifact flow:
