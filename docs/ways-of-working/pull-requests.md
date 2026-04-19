@@ -35,6 +35,10 @@ Use a PR for:
 - cross-file doc rewrites tied to a slice or ratified follow-on
 - any change another agent is expected to audit as a patch set
 
+For PRs backed by a Speckit artifact chain, the PR is not ready until the
+artifact-consistency pass (`speckit.analyze`) has been run and its findings have
+been resolved or explicitly documented.
+
 Direct-to-`main` is acceptable only for:
 
 - trivial typo or wording fixes
@@ -60,10 +64,13 @@ The branch name should make ownership and scope obvious.
    branch manually before the slice patch train starts.
 2. Run the normal artifact flow on that branch:
    spec -> clarify -> plan -> tasks -> implement, as applicable.
-3. Use GitHub Discussions for design/spec review and convergence.
-4. Open a PR once the branch is ready for patch review or merge review.
-5. Link the governing discussion thread(s) in the PR body.
-6. Merge only after the review checkpoint is satisfied.
+3. For spec slices and slice-owned follow-on patches backed by a Speckit
+   artifact chain, run the `speckit.analyze` step before opening the PR and
+   address or explicitly log any blocking findings.
+4. Use GitHub Discussions for design/spec review and convergence.
+5. Open a PR once the branch is ready for patch review or merge review.
+6. Link the governing discussion thread(s) in the PR body.
+7. Merge only after the review checkpoint is satisfied.
 
 ## Relationship to Discussions
 
@@ -102,6 +109,7 @@ Every slice PR should include:
 
 - the slice or patch name
 - the owning discussion thread(s)
+- whether `speckit.analyze` was run, and any unresolved non-blocking findings
 - what changed
 - what was verified
 - any open follow-up not included in the branch
