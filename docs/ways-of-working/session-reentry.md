@@ -89,7 +89,7 @@ assume the prior owner/worktree still reflects reality.
 The registry is authoritative for current ownership. Naming conventions help,
 but they do not replace the registry.
 
-## Readiness declaration
+## Sanity one-liner (`READINESS`)
 
 Before substantive work begins, the fresh session MUST emit a short readiness
 statement in-chat using this format:
@@ -103,6 +103,13 @@ The declaration is meant to be:
 - grep-able in chat logs
 - easy for peer agents to parse
 - easy for the operator to scan
+
+The `READINESS` line is **mandatory**:
+
+- on fresh-session starts, it should be the first substantive response after
+  orientation
+- on ambiguous orientation prompts, it should appear before any longer status
+  explanation
 
 The readiness declaration is **ephemeral**. The durable state belongs in
 `ACTIVE-SLICES.md`.
@@ -119,8 +126,9 @@ skip re-entry:
 
 For those prompts, the session should first orient through the required
 re-entry surfaces, then answer with project / slice status grounded in those
-artifacts. Do not default to raw `git status` alone unless the prompt clearly
-asks for repository cleanliness only.
+artifacts. Emit the `READINESS` line first, then give any longer explanation.
+Do not default to raw `git status` alone unless the prompt clearly asks for
+repository cleanliness only.
 
 ## Speckit gates
 
@@ -136,6 +144,24 @@ Repo-specific rule:
 
 Skipping commit-assist hooks does **not** waive this requirement. The rigor
 comes from the artifact cross-check, not from the commit boundary itself.
+
+## Hook boundary
+
+Repo-local hooks can reinforce re-entry at workflow boundaries such as
+`before_plan`, `before_tasks`, and `before_implement`.
+
+They cannot, by themselves, guarantee the very first chat message of a new
+session across every client or bridge. That stronger guarantee belongs in the
+session harness / client bootstrap layer.
+
+So the enforcement split is:
+
+- **repo protocol**: mandates the `READINESS` line as the first substantive
+  response
+- **repo hooks**: can check that re-entry steps were completed before major
+  workflow transitions
+- **harness / client integration**: future hardening if we want the `READINESS`
+  line enforced at process start rather than just by repo protocol
 
 ## Generic-skill override
 
