@@ -274,6 +274,7 @@ type interactiveState struct {
 	replyCtx               any
 	workspaceDir           string
 	agent                  Agent
+	startupBootstrap       string
 	mu                     sync.Mutex
 	stopCh                 chan struct{}
 	stopped                bool
@@ -353,6 +354,20 @@ func (s *interactiveState) markStopped() {
 		s.stopCh = make(chan struct{})
 	}
 	close(s.stopCh)
+}
+
+func (s *interactiveState) consumeStartupBootstrap(prompt string) string {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.startupBootstrap == "" {
+		return prompt
+	}
+	bootstrap := s.startupBootstrap
+	s.startupBootstrap = ""
+	if strings.TrimSpace(prompt) == "" {
+		return bootstrap
+	}
+	return bootstrap + "\n\n[user prompt]\n" + prompt
 }
 
 // resolve safely closes the Resolved channel exactly once.
@@ -2096,6 +2111,7 @@ func (e *Engine) processInteractiveMessageWith(p Platform, msg *Message, session
 	drainEvents(state.agentSession.Events())
 
 	promptContent := e.buildSenderPrompt(msg.Content, msg.UserID, msg.UserName, msg.Platform, msg.SessionKey)
+	promptContent = state.consumeStartupBootstrap(promptContent)
 
 	sendStart := time.Now()
 	state.mu.Lock()
@@ -2342,6 +2358,7 @@ func (e *Engine) getOrCreateInteractiveStateWith(sessionKey string, p Platform, 
 	// conversation happens to be "latest" in this workspace.
 	startSessionID := session.GetAgentSessionID()
 	isResume := startSessionID != ""
+	freshStart := !isResume
 	startAt := time.Now()
 	agentSession, err := agent.StartSession(e.ctx, startSessionID)
 	startElapsed := time.Since(startAt)
@@ -2355,6 +2372,7 @@ func (e *Engine) getOrCreateInteractiveStateWith(sessionKey string, p Platform, 
 			agentSession, err = agent.StartSession(e.ctx, "")
 			startElapsed = time.Since(startAt)
 			if err == nil {
+				freshStart = true
 				slog.Info("fresh session started after resume failure",
 					"session_key", sessionKey, "elapsed", startElapsed)
 			}
@@ -2383,6 +2401,9 @@ func (e *Engine) getOrCreateInteractiveStateWith(sessionKey string, p Platform, 
 		platform:     p,
 		replyCtx:     replyCtx,
 		agent:        agent,
+	}
+	if freshStart {
+		newState.startupBootstrap = buildRepoReentryBootstrap(agent)
 	}
 	adoptPendingFromPlaceholder(e.interactiveStates[sessionKey], newState)
 	state = newState
@@ -3044,6 +3065,7 @@ func (e *Engine) processInteractiveEvents(state *interactiveState, session *Sess
 				}
 
 				queuedPrompt := e.buildSenderPrompt(queued.content, queued.userID, queued.userName, queued.msgPlatform, queued.msgSessionKey)
+				queuedPrompt = state.consumeStartupBootstrap(queuedPrompt)
 
 				nextSend := make(chan error, 1)
 				go func() {
