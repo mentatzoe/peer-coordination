@@ -92,7 +92,124 @@ See **Post-commit sanity checks** below. If any check fails, fix and re-commit w
 
 ## Path B — Two-auditor audit (counted sessions)
 
-*Filled by US2 — see `specs/008-drift-audit-workflow/quickstart.md` Path B until this section lands.*
+Use this for sessions intended as counted H1/H2 evidence. Two independent passes against the same pinned rubric version get reconciled against spec 005's FR-016 tolerance. In the POC, the two auditors are typically one human operator and one LLM-judge cross-reviewer — see **LLM-judge as cross-reviewer** below for the entry criteria.
+
+### Step 1 — Pin the rubric version (shared by both auditors)
+
+Same as Path A Step 1. Both primary auditor and cross-reviewer MUST use the identical `$RUBRIC_SHA`.
+
+### Step 2 — Primary auditor produces draft A
+
+Primary auditor (typically the operator) runs [`RUBRIC.md`](RUBRIC.md) §4 and produces a draft `drift-audit.json` — **do not commit yet**. Keep it as a working file next to the bundle, e.g.:
+
+```bash
+observations/sessions/<session-id>/drift-audit.draft-primary.json
+```
+
+### Step 3 — Cross-reviewer produces draft B independently
+
+The cross-reviewer (human or LLM-judge) runs [`RUBRIC.md`](RUBRIC.md) §4 against the **same** bundle and the **same** `$RUBRIC_SHA`.
+
+**Independence discipline** ([FR-005](../../specs/008-drift-audit-workflow/spec.md), [contract C5](../../specs/008-drift-audit-workflow/contracts/workflow-contracts.md)):
+
+- Either the cross-reviewer never sees draft A before finalizing draft B (enforced isolation), OR
+- the cross-reviewer finalizes draft B before seeing draft A and the **operator attests to that independence** in the commit body.
+
+The workflow does NOT enforce isolation mechanically; operator attestation is the gate. For LLM-judge cross-reviewers, see **LLM-judge as cross-reviewer** below — the prompt template produces natural isolation.
+
+Store as:
+
+```bash
+observations/sessions/<session-id>/drift-audit.draft-cross.json
+```
+
+### Step 4 — Reconciliation against spec 005 FR-016 tolerance
+
+Compute:
+
+```bash
+PC=$(jq -r '.load_bearing_findings_count' observations/sessions/<session-id>/drift-audit.draft-primary.json)
+CC=$(jq -r '.load_bearing_findings_count' observations/sessions/<session-id>/drift-audit.draft-cross.json)
+DIFF=$(( PC > CC ? PC - CC : CC - PC ))
+echo "|primary($PC) - cross($CC)| = $DIFF"
+```
+
+- **If `$DIFF` ≤ 1** (within spec 005 FR-016 tolerance for ≤200-turn sessions): go to Step 5a.
+- **If `$DIFF` > 1** (diverged): go to Step 5b — operator arbitration.
+
+### Step 5a — Within tolerance: merge and commit
+
+The primary auditor merges the two drafts into a single `drift-audit.json`:
+
+- `findings`: union of primary + cross, deduplicated by `(category, turn_ref, severity)`, ordered by `turn_ref` ascending
+- `auditor`: `"<primary-id>, <cross-reviewer-id>"` (comma-separated; spec 005's free-text schema accepts this)
+- `audited_by`: `"manual"` if both auditors are human, `"hybrid"` if one is the LLM-judge
+- other fields: as in Path A Step 3
+
+Commit:
+
+```bash
+git add observations/sessions/<session-id>/drift-audit.json
+rm observations/sessions/<session-id>/drift-audit.draft-*.json
+git add -u
+git commit -m "session bundle amend: <session-id> — drift-audit @ $RUBRIC_SHORT" \
+           -m "Two-auditor: primary=<primary-id>, cross=<cross-reviewer-id>. Within tolerance (diff=$DIFF)."
+```
+
+No taxonomy token — agreed two-auditor is the default within-tolerance case (see [`COMMIT-TAXONOMY.md`](COMMIT-TAXONOMY.md)).
+
+### Step 5b — Diverged: operator arbitrates
+
+When `$DIFF` > 1, the operator reviews both drafts, decides which findings stand, and authors the final `drift-audit.json`:
+
+- `findings`: operator-selected set (can include subsets from either draft, or a fresh synthesis)
+- `auditor`: `"<operator-id> (arbitrating <primary-id>/<cross-reviewer-id>)"`
+- `audited_by`: `"manual"` or `"hybrid"` depending on who produced the drafts
+- other fields: as in Path A Step 3
+
+Commit with the `[arbitrated]` token — this is the **arbitration-ledger signal** per [contract C7](../../specs/008-drift-audit-workflow/contracts/workflow-contracts.md):
+
+```bash
+git add observations/sessions/<session-id>/drift-audit.json
+rm observations/sessions/<session-id>/drift-audit.draft-*.json
+git add -u
+git commit -m "session bundle amend: <session-id> — drift-audit [arbitrated] @ $RUBRIC_SHORT" \
+           -m "Operator arbitration. Primary=<primary-id> found $PC load-bearing; cross=<cross-reviewer-id> found $CC. Arbitrated to <N>: <brief rationale>."
+```
+
+**The `[arbitrated]` token is the calibration signal.** POC-exit synthesis and mid-POC calibration review grep for it — if a high fraction of counted sessions arbitrate, that's the signal that spec 005 §6.3 calibration is owed. Per spec 008 FR-008, an arbitrated session remains counted-eligible — the signal is emitted via commit message, not by holding the session in a pending state.
+
+Verify the ledger includes this session:
+
+```bash
+git log --all --grep='\[arbitrated\]' --format='%H %s'
+```
+
+### Step 6 — Run sanity checks
+
+Same as Path A Step 5. See **Post-commit sanity checks** below.
+
+**Done.** Session is counted-eligible with independent-review evidence satisfying constitution v1.5.0 Principle IV.
+
+---
+
+### LLM-judge as cross-reviewer
+
+In the POC, two-auditor mode in practice usually means **one human operator + one LLM-judge**, not two humans. POC staffing is thin.
+
+**Entry criteria** ([FR-014](../../specs/008-drift-audit-workflow/spec.md), [spec 005 §7](../../specs/005-drift-audit-rubric/spec.md)): the LLM-judge path becomes available only after:
+
+1. At least 2 counted manual Phase 3 sessions have completed two-auditor audits (two humans), AND
+2. Those sessions landed within spec 005 FR-016 tolerance at Step 4 (evidence the rubric has been calibrated enough to be reliable), AND
+3. The operator has read [`RUBRIC.md`](RUBRIC.md) §7 (the LLM-judge prompt template) and decided the template is ready for the specific rubric version active in the session.
+
+Before those criteria are met, counted sessions either use two humans (if available) or run as single-auditor via Path A and are upgraded via Path C once a cross-reviewer passes.
+
+**Operating note**:
+
+- The LLM-judge is invoked per [`RUBRIC.md`](RUBRIC.md) §7's prompt template. The template provides natural isolation — the LLM does not see draft A.
+- The operator is still the arbiter in Step 5b; LLM-judge output is input to reconciliation, not the final verdict.
+- `audited_by: "hybrid"` is the correct value when one auditor is manual and one is LLM-judge; `"llm_assisted"` is reserved for a future slice where the primary pass itself is LLM-produced (not scoped here).
 
 ## Path C — Re-audit and single→two upgrade
 
