@@ -48,6 +48,7 @@ type Platform struct {
 	token                      string
 	allowFrom                  string
 	guildID                    string // optional: per-guild registration (instant) vs global (up to 1h propagation)
+	channelID                  string // optional: explicit bound Discord surface for Phase 1 session controls
 	progressStyle              string
 	groupReplyAll              bool
 	shareSessionInChannel      bool
@@ -63,6 +64,9 @@ type Platform struct {
 	readyCh                    chan struct{}
 	seenMsgs                   sync.Map // message ID dedup: prevents duplicate MessageCreate events
 	seenInteractions           sync.Map // interaction ID dedup: prevents duplicate slash/button events
+	sessionGateMu              sync.RWMutex
+	sessionOpen                bool
+	threadOps                  discordThreadOps
 	self                       core.Platform
 }
 
@@ -74,6 +78,7 @@ func New(opts map[string]any) (core.Platform, error) {
 	allowFrom, _ := opts["allow_from"].(string)
 	core.CheckAllowFrom("discord", allowFrom)
 	guildID, _ := opts["guild_id"].(string)
+	channelID, _ := opts["channel_id"].(string)
 	groupReplyAll, _ := opts["group_reply_all"].(bool)
 	shareSessionInChannel, _ := opts["share_session_in_channel"].(bool)
 	threadIsolation, _ := opts["thread_isolation"].(bool)
@@ -107,10 +112,12 @@ func New(opts map[string]any) (core.Platform, error) {
 		token:                      token,
 		allowFrom:                  allowFrom,
 		guildID:                    guildID,
+		channelID:                  channelID,
 		progressStyle:              progressStyle,
 		groupReplyAll:              groupReplyAll,
 		shareSessionInChannel:      shareSessionInChannel,
 		readyCh:                    make(chan struct{}),
+		sessionOpen:                strings.TrimSpace(channelID) == "",
 		threadIsolation:            threadIsolation,
 		respondToAtEveryoneAndHere: respondToAtEveryoneAndHere,
 		proxyURL:                   proxyU,
@@ -182,6 +189,131 @@ func buildSessionKey(channelID string, userID string, shareSessionInChannel bool
 // TODO: thread_isolation currently keys each Discord thread as one shared session, so share_session_in_channel=false does not further isolate users within the same thread.
 func buildThreadSessionKey(threadID string) string {
 	return fmt.Sprintf("discord:%s", threadID)
+}
+
+func isDiscordThreadChannelType(typ discordgo.ChannelType) bool {
+	switch typ {
+	case discordgo.ChannelTypeGuildPublicThread,
+		discordgo.ChannelTypeGuildPrivateThread,
+		discordgo.ChannelTypeGuildNewsThread:
+		return true
+	default:
+		return false
+	}
+}
+
+func normalizeSessionControlCommand(content string) string {
+	switch strings.ToLower(strings.TrimSpace(content)) {
+	case "!stop":
+		return "/stop"
+	case "!resume":
+		return "/new"
+	default:
+		return ""
+	}
+}
+
+func (p *Platform) sessionGateEnabled() bool {
+	return strings.TrimSpace(p.channelID) != ""
+}
+
+func (p *Platform) isSessionOpen() bool {
+	p.sessionGateMu.RLock()
+	defer p.sessionGateMu.RUnlock()
+	return p.sessionOpen
+}
+
+func (p *Platform) setSessionOpen(open bool) {
+	p.sessionGateMu.Lock()
+	p.sessionOpen = open
+	p.sessionGateMu.Unlock()
+}
+
+func (p *Platform) boundChannelKey(channelID string) string {
+	if strings.TrimSpace(p.channelID) != "" {
+		return p.channelID
+	}
+	return channelID
+}
+
+func (p *Platform) isOperatorUser(userID string) bool {
+	allowFrom := strings.TrimSpace(p.allowFrom)
+	if allowFrom == "" || allowFrom == "*" {
+		return true
+	}
+	ids := strings.Split(allowFrom, ",")
+	if len(ids) == 0 {
+		return false
+	}
+	return strings.EqualFold(strings.TrimSpace(ids[0]), userID)
+}
+
+func (p *Platform) isBoundSurface(channelID string) (bool, error) {
+	return p.isBoundSurfaceWithOps(channelID, p.threadOpsForSession())
+}
+
+func (p *Platform) threadOpsForSession() discordThreadOps {
+	if p != nil && p.threadOps != nil {
+		return p.threadOps
+	}
+	return sessionThreadOps{session: p.session}
+}
+
+func (p *Platform) isBoundSurfaceWithOps(channelID string, ops discordThreadOps) (bool, error) {
+	boundChannelID := strings.TrimSpace(p.channelID)
+	if boundChannelID == "" {
+		return true, nil
+	}
+	if channelID == boundChannelID {
+		return true, nil
+	}
+	if !p.threadIsolation {
+		return false, nil
+	}
+	ch, err := ops.ResolveChannel(channelID)
+	if err != nil {
+		return false, err
+	}
+	if ch == nil {
+		return false, fmt.Errorf("discord: bound surface resolution returned nil channel for %s", channelID)
+	}
+	if !isDiscordThreadChannelType(ch.Type) {
+		return false, nil
+	}
+	return ch.ParentID == boundChannelID, nil
+}
+
+func (p *Platform) prepareInboundMessage(msg *core.Message) (*core.Message, bool) {
+	if msg == nil {
+		return nil, false
+	}
+	isOperator := p.isOperatorUser(msg.UserID)
+	if control := normalizeSessionControlCommand(msg.Content); control != "" {
+		if !isOperator {
+			if p.sessionGateEnabled() && !p.isSessionOpen() {
+				return nil, false
+			}
+			return msg, true
+		}
+		if control == "/stop" {
+			p.setSessionOpen(false)
+		} else {
+			p.setSessionOpen(true)
+		}
+		msg.Content = control
+		return msg, true
+	}
+	if !p.sessionGateEnabled() {
+		return msg, true
+	}
+	if p.isSessionOpen() {
+		return msg, true
+	}
+	if !isOperator {
+		return nil, false
+	}
+	p.setSessionOpen(true)
+	return msg, true
 }
 
 func (rc replyContext) targetChannelID() string {
@@ -498,108 +630,7 @@ func (p *Platform) Start(handler core.MessageHandler) error {
 	})
 
 	session.AddHandler(func(s *discordgo.Session, m *discordgo.MessageCreate) {
-		// Deduplicate: Discord gateway may deliver the same event twice
-		if !rememberDedupID(&p.seenMsgs, m.ID) {
-			slog.Debug("discord: ignoring duplicate message", "msg_id", m.ID)
-			return
-		}
-
-		if m.Author.Bot || m.Author.ID == p.botID {
-			return
-		}
-		if core.IsOldMessage(m.Timestamp) {
-			slog.Debug("discord: ignoring old message after restart", "timestamp", m.Timestamp)
-			return
-		}
-		if !core.AllowList(p.allowFrom, m.Author.ID) {
-			slog.Debug("discord: message from unauthorized user", "user", m.Author.ID)
-			return
-		}
-
-		// In guild channels, only respond when the bot is @mentioned (unless group_reply_all).
-		// Check both user mentions and role mentions (Discord auto-creates a managed role
-		// for each bot; users may @ the role instead of the user).
-		botRoleID := p.botRoleIDForGuild(m.GuildID)
-		if botRoleID == "" && m.GuildID != "" {
-			p.cacheBotRoleIDForGuild(s, m.GuildID, nil)
-			botRoleID = p.botRoleIDForGuild(m.GuildID)
-		}
-		if m.GuildID != "" && !p.groupReplyAll {
-			if !isDiscordBotMention(m, p.botID, botRoleID, p.respondToAtEveryoneAndHere) {
-				slog.Debug("discord: ignoring guild message without bot mention", "channel", m.ChannelID)
-				return
-			}
-			m.Content = stripDiscordMentionWithRole(m.Content, p.botID, botRoleID)
-			if m.MentionEveryone {
-				m.Content = stripEveryoneHere(m.Content)
-			}
-		}
-
-		slog.Debug("discord: message received", "user", m.Author.Username, "channel", m.ChannelID)
-
-		sessionKey := p.makeSessionKey(m.ChannelID, m.Author.ID)
-		rctx := replyContext{channelID: m.ChannelID, messageID: m.ID}
-		if p.threadIsolation && m.GuildID != "" {
-			threadSessionKey, threadCtx, err := resolveThreadReplyContext(m, p.botID, sessionThreadOps{session: p.session})
-			if err != nil {
-				slog.Warn("discord: thread isolation setup failed, falling back", "message", m.ID, "channel", m.ChannelID, "error", err)
-			} else {
-				sessionKey = threadSessionKey
-				rctx = threadCtx
-			}
-		}
-
-		var images []core.ImageAttachment
-		var audio *core.AudioAttachment
-		var files []core.FileAttachment
-		for _, att := range m.Attachments {
-			ct := strings.ToLower(att.ContentType)
-			if strings.HasPrefix(ct, "audio/") {
-				data, err := downloadURL(att.URL)
-				if err != nil {
-					slog.Error("discord: download audio failed", "url", att.URL, "error", err)
-					continue
-				}
-				format := "ogg"
-				if parts := strings.SplitN(ct, "/", 2); len(parts) == 2 {
-					format = parts[1]
-				}
-				audio = &core.AudioAttachment{
-					MimeType: ct, Data: data, Format: format,
-				}
-			} else if att.Width > 0 && att.Height > 0 {
-				data, err := downloadURL(att.URL)
-				if err != nil {
-					slog.Error("discord: download attachment failed", "url", att.URL, "error", err)
-					continue
-				}
-				images = append(images, core.ImageAttachment{
-					MimeType: att.ContentType, Data: data, FileName: att.Filename,
-				})
-			} else {
-				data, err := downloadURL(att.URL)
-				if err != nil {
-					slog.Error("discord: download file attachment failed", "url", att.URL, "error", err)
-					continue
-				}
-				files = append(files, core.FileAttachment{
-					MimeType: att.ContentType, Data: data, FileName: att.Filename,
-				})
-			}
-		}
-
-		if m.Content == "" && len(images) == 0 && audio == nil && len(files) == 0 {
-			return
-		}
-
-		msg := &core.Message{
-			SessionKey: sessionKey, Platform: "discord",
-			MessageID: m.ID,
-			UserID:    m.Author.ID, UserName: m.Author.Username,
-			ChatName: p.resolveChannelName(m.ChannelID),
-			Content:  m.Content, Images: images, Files: files, Audio: audio, ReplyCtx: rctx,
-		}
-		p.dispatchMessage(msg)
+		p.handleMessageCreate(m)
 	})
 
 	session.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -611,6 +642,127 @@ func (p *Platform) Start(handler core.MessageHandler) error {
 	}
 
 	return nil
+}
+
+func (p *Platform) handleMessageCreate(m *discordgo.MessageCreate) {
+	// Deduplicate: Discord gateway may deliver the same event twice.
+	if !rememberDedupID(&p.seenMsgs, m.ID) {
+		slog.Debug("discord: ignoring duplicate message", "msg_id", m.ID)
+		return
+	}
+
+	if m.Author.Bot || m.Author.ID == p.botID {
+		return
+	}
+	if core.IsOldMessage(m.Timestamp) {
+		slog.Debug("discord: ignoring old message after restart", "timestamp", m.Timestamp)
+		return
+	}
+	if !core.AllowList(p.allowFrom, m.Author.ID) {
+		slog.Debug("discord: message from unauthorized user", "user", m.Author.ID)
+		return
+	}
+
+	// In guild channels, only respond when the bot is @mentioned (unless group_reply_all).
+	// Check both user mentions and role mentions (Discord auto-creates a managed role
+	// for each bot; users may @ the role instead of the user).
+	botRoleID := p.botRoleIDForGuild(m.GuildID)
+	if botRoleID == "" && m.GuildID != "" {
+		p.cacheBotRoleIDForGuild(p.session, m.GuildID, nil)
+		botRoleID = p.botRoleIDForGuild(m.GuildID)
+	}
+	if m.GuildID != "" && !p.groupReplyAll {
+		if !isDiscordBotMention(m, p.botID, botRoleID, p.respondToAtEveryoneAndHere) {
+			slog.Debug("discord: ignoring guild message without bot mention", "channel", m.ChannelID)
+			return
+		}
+		m.Content = stripDiscordMentionWithRole(m.Content, p.botID, botRoleID)
+		if m.MentionEveryone {
+			m.Content = stripEveryoneHere(m.Content)
+		}
+	}
+
+	onBoundSurface, err := p.isBoundSurface(m.ChannelID)
+	if err != nil {
+		slog.Warn("discord: bound surface resolution failed, ignoring message", "message", m.ID, "channel", m.ChannelID, "error", err)
+		return
+	}
+	if !onBoundSurface {
+		slog.Debug("discord: ignoring message outside bound surface", "message", m.ID, "channel", m.ChannelID, "bound_channel", p.channelID)
+		return
+	}
+
+	slog.Debug("discord: message received", "user", m.Author.Username, "channel", m.ChannelID)
+
+	sessionKey := p.makeSessionKey(m.ChannelID, m.Author.ID)
+	rctx := replyContext{channelID: m.ChannelID, messageID: m.ID}
+	if p.threadIsolation && m.GuildID != "" {
+		threadSessionKey, threadCtx, err := resolveThreadReplyContext(m, p.botID, p.threadOpsForSession())
+		if err != nil {
+			slog.Warn("discord: thread isolation setup failed, falling back", "message", m.ID, "channel", m.ChannelID, "error", err)
+		} else {
+			sessionKey = threadSessionKey
+			rctx = threadCtx
+		}
+	}
+
+	var images []core.ImageAttachment
+	var audio *core.AudioAttachment
+	var files []core.FileAttachment
+	for _, att := range m.Attachments {
+		ct := strings.ToLower(att.ContentType)
+		if strings.HasPrefix(ct, "audio/") {
+			data, err := downloadURL(att.URL)
+			if err != nil {
+				slog.Error("discord: download audio failed", "url", att.URL, "error", err)
+				continue
+			}
+			format := "ogg"
+			if parts := strings.SplitN(ct, "/", 2); len(parts) == 2 {
+				format = parts[1]
+			}
+			audio = &core.AudioAttachment{
+				MimeType: ct, Data: data, Format: format,
+			}
+		} else if att.Width > 0 && att.Height > 0 {
+			data, err := downloadURL(att.URL)
+			if err != nil {
+				slog.Error("discord: download attachment failed", "url", att.URL, "error", err)
+				continue
+			}
+			images = append(images, core.ImageAttachment{
+				MimeType: att.ContentType, Data: data, FileName: att.Filename,
+			})
+		} else {
+			data, err := downloadURL(att.URL)
+			if err != nil {
+				slog.Error("discord: download file attachment failed", "url", att.URL, "error", err)
+				continue
+			}
+			files = append(files, core.FileAttachment{
+				MimeType: att.ContentType, Data: data, FileName: att.Filename,
+			})
+		}
+	}
+
+	if m.Content == "" && len(images) == 0 && audio == nil && len(files) == 0 {
+		return
+	}
+
+	msg := &core.Message{
+		SessionKey: sessionKey, Platform: "discord",
+		MessageID: m.ID,
+		UserID:    m.Author.ID, UserName: m.Author.Username,
+		ChatName: p.resolveChannelName(m.ChannelID),
+		Content:  m.Content, Images: images, Files: files, Audio: audio,
+		ChannelKey: p.boundChannelKey(m.ChannelID),
+		ReplyCtx:   rctx,
+	}
+	prepared, ok := p.prepareInboundMessage(msg)
+	if !ok {
+		return
+	}
+	p.dispatchMessage(prepared)
 }
 
 // handleInteraction processes incoming Discord command and button interactions.
@@ -680,16 +832,32 @@ func (p *Platform) handleInteraction(s *discordgo.Session, i *discordgo.Interact
 
 	slog.Debug("discord: slash command", "user", userName, "command", cmdText, "channel", channelID)
 
-	sessionKey := resolveSessionKeyForChannel(channelID, userID, p.shareSessionInChannel, p.threadIsolation, sessionThreadOps{session: p.session})
+	onBoundSurface, err := p.isBoundSurface(channelID)
+	if err != nil {
+		slog.Warn("discord: bound surface resolution failed, ignoring interaction", "interaction", i.ID, "channel", channelID, "error", err)
+		return
+	}
+	if !onBoundSurface {
+		slog.Debug("discord: ignoring interaction outside bound surface", "interaction", i.ID, "channel", channelID, "bound_channel", p.channelID)
+		return
+	}
+
+	sessionKey := resolveSessionKeyForChannel(channelID, userID, p.shareSessionInChannel, p.threadIsolation, p.threadOpsForSession())
 
 	msg := &core.Message{
 		SessionKey: sessionKey, Platform: "discord",
 		MessageID: i.ID,
 		UserID:    userID, UserName: userName,
-		ChatName: p.resolveChannelName(channelID),
-		Content:  cmdText, ReplyCtx: rctx,
+		ChatName:   p.resolveChannelName(channelID),
+		Content:    cmdText,
+		ChannelKey: p.boundChannelKey(channelID),
+		ReplyCtx:   rctx,
 	}
-	p.dispatchMessage(msg)
+	prepared, ok := p.prepareInboundMessage(msg)
+	if !ok {
+		return
+	}
+	p.dispatchMessage(prepared)
 }
 
 // replyContextForDeferredInteractionFallback builds a replyContext for slash commands
@@ -748,12 +916,21 @@ func (p *Platform) handleComponentInteraction(s *discordgo.Session, i *discordgo
 	}
 
 	channelID := i.ChannelID
-	sessionKey := resolveSessionKeyForChannel(channelID, userID, p.shareSessionInChannel, p.threadIsolation, sessionThreadOps{session: p.session})
+	onBoundSurface, err := p.isBoundSurface(channelID)
+	if err != nil {
+		slog.Warn("discord: bound surface resolution failed, ignoring component interaction", "interaction", i.ID, "channel", channelID, "error", err)
+		return
+	}
+	if !onBoundSurface {
+		slog.Debug("discord: ignoring component interaction outside bound surface", "interaction", i.ID, "channel", channelID, "bound_channel", p.channelID)
+		return
+	}
+	sessionKey := resolveSessionKeyForChannel(channelID, userID, p.shareSessionInChannel, p.threadIsolation, p.threadOpsForSession())
 	rc := replyContext{channelID: channelID}
 	if i.Message != nil {
 		rc.messageID = i.Message.ID
 	}
-	p.dispatchMessage(&core.Message{
+	msg := &core.Message{
 		SessionKey: sessionKey,
 		Platform:   "discord",
 		MessageID:  i.ID,
@@ -761,8 +938,14 @@ func (p *Platform) handleComponentInteraction(s *discordgo.Session, i *discordgo
 		UserName:   userName,
 		ChatName:   p.resolveChannelName(channelID),
 		Content:    command,
+		ChannelKey: p.boundChannelKey(channelID),
 		ReplyCtx:   rc,
-	})
+	}
+	prepared, ok := p.prepareInboundMessage(msg)
+	if !ok {
+		return
+	}
+	p.dispatchMessage(prepared)
 }
 
 func (p *Platform) Reply(ctx context.Context, rctx any, content string) error {
@@ -1142,6 +1325,21 @@ func (p *Platform) ResolveChannelName(channelID string) (string, error) {
 func (p *Platform) resolveChannelName(channelID string) string {
 	if cached, ok := p.channelNameCache.Load(channelID); ok {
 		return cached.(string)
+	}
+	if p.session == nil {
+		return channelID
+	}
+	if p.session.State != nil {
+		if ch, err := p.session.State.Channel(channelID); err == nil && ch != nil {
+			if ch.Name != "" {
+				p.channelNameCache.Store(channelID, ch.Name)
+				return ch.Name
+			}
+			return channelID
+		}
+	}
+	if p.session.Client == nil || p.session.Ratelimiter == nil {
+		return channelID
 	}
 	ch, err := p.session.Channel(channelID)
 	if err != nil {
