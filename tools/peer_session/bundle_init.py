@@ -46,6 +46,7 @@ def initialize_bundle(
         operator_handle=operator_handle,
         channel_id=channel_id,
     )
+    pinned_rules_ref = resolve_pinned_rules_ref(repo_root)
 
     shutil.copytree(template_dir, bundle_dir)
 
@@ -57,7 +58,7 @@ def initialize_bundle(
         *({"handle": handle, "role": "peer"} for handle in defaults.peer_handles),
         {"handle": defaults.operator_handle, "role": "operator"},
     ]
-    meta["pinned_rules_ref"] = resolve_pinned_rules_ref(repo_root)
+    meta["pinned_rules_ref"] = pinned_rules_ref
     meta["substrate"] = defaults.substrate
     meta["channel_id"] = defaults.channel_id
     meta.pop("transcript_source", None)

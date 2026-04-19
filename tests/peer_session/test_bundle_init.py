@@ -112,5 +112,24 @@ class InitializeBundleTest(unittest.TestCase):
                     defaults_path=defaults_path,
                 )
 
+    def test_initialize_bundle_fails_when_pinned_rules_file_is_missing_without_writing_bundle(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            seed_template(repo_root)
+            seed_pinned_rules(repo_root)
+            defaults_path = write_defaults(repo_root)
+            (repo_root / "pinned-rules" / "current.md").unlink()
+
+            with self.assertRaises(FileNotFoundError):
+                initialize_bundle(
+                    repo_root,
+                    "2026-04-20-dry-run-missing-rules",
+                    defaults_path=defaults_path,
+                )
+
+            self.assertFalse(
+                (repo_root / "observations" / "sessions" / "2026-04-20-dry-run-missing-rules").exists()
+            )
+
 if __name__ == "__main__":
     unittest.main()

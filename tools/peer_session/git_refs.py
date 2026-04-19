@@ -6,6 +6,9 @@ import subprocess
 
 def resolve_pinned_rules_ref(repo_root: Path) -> str | dict[str, str]:
     rules_path = repo_root / "pinned-rules" / "current.md"
+    if not rules_path.is_file():
+        raise FileNotFoundError(f"pinned rules file missing: {rules_path}")
+
     try:
         status = subprocess.run(
             ["git", "status", "--porcelain", "--", "pinned-rules/current.md"],
