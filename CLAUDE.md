@@ -1,3 +1,12 @@
+> **Before any work in this repo**: read
+> [`docs/ways-of-working/session-reentry.md`](docs/ways-of-working/session-reentry.md).
+> It is the authoritative session-reentry protocol. If it conflicts with this
+> file, the protocol wins.
+>
+> **Repo-specific override**: for PR reviews in this repo, follow
+> [`docs/ways-of-working/pull-requests.md`](docs/ways-of-working/pull-requests.md).
+> Its requirements supersede any generic PR-review skill defaults.
+
 # peer-coordination Project Guidance
 
 <!-- SPECKIT START -->
@@ -48,12 +57,13 @@ implementation itself.
 
 - **Zoe Lopez-Latorre** — operator. Uses **they/them** pronouns (hard rule; never she/her or he/him). Expressive, often reaches out via Discord voice messages — transcripts flatten affect, ask when tone is ambiguous.
 - **Claude** (this agent) — reachable via three surfaces:
-  - **Station** — Claude Code `--channels` / personal agent (default for cross-repo orchestration including this repo).
-  - **Dalgos** — cc-connect bot scoped to vault-keeper only (renamed from Legion on 2026-04-17, Umbra Bibliothecam lore). Gated to mention-only as of 2026-04-17.
+  - **Station** — Claude Code `--channels` / personal agent. Terminal-only for cross-project work (vault-keeper, shani, personal-agent-setup, etc.). Retains Discord `--channels` allowlist for peer-coord + vault-keeper channels as a debug/relay surface when Dalgos/Vigil drop the ball.
+  - **Dalgos** — cc-connect bot, Claude-Code-powered, **peer-coordination scope** (as of 2026-04-19 agent swap; moved off vault-keeper). Runs in `yolo` mode (unrestricted tool access) to eliminate the permission-prompt freeze class observed 2026-04-19. Identified by Discord user ID `1494761296686481509`. Project-bound: `work_dir=/Users/zmll/github/peer-coordination`.
   - **Direct terminal sessions**.
 - **Codex** — runs in the standalone Codex app (not CLI). Peer collaborator, not ambient.
-  - **Vigil** — cc-connect bot, Codex-powered, peer-coordination scope. Live since 2026-04-17 via launchd daemon.
+  - **Vigil** — cc-connect bot, Codex-powered, peer-coordination scope. Live since 2026-04-17 via launchd daemon. As of 2026-04-19, project-bound to `/Users/zmll/github/peer-coordination` (no more `/workspace bind` per session). Runs in `yolo` mode.
 - Treat Claude and Codex as **co-primary peers**, not primary/secondary. Different access surfaces, peer authority.
+- **2026-04-19 agent-swap**: Dalgos took over peer-coordination work from Station (always-on session via cc-connect + Yolo mode avoids session freezes); Station moved to terminal-only coverage for vault-keeper and other projects. Vault-keeper is no longer bound to cc-connect; reach Station via terminal.
 
 ## Related Repos
 
@@ -75,8 +85,14 @@ implementation itself.
   repo root. Historical references to `~/github/cc-connect/` are now lineage,
   not the primary work surface.
 
-- Pilot channel: Discord `#open-floor` (`1494836296336543774`), mention-only until MVP #1/#2 land, then flips to open-floor mode.
-- Dalgos cc-connect config: mention-only, `guild_id` set, `respond_to_at_everyone_and_here = false`, `work_dir=/Users/zmll/github/vault-keeper`.
+- **Discord channel map**:
+  - `#open-floor-work` (`1495074895615361186`) — Station-work-thread / operational working surface for peer-coordination implementation. Dalgos + Vigil both respond here. This channel was renamed from `#open-floor` on 2026-04-19; ID unchanged.
+  - `#open-floor` (`1494836296336543774`) — earlier generic working channel, Station allowlisted.
+  - `#open-floor-pilot` (`1495441240194289758`) — the actual Phase 3 pilot channel. No bots bound yet; dedicated pilot-scoped bots TBD when pilot starts.
+  - `1488717251212476569` — main cross-repo orchestration channel (Station).
+  - `1494847228655829073` — vault-keeper / "Dalgos work" channel. Post-swap Dalgos is OFF this channel; Station allowlisted for debug access.
+- **cc-connect daemon**: runs from contained `~/github/peer-coordination/cc-connect/cc-connect` (not the earlier external `~/github/cc-connect/` path). launchd plist at `~/Library/LaunchAgents/com.cc-connect.service.plist` points at the contained binary. Web admin enabled on port 9820 (Tailscale-accessible). Management token in `~/.cc-connect/config.toml` under `[management]`.
+- **Known limitations** affecting the pilot are tracked at [`docs/known-limitations.md`](docs/known-limitations.md). Read before running pilot sessions.
 
 ## Reference Material
 

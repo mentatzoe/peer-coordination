@@ -109,12 +109,16 @@ type = "discord"
 
 [projects.platforms.options]
 token = "MTk4NjIyNDgzNDcOTY3NDUxMg.G8vKqh.xxx..."
+# channel_id = "123456789012345678" # Optional: bind Discord intake to one channel/thread parent
 # thread_isolation = true  # Optional: isolate each agent session in its own Discord thread
 # progress_style = "legacy" # Optional: legacy | compact | card
 ```
 
 > cc-connect automatically configures the required Intents (MESSAGE_CONTENT, GUILD_MESSAGES, DIRECT_MESSAGES).
 > With `thread_isolation = true`, cc-connect creates or reuses a Discord thread for each session and routes follow-up messages by thread channel ID.
+> With `channel_id` set, only that channel (or its child threads when `thread_isolation = true`) can enter the runtime.
+> On a bound surface, the session starts closed; the first operator post opens it, `!stop` closes it, and `!resume` opens a fresh session.
+> For the current Phase 1 probe, the operator is taken from the first user ID in `allow_from`.
 > `progress_style = "compact"` merges thinking/tool updates into one editable message; `progress_style = "card"` renders a Discord-native embed progress card and still sends the final answer as a normal message.
 
 ---
@@ -192,6 +196,15 @@ level=INFO msg="cc-connect is running" projects=1
 ### 9.1 Channel Usage
 
 Send a message in any channel where the bot has permissions.
+
+If you configured `channel_id` for the Phase 1 open-floor probe:
+
+- only the bound channel is accepted
+- if `thread_isolation = true`, child threads under that channel are accepted too
+- the first user ID in `allow_from` is treated as the operator
+- the first operator post opens the session
+- `!stop` closes the current session
+- `!resume` starts a fresh session after a stop
 
 ### 9.2 Direct Message
 

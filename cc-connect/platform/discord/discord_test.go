@@ -12,6 +12,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/chenhg5/cc-connect/core"
@@ -630,6 +631,371 @@ func TestDispatchMessage_LegacyPlatformFallsBackToBasePlatform(t *testing.T) {
 	}
 	if _, ok := got.(core.ProgressStyleProvider); ok {
 		t.Fatalf("legacy handler platform should not implement ProgressStyleProvider, got %T", got)
+	}
+}
+
+func TestNew_ParsesBoundChannelID(t *testing.T) {
+	pAny, err := New(map[string]any{
+		"token":      "discord-token",
+		"channel_id": "channel-123",
+	})
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+
+	p, ok := pAny.(*Platform)
+	if !ok {
+		t.Fatalf("platform type = %T, want *Platform", pAny)
+	}
+	if p.channelID != "channel-123" {
+		t.Fatalf("channelID = %q, want channel-123", p.channelID)
+	}
+}
+
+func TestHandleMessageCreate_DispatchesOnlyFromBoundChannel(t *testing.T) {
+	p := &Platform{
+		session:       &discordgo.Session{State: discordgo.NewState()},
+		allowFrom:     "operator",
+		channelID:     "bound-channel",
+		groupReplyAll: true,
+		sessionOpen:   true,
+	}
+	p.session.State.ChannelAdd(&discordgo.Channel{ID: "bound-channel", Name: "bound"})
+	p.session.State.ChannelAdd(&discordgo.Channel{ID: "other-channel", Name: "other"})
+
+	var got []*core.Message
+	p.handler = func(_ core.Platform, msg *core.Message) {
+		got = append(got, msg)
+	}
+
+	p.handleMessageCreate(&discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			ID:        "m-bound",
+			ChannelID: "bound-channel",
+			Content:   "hello from bound",
+			Timestamp: time.Now(),
+			Author:    &discordgo.User{ID: "operator", Username: "zoe"},
+		},
+	})
+	if len(got) != 1 {
+		t.Fatalf("dispatched messages = %d, want 1", len(got))
+	}
+	if got[0].SessionKey != "discord:bound-channel:operator" {
+		t.Fatalf("session key = %q, want discord:bound-channel:operator", got[0].SessionKey)
+	}
+	if got[0].ChannelKey != "bound-channel" {
+		t.Fatalf("channel key = %q, want bound-channel", got[0].ChannelKey)
+	}
+
+	p.handleMessageCreate(&discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			ID:        "m-unbound",
+			ChannelID: "other-channel",
+			Content:   "should be ignored",
+			Timestamp: time.Now(),
+			Author:    &discordgo.User{ID: "operator", Username: "zoe"},
+		},
+	})
+	if len(got) != 1 {
+		t.Fatalf("dispatched messages after unbound post = %d, want 1", len(got))
+	}
+}
+
+func TestHandleMessageCreate_ClosedGateRequiresOperatorOpen(t *testing.T) {
+	p := &Platform{
+		session:       &discordgo.Session{State: discordgo.NewState()},
+		allowFrom:     "operator,peer",
+		channelID:     "bound-channel",
+		groupReplyAll: true,
+		sessionOpen:   false,
+	}
+	p.session.State.ChannelAdd(&discordgo.Channel{ID: "bound-channel", Name: "bound"})
+
+	var got []*core.Message
+	p.handler = func(_ core.Platform, msg *core.Message) {
+		got = append(got, msg)
+	}
+
+	p.handleMessageCreate(&discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			ID:        "m-peer",
+			ChannelID: "bound-channel",
+			Content:   "peer-before-open",
+			Timestamp: time.Now(),
+			Author:    &discordgo.User{ID: "peer", Username: "peer"},
+		},
+	})
+	if len(got) != 0 {
+		t.Fatalf("peer message while closed dispatched %d messages, want 0", len(got))
+	}
+	if p.sessionOpen {
+		t.Fatal("session gate opened from non-operator message")
+	}
+
+	p.handleMessageCreate(&discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			ID:        "m-operator",
+			ChannelID: "bound-channel",
+			Content:   "operator-seed",
+			Timestamp: time.Now(),
+			Author:    &discordgo.User{ID: "operator", Username: "zoe"},
+		},
+	})
+	if len(got) != 1 {
+		t.Fatalf("dispatched messages after operator seed = %d, want 1", len(got))
+	}
+	if !p.sessionOpen {
+		t.Fatal("session gate remained closed after operator seed")
+	}
+}
+
+func TestHandleMessageCreate_StopAndResumeMapToControlCommands(t *testing.T) {
+	p := &Platform{
+		session:       &discordgo.Session{State: discordgo.NewState()},
+		allowFrom:     "operator,peer",
+		channelID:     "bound-channel",
+		groupReplyAll: true,
+		sessionOpen:   true,
+	}
+	p.session.State.ChannelAdd(&discordgo.Channel{ID: "bound-channel", Name: "bound"})
+
+	var got []*core.Message
+	p.handler = func(_ core.Platform, msg *core.Message) {
+		got = append(got, msg)
+	}
+
+	p.handleMessageCreate(&discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			ID:        "m-stop",
+			ChannelID: "bound-channel",
+			Content:   "!stop",
+			Timestamp: time.Now(),
+			Author:    &discordgo.User{ID: "operator", Username: "zoe"},
+		},
+	})
+	if len(got) != 1 {
+		t.Fatalf("messages after !stop = %d, want 1", len(got))
+	}
+	if got[0].Content != "/stop" {
+		t.Fatalf("stop content = %q, want /stop", got[0].Content)
+	}
+	if p.sessionOpen {
+		t.Fatal("session gate remained open after !stop")
+	}
+
+	p.handleMessageCreate(&discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			ID:        "m-closed-peer",
+			ChannelID: "bound-channel",
+			Content:   "still closed",
+			Timestamp: time.Now(),
+			Author:    &discordgo.User{ID: "peer", Username: "peer"},
+		},
+	})
+	if len(got) != 1 {
+		t.Fatalf("peer continuation after !stop dispatched %d messages, want 1", len(got))
+	}
+
+	p.handleMessageCreate(&discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			ID:        "m-resume",
+			ChannelID: "bound-channel",
+			Content:   "!resume",
+			Timestamp: time.Now(),
+			Author:    &discordgo.User{ID: "operator", Username: "zoe"},
+		},
+	})
+	if len(got) != 2 {
+		t.Fatalf("messages after !resume = %d, want 2", len(got))
+	}
+	if got[1].Content != "/new" {
+		t.Fatalf("resume content = %q, want /new", got[1].Content)
+	}
+	if !p.sessionOpen {
+		t.Fatal("session gate remained closed after !resume")
+	}
+}
+
+func TestHandleMessageCreate_PreservesBoundChannelKeyForThreadSession(t *testing.T) {
+	p := &Platform{
+		allowFrom:       "operator",
+		channelID:       "bound-channel",
+		groupReplyAll:   true,
+		threadIsolation: true,
+		sessionOpen:     true,
+		threadOps: fakeThreadOps{
+			resolveChannel: func(channelID string) (*discordgo.Channel, error) {
+				switch channelID {
+				case "thread-1":
+					return &discordgo.Channel{
+						ID:       "thread-1",
+						Type:     discordgo.ChannelTypeGuildPublicThread,
+						ParentID: "bound-channel",
+					}, nil
+				case "bound-channel":
+					return &discordgo.Channel{
+						ID:   "bound-channel",
+						Type: discordgo.ChannelTypeGuildText,
+						Name: "bound",
+					}, nil
+				default:
+					t.Fatalf("unexpected channel lookup %q", channelID)
+					return nil, nil
+				}
+			},
+			joinThread: func(threadID string) error {
+				if threadID != "thread-1" {
+					t.Fatalf("joinThread(%q), want thread-1", threadID)
+				}
+				return nil
+			},
+		},
+	}
+
+	var got []*core.Message
+	p.handler = func(_ core.Platform, msg *core.Message) {
+		got = append(got, msg)
+	}
+
+	p.handleMessageCreate(&discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			ID:        "m-thread",
+			ChannelID: "thread-1",
+			GuildID:   "guild-1",
+			Content:   "operator in thread",
+			Timestamp: time.Now(),
+			Author:    &discordgo.User{ID: "operator", Username: "zoe"},
+		},
+	})
+	if len(got) != 1 {
+		t.Fatalf("thread dispatch count = %d, want 1", len(got))
+	}
+	if got[0].SessionKey != "discord:thread-1" {
+		t.Fatalf("session key = %q, want discord:thread-1", got[0].SessionKey)
+	}
+	if got[0].ChannelKey != "bound-channel" {
+		t.Fatalf("channel key = %q, want bound-channel", got[0].ChannelKey)
+	}
+}
+
+func TestHandleInteraction_DispatchesOnlyFromBoundChannel(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprint(w, `{"id":"ok"}`)
+	}))
+	defer server.Close()
+
+	s := newTestDiscordSession(t, server)
+	p := &Platform{
+		session:       s,
+		allowFrom:     "operator",
+		channelID:     "bound-channel",
+		sessionOpen:   true,
+		groupReplyAll: true,
+	}
+
+	var got []*core.Message
+	p.handler = func(_ core.Platform, msg *core.Message) {
+		got = append(got, msg)
+	}
+
+	p.handleInteraction(s, &discordgo.InteractionCreate{
+		Interaction: &discordgo.Interaction{
+			ID:        "i-bound",
+			AppID:     "app-1",
+			Token:     "token-1",
+			Type:      discordgo.InteractionApplicationCommand,
+			ChannelID: "bound-channel",
+			Member:    &discordgo.Member{User: &discordgo.User{ID: "operator", Username: "zoe"}},
+			Data: discordgo.ApplicationCommandInteractionData{
+				Name: "status",
+			},
+		},
+	})
+	if len(got) != 1 {
+		t.Fatalf("bound interaction dispatch count = %d, want 1", len(got))
+	}
+	if got[0].Content != "/status" {
+		t.Fatalf("interaction content = %q, want /status", got[0].Content)
+	}
+	if got[0].ChannelKey != "bound-channel" {
+		t.Fatalf("channel key = %q, want bound-channel", got[0].ChannelKey)
+	}
+
+	p.handleInteraction(s, &discordgo.InteractionCreate{
+		Interaction: &discordgo.Interaction{
+			ID:        "i-unbound",
+			AppID:     "app-1",
+			Token:     "token-2",
+			Type:      discordgo.InteractionApplicationCommand,
+			ChannelID: "other-channel",
+			Member:    &discordgo.Member{User: &discordgo.User{ID: "operator", Username: "zoe"}},
+			Data: discordgo.ApplicationCommandInteractionData{
+				Name: "status",
+			},
+		},
+	})
+	if len(got) != 1 {
+		t.Fatalf("unbound interaction dispatch count = %d, want still 1", len(got))
+	}
+}
+
+func TestHandleComponentInteraction_DispatchesOnlyFromBoundChannel(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprint(w, `{"id":"ok"}`)
+	}))
+	defer server.Close()
+
+	s := newTestDiscordSession(t, server)
+	p := &Platform{
+		session:       s,
+		allowFrom:     "operator",
+		channelID:     "bound-channel",
+		sessionOpen:   true,
+		groupReplyAll: true,
+	}
+
+	var got []*core.Message
+	p.handler = func(_ core.Platform, msg *core.Message) {
+		got = append(got, msg)
+	}
+
+	p.handleComponentInteraction(s, &discordgo.InteractionCreate{
+		Interaction: &discordgo.Interaction{
+			ID:        "c-bound",
+			AppID:     "app-1",
+			Token:     "token-1",
+			Type:      discordgo.InteractionMessageComponent,
+			ChannelID: "bound-channel",
+			Message:   &discordgo.Message{ID: "m-1", Content: "orig"},
+			Data: discordgo.MessageComponentInteractionData{
+				CustomID: "cmd:/status",
+			},
+		},
+	}, "operator", "zoe")
+	if len(got) != 1 {
+		t.Fatalf("bound component dispatch count = %d, want 1", len(got))
+	}
+	if got[0].Content != "/status" {
+		t.Fatalf("component content = %q, want /status", got[0].Content)
+	}
+
+	p.handleComponentInteraction(s, &discordgo.InteractionCreate{
+		Interaction: &discordgo.Interaction{
+			ID:        "c-unbound",
+			AppID:     "app-1",
+			Token:     "token-2",
+			Type:      discordgo.InteractionMessageComponent,
+			ChannelID: "other-channel",
+			Message:   &discordgo.Message{ID: "m-2", Content: "orig"},
+			Data: discordgo.MessageComponentInteractionData{
+				CustomID: "cmd:/status",
+			},
+		},
+	}, "operator", "zoe")
+	if len(got) != 1 {
+		t.Fatalf("unbound component dispatch count = %d, want still 1", len(got))
 	}
 }
 

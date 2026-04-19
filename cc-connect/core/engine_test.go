@@ -5475,6 +5475,14 @@ type stubMemoryAgent struct {
 func (a *stubMemoryAgent) ProjectMemoryFile() string { return a.memFile }
 func (a *stubMemoryAgent) GlobalMemoryFile() string  { return "" }
 
+type stubMemoryResultAgent struct {
+	resultAgent
+	memFile string
+}
+
+func (a *stubMemoryResultAgent) ProjectMemoryFile() string { return a.memFile }
+func (a *stubMemoryResultAgent) GlobalMemoryFile() string  { return "" }
+
 type stubNativePromptAgent struct {
 	stubAgent
 }
@@ -5639,6 +5647,147 @@ func TestCmdBindSetup_UsesSharedLogic(t *testing.T) {
 	content, _ := os.ReadFile(memFile)
 	if !strings.Contains(string(content), ccConnectInstructionMarker) {
 		t.Error("expected instructions written to file")
+	}
+}
+
+func TestHandleMessage_PrependsRepoBootstrapOnFreshSession(t *testing.T) {
+	repoDir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(repoDir, "docs", "ways-of-working"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(repoDir, "docs", "ways-of-working", "session-reentry.md"), []byte("# Session Re-Entry Protocol\n\nREADINESS is mandatory.\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(repoDir, "ACTIVE-SLICES.md"), []byte("# Active Slices\n\n- 007-session-bundle-init-cli\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	p := &stubPlatformEngine{n: "test"}
+	agentSession := newResultAgentSession("repo-aware")
+	agent := &stubMemoryResultAgent{
+		resultAgent: resultAgent{session: agentSession},
+		memFile:     filepath.Join(repoDir, "AGENTS.md"),
+	}
+	e := NewEngine("test", agent, []Platform{p}, "", LangEnglish)
+
+	msg := &Message{
+		SessionKey: "test:user1",
+		Platform:   "test",
+		Content:    "howdy",
+		ReplyCtx:   "ctx",
+	}
+	e.handleMessage(p, msg)
+
+	deadline := time.After(2 * time.Second)
+	for {
+		if len(agentSession.sentPrompts) > 0 {
+			prompt := agentSession.sentPrompts[0]
+			if !strings.Contains(prompt, "# Session Re-Entry Protocol") {
+				t.Fatalf("prompt = %q, want injected session-reentry content", prompt)
+			}
+			if !strings.Contains(prompt, "# Active Slices") {
+				t.Fatalf("prompt = %q, want injected active-slices content", prompt)
+			}
+			if !strings.Contains(prompt, "howdy") {
+				t.Fatalf("prompt = %q, want original user prompt", prompt)
+			}
+			return
+		}
+		select {
+		case <-deadline:
+			t.Fatal("timed out waiting for fresh-session prompt")
+		default:
+			time.Sleep(10 * time.Millisecond)
+		}
+	}
+}
+
+func TestHandleMessage_SkipsRepoBootstrapOnResume(t *testing.T) {
+	repoDir := t.TempDir()
+	if err := os.MkdirAll(filepath.Join(repoDir, "docs", "ways-of-working"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(repoDir, "docs", "ways-of-working", "session-reentry.md"), []byte("# Session Re-Entry Protocol\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(repoDir, "ACTIVE-SLICES.md"), []byte("# Active Slices\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	p := &stubPlatformEngine{n: "test"}
+	agentSession := newResultAgentSession("resumed")
+	agent := &stubMemoryResultAgent{
+		resultAgent: resultAgent{session: agentSession},
+		memFile:     filepath.Join(repoDir, "AGENTS.md"),
+	}
+	e := NewEngine("test", agent, []Platform{p}, "", LangEnglish)
+
+	session := e.sessions.GetOrCreateActive("test:user1")
+	session.SetAgentSessionID("existing-session", "stub")
+
+	msg := &Message{
+		SessionKey: "test:user1",
+		Platform:   "test",
+		Content:    "status?",
+		ReplyCtx:   "ctx",
+	}
+	e.handleMessage(p, msg)
+
+	deadline := time.After(2 * time.Second)
+	for {
+		if len(agentSession.sentPrompts) > 0 {
+			prompt := agentSession.sentPrompts[0]
+			if strings.Contains(prompt, "# Session Re-Entry Protocol") {
+				t.Fatalf("prompt = %q, want no repo bootstrap on resume", prompt)
+			}
+			if prompt != "status?" {
+				t.Fatalf("prompt = %q, want original prompt only", prompt)
+			}
+			return
+		}
+		select {
+		case <-deadline:
+			t.Fatal("timed out waiting for resumed-session prompt")
+		default:
+			time.Sleep(10 * time.Millisecond)
+		}
+	}
+}
+
+func TestHandleMessage_SkipsRepoBootstrapForNonMatchingRepo(t *testing.T) {
+	repoDir := t.TempDir()
+
+	p := &stubPlatformEngine{n: "test"}
+	agentSession := newResultAgentSession("plain")
+	agent := &stubMemoryResultAgent{
+		resultAgent: resultAgent{session: agentSession},
+		memFile:     filepath.Join(repoDir, "AGENTS.md"),
+	}
+	e := NewEngine("test", agent, []Platform{p}, "", LangEnglish)
+
+	msg := &Message{
+		SessionKey: "test:user1",
+		Platform:   "test",
+		Content:    "howdy",
+		ReplyCtx:   "ctx",
+	}
+	e.handleMessage(p, msg)
+
+	deadline := time.After(2 * time.Second)
+	for {
+		if len(agentSession.sentPrompts) > 0 {
+			prompt := agentSession.sentPrompts[0]
+			if prompt != "howdy" {
+				t.Fatalf("prompt = %q, want original prompt only", prompt)
+			}
+			return
+		}
+		select {
+		case <-deadline:
+			t.Fatal("timed out waiting for plain-repo prompt")
+		default:
+			time.Sleep(10 * time.Millisecond)
+		}
 	}
 }
 

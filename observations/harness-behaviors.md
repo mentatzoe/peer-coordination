@@ -114,3 +114,33 @@ This is a **stronger** claim than the prior SESSION-HANDOFF note ("empty-body ev
 - how safe it is to use thread creation as an operator control surface
 
 At minimum, thread creation should not be assumed to preserve an active working session unless the transport layer makes that guarantee explicit.
+
+---
+
+## 2026-04-19 — cc-connect drops Discord reply-to context before reaching the agent
+
+**Harnesses observed:** Dalgos (cc-connect + Claude Code CLI). Likely same on Vigil (cc-connect + Codex CLI) by construction.
+
+**Observation:** Operator used Discord's reply-to UI (quoting a specific earlier message for context) when sending a new message to Dalgos. The agent received the new message's text + mentions, but NOT the quoted message's content or reference. From the agent's perspective, the message is freestanding; the operator's intent to pin context to a specific earlier message is lost.
+
+Concrete instance: operator quoted Station's `"Done. Daemon restarted from contained cc-connect binary — both bots live."` and asked `@Dalgos can you reply to this message I'm quoting just saying hi?`. Dalgos responded `"I don't see a quoted message — can you paste it or share the channel/message ID?"`, confirming cc-connect did not forward the reply-to context.
+
+**Framing:** Two plausible root causes that likely both contribute:
+
+1. **Reply-to payload not included**: Discord's gateway delivers `MessageReferenceID` on message events, but cc-connect's `handleMessageCreate` in `platform/discord/discord.go` constructs the `core.Message` from `m.Content` + attachments + mentions only — no `message_reference` field is looked up, fetched, or forwarded.
+2. **Bot-author filter drops reply-to content when the referenced message is bot-authored** (related to [`mentatzoe/cc-connect#4`](https://github.com/mentatzoe/cc-connect/issues/4)): even if (1) were fixed, messages referencing a bot-authored earlier message would be filtered at the `if m.Author.Bot { return }` boundary in whatever lookup path fetches the reference content.
+
+These are separable: (1) is a missing-field gap on ALL reply-to, (2) is a bot-filter interaction specific to quoted bot content.
+
+**Implication:** Affects Layer 1 transport fidelity. Operators commonly use reply-to for context-pinning ("I'm asking about THIS earlier point"). Currently that intent is invisible to the agent, so the agent has to infer from text alone. Workaround: paste the referenced text or message ID inline.
+
+**Upstream fix:** cc-connect should:
+
+- parse `MessageReferenceID` from the inbound event
+- fetch the referenced message (cached where possible)
+- include a `ReplyToMessage` field on `core.Message` (or equivalent) with the referenced author, timestamp, and content
+- gate bot-authored reference content on the same `allow_from_bots` allowlist proposed in cc-connect issue #4
+
+Issue to be filed at `mentatzoe/cc-connect` as a sibling of #4; operator has flagged as "concern for another time" — not blocking Phase 1 but worth tracking.
+
+**Workaround until resolved:** when the operator uses Discord's reply-to UI for context, the operator also pastes the relevant reference text (or a `<message-id>` link) in the message body so the agent has it inline.
