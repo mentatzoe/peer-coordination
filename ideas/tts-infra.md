@@ -38,7 +38,7 @@ Voice-mode off by default so existing text flows aren't slowed. Operator sets `v
 
 ## v1 spec scope (when we run `/speckit.specify`)
 
-**Slice name**: `008-local-tts-mcp` or similar; let speckit assign.
+**Slice name**: let speckit assign. Note: slot `008` is already owned by Dalgos's `drift-audit-workflow` per `ACTIVE-SLICES.md` — the TTS slice will land at `009-*` or later depending on what's claimed by then.
 
 **Surface**: small MCP server (`tts-local` working name) exposing:
 - `synthesize(text, voice?, emotion?) -> path`
