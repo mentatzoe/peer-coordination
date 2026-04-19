@@ -213,7 +213,94 @@ Before those criteria are met, counted sessions either use two humans (if availa
 
 ## Path C — Re-audit and single→two upgrade
 
-*Filled by US3 — see `specs/008-drift-audit-workflow/quickstart.md` Path C until this section lands.*
+Use this when:
+
+- The rubric has evolved (calibration commit on `RUBRIC.md`) and a past session's audit should be refreshed against the new version, OR
+- A session's single-auditor audit (Path A) should be upgraded to two-auditor so it's counted-eligible for H1/H2 evidence, OR
+- The [POC-exit rubric-version sweep](#triggers-when-re-audit) flagged this bundle as stale and the operator chose to re-audit.
+
+Path C is a **replacement** operation, not a delta — the new `drift-audit.json` fully replaces the prior committed file. The prior audit remains reconstructible via git history per [contract C6](../../specs/008-drift-audit-workflow/contracts/workflow-contracts.md).
+
+### Step 1 — Identify the reason
+
+Pick from:
+
+1. **Rubric evolution**: `RUBRIC.md` has a new commit since the prior audit landed. Pin the new `$RUBRIC_SHA`.
+2. **Single → two upgrade** (rubric unchanged): a cross-reviewer pass is landing against an existing single-auditor audit. Rubric version typically stays the same.
+3. **Both**: new rubric version AND cross-reviewer upgrade — combine tokens.
+
+### Step 2 — Retrieve the prior audit's rubric version (for the commit message)
+
+```bash
+SID=<session-id>
+OLD_RUBRIC_SHORT=$(jq -r '.rubric_version' "observations/sessions/$SID/drift-audit.json" | cut -c1-7)
+NEW_RUBRIC_SHA=$(git log -1 --format=%H -- observations/drift-audits/RUBRIC.md)
+NEW_RUBRIC_SHORT=$(git rev-parse --short "$NEW_RUBRIC_SHA")
+echo "Re-audit: supersedes $OLD_RUBRIC_SHORT, now auditing against $NEW_RUBRIC_SHORT"
+```
+
+(If rubric version is unchanged, `OLD_RUBRIC_SHORT` == `NEW_RUBRIC_SHORT` — that's fine, the token format still carries the correct information.)
+
+### Step 3 — Run the appropriate audit path
+
+- For a rubric-evolution re-audit staying in the same mode: run Path A or Path B (whichever the bundle was) end-to-end with the new `$NEW_RUBRIC_SHA`.
+- For a single → two upgrade: run Path B (both auditors reading the existing rubric, producing independent drafts).
+- For combined: run Path B with the new rubric version.
+
+The new `drift-audit.json` replaces the prior one on disk. Do NOT try to merge with or append to the prior audit — Path C is replacement.
+
+### Step 4 — Commit with the correct taxonomy token
+
+Pick the token based on the reason (see [`COMMIT-TAXONOMY.md`](COMMIT-TAXONOMY.md)):
+
+| Reason | Token |
+|---|---|
+| Rubric evolution only, mode unchanged | `re-run, supersedes $OLD_RUBRIC_SHORT` |
+| Single → two upgrade only, rubric unchanged | `two-auditor-upgrade` |
+| Both rubric evolution AND upgrade | `two-auditor-upgrade re-run, supersedes $OLD_RUBRIC_SHORT` |
+| Any of the above, arbitrated in Step 5b of Path B | prefix with `[arbitrated]` |
+
+Examples:
+
+```bash
+# Rubric evolution, within-tolerance two-auditor:
+git commit -m "session bundle amend: $SID — drift-audit re-run, supersedes $OLD_RUBRIC_SHORT @ $NEW_RUBRIC_SHORT"
+
+# Single → two upgrade, no rubric change:
+git commit -m "session bundle amend: $SID — drift-audit two-auditor-upgrade @ $NEW_RUBRIC_SHORT"
+
+# Combined upgrade + rubric evolution:
+git commit -m "session bundle amend: $SID — drift-audit two-auditor-upgrade re-run, supersedes $OLD_RUBRIC_SHORT @ $NEW_RUBRIC_SHORT"
+
+# Arbitrated combined (rare):
+git commit -m "session bundle amend: $SID — drift-audit [arbitrated] two-auditor-upgrade re-run, supersedes $OLD_RUBRIC_SHORT @ $NEW_RUBRIC_SHORT"
+```
+
+### Step 5 — Verify the prior audit is preserved in git history
+
+```bash
+git log --all --follow --format='%H %s' -- "observations/sessions/$SID/drift-audit.json"
+git show <prior-commit>:"observations/sessions/$SID/drift-audit.json"
+```
+
+The prior audit is retrievable; the current file on disk is the authoritative consumer-relevant version per [contract C8](../../specs/008-drift-audit-workflow/contracts/workflow-contracts.md).
+
+### Step 6 — Run sanity checks
+
+Same as Path A Step 5. See **Post-commit sanity checks** below.
+
+---
+
+### <a id="triggers-when-re-audit"></a>Triggers — when to re-audit
+
+Per [FR-012](../../specs/008-drift-audit-workflow/spec.md), re-audit runs on two paths:
+
+1. **Explicit operator request** — at any time, the operator selects a specific bundle for re-audit. Always valid regardless of rubric-version state.
+2. **POC-exit rubric-version sweep** — at POC-exit synthesis time, the POC-exit synthesis slice (not yet specced) produces a sweep artifact enumerating each counted-session bundle, its pinned `rubric_version`, and the synthesis-time `RUBRIC.md` HEAD SHA. Stale bundles are flagged re-audit-eligible; the operator decides per-bundle whether to re-audit before the final KPI roll-up.
+
+This workflow supports both paths but only specifies path (1) operationally. Path (2) is delegated to the POC-exit synthesis slice when that slice is cut — this workflow only guarantees the data it needs (reliable `rubric_version` pins on every committed audit) is available.
+
+**Not supported**: continuous or daemon-driven detection of stale audits between sessions. Out of scope per FR-012 — keeps this slice narrow and aligned with POC staffing constraints.
 
 ---
 
@@ -275,7 +362,19 @@ All five checks are cheap and fast — run them as a habit after every audit com
 
 ## Downstream consumption
 
-*Filled by US3 — pointer to spec 005 §8 + contract C8 about consumers reading `drift-audit.json.verdict` directly.*
+Per [FR-016](../../specs/008-drift-audit-workflow/spec.md) and [contract C8](../../specs/008-drift-audit-workflow/contracts/workflow-contracts.md), downstream consumers of audit evidence (Phase 5 KPI rollup, H2 per-session reviewer, POC-exit synthesis) read `drift-audit.json.verdict` directly — they MUST NOT re-derive drift findings from transcript + rubric.
+
+Composition rules for H2 evidence are specified in [`RUBRIC.md`](RUBRIC.md) §8:
+
+- `verdict: "no_drift"` → H2 judgment proceeds on other grounds (transcript completeness, etc.); drift is not the blocker.
+- `verdict: "minor_drift"` → H2 is probably still passable; reviewer notes the warnings without them blocking reconstruction.
+- `verdict: "load_bearing_drift"` → H2 likely fails on this session; reviewer cites the specific `findings[].rationale` entries that block the fresh-reader reconstruction.
+
+**What consumers rely on** (from [contract C8](../../specs/008-drift-audit-workflow/contracts/workflow-contracts.md)):
+
+- The session bundle directory is self-contained — no bundle-specific context outside `observations/sessions/<id>/` is needed.
+- The *current* `drift-audit.json` is always the consumer-relevant version; re-audits (Path C) mean historical versions are in git history only, not live evidence.
+- Re-runs are idempotent modulo `audited_at` — repeated reads of the same current file return the same `verdict` + `findings`.
 
 ---
 
