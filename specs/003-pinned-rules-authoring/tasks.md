@@ -18,7 +18,7 @@
 
 ## Phase 2: Foundational (workflow + consumer-contract documentation)
 
-- [x] **T002** [US1/US2/US3] Author `pinned-rules/README.md` — authoring workflow (FR-005, FR-009, FR-010), commit-hash-ref contract with session bundles (FR-011), Discord exposure discipline (FR-007, FR-008), single-pin rule, why single `current.md` + git versioning, cross-references to VISION/architecture/POC/constitution. → `2b740e2`.
+- [x] **T002** [US1/US2/US3] Author `pinned-rules/README.md` — authoring workflow (FR-005, FR-009, FR-010), commit-hash-ref contract with session bundles (FR-011), Discord exposure discipline (FR-007, FR-008), single-pin rule, why single `current.md` + git versioning, cross-references to `design/poc.md`, `design/architecture.md`, `.specify/memory/constitution.md`, and the `specs/001-session-bundle-skeleton/spec.md` consumer contract. → `2b740e2`.
 
 ## Phase 3: User Story 1 — Operator authors + exposes (Priority: P1)
 
@@ -27,7 +27,7 @@
 **Independent Test**: operator opens a session, reads `pinned-rules/current.md`, records commit hash in `meta.json.pinned_rules_ref`.
 
 - [x] **T003** [P] [US1] Author `pinned-rules/current.md` — v1 seed content per FR-012: turn-taking heuristics (yielding / claiming / building), distinct-contribution norm (H1 complementarity), plain-language preference (H2 legibility), emoji palette (✅ 👀 🤔 🚫 ⏸️) with defined semantics, `!stop`/`!resume` interrupt semantics, escalation path, operator role (Constitution Principle IV). → `2b740e2`.
-- [x] **T004** [P] [US1] Verify `current.md` stays under the Discord 2000-char pin limit (FR-014). Measured at 1475 rendered chars. → `2b740e2`.
+- [x] **T004** [P] [US1] Verify `current.md` stays under the FR-014 ~1500 rendered-char cap (the tighter spec-level constraint; Discord's own pin limit is 2000). Measured at 1475 rendered chars. → `2b740e2`.
 
 ## Phase 4: User Story 2 — Operator updates between sessions (Priority: P1)
 
