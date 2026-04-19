@@ -107,6 +107,21 @@ The declaration is meant to be:
 The readiness declaration is **ephemeral**. The durable state belongs in
 `ACTIVE-SLICES.md`.
 
+## Ambiguous orientation prompts
+
+Treat short prompts such as these as **re-entry cues**, not as permission to
+skip re-entry:
+
+- `status?`
+- `what's active?`
+- `where are we?`
+- `what should I do next?`
+
+For those prompts, the session should first orient through the required
+re-entry surfaces, then answer with project / slice status grounded in those
+artifacts. Do not default to raw `git status` alone unless the prompt clearly
+asks for repository cleanliness only.
+
 ## Speckit gates
 
 For Speckit-backed slices, follow the normal artifact flow:
