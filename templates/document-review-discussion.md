@@ -28,6 +28,10 @@
 >
 > - The document owner lands revisions in the repo and reports back with the
 >   commit hash.
+> - Substantive revisions should normally follow the Speckit/hook-created
+>   feature-branch workflow when available, and merge via PR rather than
+>   landing directly on `main`. See
+>   [`docs/ways-of-working/pull-requests.md`](../docs/ways-of-working/pull-requests.md).
 > - If a thread is resolved, reply in-thread with the commit hash and a short
 >   note on what changed.
 > - If a point is rejected, reply in-thread with the rationale so the decision

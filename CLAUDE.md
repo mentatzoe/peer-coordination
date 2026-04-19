@@ -29,6 +29,10 @@ implementation itself.
 - Keep governance separate from transport plumbing.
 - Let agent style differences drift organically unless the operator asks for a
   formal rule.
+- For spec slices and slice-owned follow-on patches, follow the Speckit
+  git-hook branch workflow when available, and merge via PR by default. See
+  `docs/ways-of-working/pull-requests.md`. Direct-to-`main` should be limited
+  to trivial fixes or explicit operator instruction.
 
 ## Speckit Flow
 
