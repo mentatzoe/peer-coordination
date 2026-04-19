@@ -58,6 +58,19 @@ The main gap is that the repo now has the **design and evaluation shape**, but n
 
 The biggest missing pieces are not more design docs. They are implementation-facing artifacts and operational surfaces.
 
+## Ownership and handover contracts
+
+No single owner should quietly absorb the whole POC. Ownership in this roadmap
+is meant to stay **slice-local** and **handoff-based**.
+
+| Slice | Lead owner | Boundary | Handover contract |
+|---|---|---|---|
+| **Baseline substrate build** | Open | Own the shared runtime surface only: bridge path, session controls, transcript export, pinned-rules support, and session-bundle skeleton. Does **not** own evaluation logic or hypothesis judgment. | Hand off a runnable dry-run-capable substrate to the Evaluation Surface and Two-Peer Baseline slices, with the required artifact outputs preserved. |
+| **Evaluation surface build** | Open | Own the review / measurement surfaces only: draft drift-audit rubric, intervention-tagging path, summary workflow, KPI computation path. Does **not** own transport or pilot-session execution. | Hand off a usable post-session review pipeline to the Two-Peer Baseline and POC Exit slices. |
+| **Two-peer baseline run** | Zoe + Open implementation support | Own live session execution, operator intervention, and evidence capture for baseline sessions. Does **not** silently redesign the framework mid-run. | Hand off counted session bundles and operator observations to POC Exit / Handoff, and to Gemini Extension only if the credibility gate is met. |
+| **Gemini extension** | Open | Own the incremental harness-diversity extension only if Phase 3 is credible enough to continue. Does **not** reopen already-settled baseline requirements. | Hand off extension-session bundles or a documented no-go / confounded-result decision to POC Exit / Handoff. |
+| **POC exit and handoff** | Zoe + Open analysis support | Own final synthesis only: KPI rollup, hypothesis stances, next-step recommendation. Does **not** absorb unfinished implementation work back into the same slice. | Hand off `observations/poc-exit.md` and the resulting next-cut recommendation back into roadmap / spec planning. |
+
 ### Missing implementation-facing artifacts
 
 | Needed artifact / deliverable | Why it is needed | Status |
