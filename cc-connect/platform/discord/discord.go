@@ -47,6 +47,7 @@ type progressPlatform struct {
 type Platform struct {
 	token                      string
 	allowFrom                  string
+	allowFromBots              map[string]struct{}
 	guildID                    string // optional: per-guild registration (instant) vs global (up to 1h propagation)
 	channelID                  string // optional: explicit bound Discord surface for Phase 1 session controls
 	progressStyle              string
@@ -77,6 +78,10 @@ func New(opts map[string]any) (core.Platform, error) {
 	}
 	allowFrom, _ := opts["allow_from"].(string)
 	core.CheckAllowFrom("discord", allowFrom)
+	allowFromBots, err := parseDiscordIDSet(opts["allow_from_bots"])
+	if err != nil {
+		return nil, fmt.Errorf("discord: invalid allow_from_bots: %w", err)
+	}
 	guildID, _ := opts["guild_id"].(string)
 	channelID, _ := opts["channel_id"].(string)
 	groupReplyAll, _ := opts["group_reply_all"].(bool)
@@ -111,6 +116,7 @@ func New(opts map[string]any) (core.Platform, error) {
 	base := &Platform{
 		token:                      token,
 		allowFrom:                  allowFrom,
+		allowFromBots:              allowFromBots,
 		guildID:                    guildID,
 		channelID:                  channelID,
 		progressStyle:              progressStyle,
@@ -129,6 +135,47 @@ func New(opts map[string]any) (core.Platform, error) {
 	}
 	base.self = base
 	return base, nil
+}
+
+func parseDiscordIDSet(v any) (map[string]struct{}, error) {
+	out := map[string]struct{}{}
+	switch ids := v.(type) {
+	case nil:
+		return out, nil
+	case string:
+		for _, raw := range strings.Split(ids, ",") {
+			id := strings.TrimSpace(raw)
+			if id == "" {
+				continue
+			}
+			out[id] = struct{}{}
+		}
+		return out, nil
+	case []string:
+		for _, raw := range ids {
+			id := strings.TrimSpace(raw)
+			if id == "" {
+				continue
+			}
+			out[id] = struct{}{}
+		}
+		return out, nil
+	case []any:
+		for _, raw := range ids {
+			s, ok := raw.(string)
+			if !ok {
+				return nil, fmt.Errorf("want string entries, got %T", raw)
+			}
+			id := strings.TrimSpace(s)
+			if id == "" {
+				continue
+			}
+			out[id] = struct{}{}
+		}
+		return out, nil
+	default:
+		return nil, fmt.Errorf("want string or string array, got %T", v)
+	}
 }
 
 func (p *Platform) Name() string { return "discord" }
@@ -234,6 +281,14 @@ func (p *Platform) boundChannelKey(channelID string) string {
 		return p.channelID
 	}
 	return channelID
+}
+
+func (p *Platform) isAllowedPeerBot(author *discordgo.User) bool {
+	if author == nil || !author.Bot {
+		return false
+	}
+	_, ok := p.allowFromBots[author.ID]
+	return ok
 }
 
 func (p *Platform) isOperatorUser(userID string) bool {
@@ -651,14 +706,18 @@ func (p *Platform) handleMessageCreate(m *discordgo.MessageCreate) {
 		return
 	}
 
-	if m.Author.Bot || m.Author.ID == p.botID {
+	if m.Author == nil || m.Author.ID == p.botID {
+		return
+	}
+	allowedPeerBot := p.isAllowedPeerBot(m.Author)
+	if m.Author.Bot && !allowedPeerBot {
 		return
 	}
 	if core.IsOldMessage(m.Timestamp) {
 		slog.Debug("discord: ignoring old message after restart", "timestamp", m.Timestamp)
 		return
 	}
-	if !core.AllowList(p.allowFrom, m.Author.ID) {
+	if !core.AllowList(p.allowFrom, m.Author.ID) && !allowedPeerBot {
 		slog.Debug("discord: message from unauthorized user", "user", m.Author.ID)
 		return
 	}
@@ -671,7 +730,9 @@ func (p *Platform) handleMessageCreate(m *discordgo.MessageCreate) {
 		p.cacheBotRoleIDForGuild(p.session, m.GuildID, nil)
 		botRoleID = p.botRoleIDForGuild(m.GuildID)
 	}
-	if m.GuildID != "" && !p.groupReplyAll {
+	// Allowlisted peer bots are explicit conversational participants and do not
+	// need to @mention this bot to stay visible in the shared channel.
+	if m.GuildID != "" && !p.groupReplyAll && !allowedPeerBot {
 		if !isDiscordBotMention(m, p.botID, botRoleID, p.respondToAtEveryoneAndHere) {
 			slog.Debug("discord: ignoring guild message without bot mention", "channel", m.ChannelID)
 			return

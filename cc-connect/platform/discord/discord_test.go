@@ -652,6 +652,27 @@ func TestNew_ParsesBoundChannelID(t *testing.T) {
 	}
 }
 
+func TestNew_ParsesAllowFromBots(t *testing.T) {
+	pAny, err := New(map[string]any{
+		"token":           "discord-token",
+		"allow_from_bots": []any{"bot-1", "bot-2"},
+	})
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+
+	p, ok := pAny.(*Platform)
+	if !ok {
+		t.Fatalf("platform type = %T, want *Platform", pAny)
+	}
+	if _, ok := p.allowFromBots["bot-1"]; !ok {
+		t.Fatal("bot-1 missing from allowFromBots")
+	}
+	if _, ok := p.allowFromBots["bot-2"]; !ok {
+		t.Fatal("bot-2 missing from allowFromBots")
+	}
+}
+
 func TestHandleMessageCreate_DispatchesOnlyFromBoundChannel(t *testing.T) {
 	p := &Platform{
 		session:       &discordgo.Session{State: discordgo.NewState()},
@@ -698,6 +719,78 @@ func TestHandleMessageCreate_DispatchesOnlyFromBoundChannel(t *testing.T) {
 	})
 	if len(got) != 1 {
 		t.Fatalf("dispatched messages after unbound post = %d, want 1", len(got))
+	}
+}
+
+func TestHandleMessageCreate_DispatchesAllowlistedPeerBotWithoutMention(t *testing.T) {
+	p := &Platform{
+		session:       &discordgo.Session{State: discordgo.NewState()},
+		allowFrom:     "operator",
+		allowFromBots: map[string]struct{}{"peer-bot": {}},
+		channelID:     "bound-channel",
+		botID:         "self-bot",
+		groupReplyAll: false,
+		sessionOpen:   true,
+	}
+	p.session.State.ChannelAdd(&discordgo.Channel{ID: "bound-channel", Name: "bound"})
+	p.botRoleIDs.Store("guild-1", "managed-role")
+
+	var got []*core.Message
+	p.handler = func(_ core.Platform, msg *core.Message) {
+		got = append(got, msg)
+	}
+
+	p.handleMessageCreate(&discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			ID:        "m-peer-bot",
+			ChannelID: "bound-channel",
+			GuildID:   "guild-1",
+			Content:   "peer bot says hello",
+			Timestamp: time.Now(),
+			Author:    &discordgo.User{ID: "peer-bot", Username: "Dalgos", Bot: true},
+		},
+	})
+
+	if len(got) != 1 {
+		t.Fatalf("dispatched messages = %d, want 1", len(got))
+	}
+	if got[0].UserID != "peer-bot" {
+		t.Fatalf("user id = %q, want peer-bot", got[0].UserID)
+	}
+	if got[0].Content != "peer bot says hello" {
+		t.Fatalf("content = %q, want peer bot content preserved", got[0].Content)
+	}
+}
+
+func TestHandleMessageCreate_IgnoresUnallowlistedPeerBot(t *testing.T) {
+	p := &Platform{
+		session:       &discordgo.Session{State: discordgo.NewState()},
+		allowFrom:     "operator",
+		channelID:     "bound-channel",
+		botID:         "self-bot",
+		groupReplyAll: false,
+		sessionOpen:   true,
+	}
+	p.session.State.ChannelAdd(&discordgo.Channel{ID: "bound-channel", Name: "bound"})
+
+	var got []*core.Message
+	p.handler = func(_ core.Platform, msg *core.Message) {
+		got = append(got, msg)
+	}
+
+	p.handleMessageCreate(&discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			ID:        "m-other-bot",
+			ChannelID: "bound-channel",
+			GuildID:   "guild-1",
+			Content:   "should be ignored",
+			Timestamp: time.Now(),
+			Author:    &discordgo.User{ID: "other-bot", Username: "OtherBot", Bot: true},
+		},
+	})
+
+	if len(got) != 0 {
+		t.Fatalf("dispatched messages = %d, want 0", len(got))
 	}
 }
 
