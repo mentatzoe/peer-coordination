@@ -13,9 +13,11 @@ implementation itself.
 
 ## Scope Boundaries
 
-- Keep constitutions, specs, coordination docs, and decision records here.
-- Treat repos like `cc-connect` and `personal-agent-setup` as downstream
-  implementation or adoption targets.
+- Keep constitutions, specs, coordination docs, and decision records at the
+  repo root.
+- Treat the contained `cc-connect/` workspace as an implementation surface
+  inside this repo (subordinate to repo-root governance/design), and downstream
+  repos such as `personal-agent-setup` as consumers of this standard.
 - Do not let implementation details silently redefine the governance layer.
 
 ## Working Norms
@@ -33,8 +35,10 @@ implementation itself.
 - Start with `/speckit-constitution`.
 - Use `/speckit-specify`, `/speckit-clarify`, `/speckit-plan`, and
   `/speckit-tasks` for scoped follow-on work.
-- Keep specification work here and code changes in the implementation repo
-  where they belong.
+- Keep specification work at the repo root. Code changes land in the
+  implementation surface they belong to — including the contained
+  `cc-connect/` workspace for transport-side work (subordinate to repo-root
+  governance).
 
 ## Collaborators & Harnesses
 
@@ -56,7 +60,9 @@ implementation itself.
 - **`personal-agent-setup`** — agent configuration hub. The scratchpad originated there and was archived to `archive/from-personal-agent-setup/` when this repo was created.
 - **`vault-keeper`** — Dalgos's target project; reference for file-level multi-agent conventions (`docs/multi-agent-parallel-work.md`).
 
-## Current State (as of 2026-04-17)
+## Current State
+
+*[`ROADMAP.md`](ROADMAP.md) is the SOT for sequencing, ownership, and status; this section captures stable project context that doesn't belong in the roadmap.*
 
 - Scratchpad at `ideas/peer-coordination.md` — canonical design log, multi-turn conversation between Zoe, Claude (Station), and Codex (Vigil).
 - Archive at `archive/from-personal-agent-setup/specs/003-peer-coordination-constitution/` — prior speckit attempt scoped incorrectly to `personal-agent-setup`; preserved for reference, not active.
