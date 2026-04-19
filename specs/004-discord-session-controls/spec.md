@@ -2,7 +2,7 @@
 
 **Feature Branch**: `004-discord-session-controls`  
 **Created**: 2026-04-19  
-**Status**: Draft  
+**Status**: Implementation Complete  
 **Input**: User description: "Implement Discord session controls for the Phase 1 peer-coordination POC: explicit channel binding, session lifecycle boundaries, and operator !stop / !resume handling in the contained cc-connect workspace, aligned with design/poc.md and the session bundle contract."
 
 ## Context
@@ -79,11 +79,11 @@ As a reviewer or operator, I need the Discord transport to expose stable session
 - **FR-004**: The Discord runtime MUST treat `!stop` from the operator as a session-closing control, aligned with `design/poc.md`.
 - **FR-005**: After `!stop`, the runtime MUST prevent later peer messages from being interpreted as continuation of the closed session.
 - **FR-006**: The Discord runtime MUST treat `!resume` from the operator as opening a new session after a stop, not as reviving the prior closed session.
-- **FR-007**: The Discord runtime MUST preserve the operator-only session-opening rule from `design/poc.md`: a peer message in a closed or not-yet-open session MUST NOT implicitly open the session.
+- **FR-007**: The Discord runtime MUST preserve the operator-only session-opening rule from `design/poc.md`: a peer message in a closed or not-yet-open session MUST NOT implicitly open the session. For the Phase 1 Discord probe, the operator is identified by the first Discord user ID in `allow_from`; broader multi-operator semantics are out of scope for this slice.
 - **FR-008**: The implementation MUST preserve a stable channel identifier in runtime-visible state so downstream artifacts can populate the `channel_id` field expected by `specs/001-session-bundle-skeleton/spec.md`.
 - **FR-009**: The implementation MUST keep session-boundary behavior coherent when Discord thread isolation is enabled; if thread-specific behavior differs from channel-level behavior, that difference MUST be explicit and reviewable.
 - **FR-010**: If the configured Discord channel binding cannot be resolved or is no longer accessible, the runtime MUST fail safely rather than silently widening scope to other channels.
-- **FR-011**: The slice MUST remain limited to Discord session controls. It MUST NOT introduce transcript export, pinned-rules pin synchronization, or session-bundle file generation.
+- **FR-011**: The slice MUST remain limited to Discord session controls. It MUST NOT introduce transcript export, pinned-rules pin synchronization, or session-bundle file generation. Operator `!stop` / `!resume` events are expected to be captured downstream as `close_or_resume` interventions in `specs/001-session-bundle-skeleton/spec.md`; this slice provides the runtime behavior only.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -103,6 +103,7 @@ As a reviewer or operator, I need the Discord transport to expose stable session
 ## Assumptions
 
 - Operator identity / authorization continues to use the existing cc-connect authorization surface; this slice does not redesign operator auth.
+- For the current POC, the `design/poc.md` 1-hour idle threshold is operator-facing only. This slice does not implement time-based idle-timeout detection; session state changes are driven only by operator post / `!stop` / `!resume`.
 - Discord remains the only substrate in scope for this slice.
 - Transcript export will be handled by a follow-on slice; this slice only has to preserve coherent runtime behavior that transcript export can later consume.
 - Pinned rules remain operator-maintained and manually pinned for Phase 1; this slice does not automate those artifacts.

@@ -21,7 +21,7 @@ than inventing a parallel lifecycle subsystem.
 **Target Platform**: Discord via the contained `cc-connect/` bridge  
 **Project Type**: Governance/spec repo with subordinate Go transport workspace  
 **Performance Goals**: No material regression in normal Discord message handling; session controls must be safe and predictable in dry runs  
-**Constraints**: Must align with `design/poc.md` session definition, preserve existing Discord features unless explicitly tightened, and keep transcript export out of scope for this slice  
+**Constraints**: Must align with `design/poc.md` session definition, preserve existing Discord features unless explicitly tightened, treat the 1-hour idle threshold as operator-facing rather than runtime-enforced in this slice, identify the Phase 1 operator from the first `allow_from` entry, and keep transcript export out of scope  
 **Scale/Scope**: One bounded transport slice touching Discord config, inbound filtering, and runtime session-control behavior
 
 ## Constitution Check
