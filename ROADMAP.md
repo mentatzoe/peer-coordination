@@ -78,7 +78,7 @@ is meant to stay **slice-local** and **handoff-based**.
 | contained `cc-connect/` workspace | resolves where the probe implementation lives and how it is versioned against this repo | Landed |
 | Transcript export path | required for the canonical episode bundle | Open |
 | Session bundle skeleton under `observations/sessions/` | required before counted sessions can start | Open |
-| Draft drift-audit rubric | required for Phase 2 to exit cleanly | Open |
+| Draft drift-audit rubric | required for Phase 2 to exit cleanly | Landed (spec 005 + `observations/drift-audits/RUBRIC.md` v1 seed) |
 | Drift-audit workflow | required to actually produce `drift-audit.json` from the rubric, first manually and later with LLM assistance | Open |
 | Intervention tagging mechanism | required so the operator can capture intervention type/reason without ad hoc drift | Open |
 | KPI rollup path | required for POC exit and hypothesis stance-taking | Open |
