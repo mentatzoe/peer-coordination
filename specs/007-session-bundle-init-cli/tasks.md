@@ -17,18 +17,18 @@
 
 **Purpose**: establish the repo-owned CLI surface and local-config touchpoints.
 
-- [ ] T001 Create the repo-owned CLI/package/test scaffolding in `peer-session`, `tools/peer_session/`, and `tests/peer_session/`.
-- [ ] T002 Update `.gitignore` for repo-root Python/runtime artifacts and the local defaults file at `observations/sessions/defaults.toml`.
-- [ ] T003 Add the committed defaults template at `observations/sessions/defaults.example.toml` and reserve the local-defaults guidance touchpoints in `observations/sessions/README.md`.
+- [X] T001 Create the repo-owned CLI/package/test scaffolding in `peer-session`, `tools/peer_session/`, and `tests/peer_session/`.
+- [X] T002 Update `.gitignore` for repo-root Python/runtime artifacts and the local defaults file at `observations/sessions/defaults.toml`.
+- [X] T003 Add the committed defaults template at `observations/sessions/defaults.example.toml` and reserve the local-defaults guidance touchpoints in `observations/sessions/README.md`.
 
 ## Phase 2: Foundational (Blocking Prerequisites)
 
 **Purpose**: build the shared helpers that every user story depends on before any story-specific workflow can work.
 
-- [ ] T004 Add the argparse-based CLI skeleton for `peer-session init` in `tools/peer_session/cli.py` and wire the repo-root `peer-session` wrapper to it.
-- [ ] T005 [P] Implement defaults-file loading and CLI override resolution helpers in `tools/peer_session/defaults.py`.
-- [ ] T006 [P] Implement pinned-rules provenance helpers in `tools/peer_session/git_refs.py`.
-- [ ] T007 [P] Implement session-id validation, template file-set validation, and bundle-copy primitives in `tools/peer_session/bundle_init.py`.
+- [X] T004 Add the argparse-based CLI skeleton for `peer-session init` in `tools/peer_session/cli.py` and wire the repo-root `peer-session` wrapper to it.
+- [X] T005 [P] Implement defaults-file loading and CLI override resolution helpers in `tools/peer_session/defaults.py`.
+- [X] T006 [P] Implement pinned-rules provenance helpers in `tools/peer_session/git_refs.py`.
+- [X] T007 [P] Implement session-id validation, template file-set validation, and bundle-copy primitives in `tools/peer_session/bundle_init.py`.
 - [ ] T008 [P] Add shared temp-repo / temp-bundle test helpers in `tests/peer_session/`.
 
 **Checkpoint**: CLI scaffolding, defaults resolution, pinned-rules provenance helpers, and bundle-copy validation all exist; user-story behavior can now be implemented safely.
@@ -41,14 +41,14 @@
 
 ### Tests for User Story 1
 
-- [ ] T009 [P] [US1] Add library-level init-success tests in `tests/peer_session/test_bundle_init.py` covering bundle creation, copied file set, and mechanical `meta.json` population.
-- [ ] T010 [P] [US1] Add CLI invocation tests in `tests/peer_session/test_cli.py` covering `peer-session init <session-id>` success and non-zero failure exit propagation.
+- [X] T009 [P] [US1] Add library-level init-success tests in `tests/peer_session/test_bundle_init.py` covering bundle creation, copied file set, and mechanical `meta.json` population.
+- [X] T010 [P] [US1] Add CLI invocation tests in `tests/peer_session/test_cli.py` covering `peer-session init <session-id>` success and non-zero failure exit propagation.
 
 ### Implementation for User Story 1
 
-- [ ] T011 [US1] Implement the init workflow in `tools/peer_session/bundle_init.py` to copy `_template/`, fill `session_id`, `opened_at`, `substrate`, `channel_id`, and `participants`, and remove `meta.json.transcript_source`.
-- [ ] T012 [US1] Wire `peer-session init` argument parsing and command execution through `tools/peer_session/cli.py` and the repo-root `peer-session` wrapper.
-- [ ] T013 [US1] Implement clear failure handling for invalid session IDs and pre-existing target bundle directories in `tools/peer_session/bundle_init.py` and `tools/peer_session/cli.py`.
+- [X] T011 [US1] Implement the init workflow in `tools/peer_session/bundle_init.py` to copy `_template/`, fill `session_id`, `opened_at`, `substrate`, `channel_id`, and `participants`, and remove `meta.json.transcript_source`.
+- [X] T012 [US1] Wire `peer-session init` argument parsing and command execution through `tools/peer_session/cli.py` and the repo-root `peer-session` wrapper.
+- [X] T013 [US1] Implement clear failure handling for invalid session IDs and pre-existing target bundle directories in `tools/peer_session/bundle_init.py` and `tools/peer_session/cli.py`.
 
 **Checkpoint**: the operator can initialize a new pre-session bundle end-to-end without manually copying `_template/`.
 

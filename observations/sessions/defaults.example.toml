@@ -1,0 +1,6 @@
+# Copy this file to `observations/sessions/defaults.toml` for local use.
+
+operator_handle = "zoe"
+peer_handles = ["codex", "claude"]
+substrate = "discord"
+channel_id = "123456789012345678"
