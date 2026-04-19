@@ -4,7 +4,7 @@
 |---|---|
 | Status | Draft |
 | Owner | Codex |
-| Date | 2026-04-19 |
+| Date | 2026-04-19 (refreshed by Claude to reflect PR #50 + #52 merges and Phase 1 slice landings) |
 | Primary inputs | [`VISION.md`](VISION.md), [`design/architecture.md`](design/architecture.md), [`design/poc.md`](design/poc.md) |
 | Review thread | [discussion #39](https://github.com/mentatzoe/peer-coordination/discussions/39) |
 
@@ -48,8 +48,8 @@ The main gap is that the repo now has the **design and evaluation shape**, but n
 | **Foundation artifacts** | Execution | 0 | Complete | `VISION.md`, `design/architecture.md`, `design/poc.md` | none inside this slice | Claude + Codex + Zoe |
 | **Roadmap reset** | Maintenance | 0 | In progress | approved POC phases and artifact set | standalone roadmap artifact, review, closure | Codex |
 | **Constitution cleanup** | Maintenance | adjacent maintenance | In progress | executive decision from discussion #32 | remove roadmap section from constitution and clean references | Claude |
-| **Baseline substrate build** | Execution | 1 | In progress | session definition, transport/harness assumptions, L1/L2 requirements, contained `cc-connect/` workspace | Discord channel binding, interrupt path, transcript export, pinned-rules support, session bundle skeleton | Codex (transport / substrate), Claude (session artifacts) |
-| **Evaluation surface build** | Execution | 2 | Not started | KPI framework, artifact bundle, intervention taxonomy, exit criteria | draft drift-audit rubric, drift-audit workflow, intervention tagging mechanism, intervention log shape, KPI computation path, session summary workflow | Claude (evaluation pipeline), Codex (schema / tagging), Zoe (summary UX design) |
+| **Baseline substrate build** | Execution | 1 | In progress | session definition, transport/harness assumptions, L1/L2 requirements, contained `cc-connect/` workspace, pinned-rules authoring (spec 003), session-bundle skeleton (spec 001), Discord session controls (spec 004), transcript export (spec 006 merged via PR [#52](https://github.com/mentatzoe/peer-coordination/pull/52)) | session-bundle init CLI (spec 007, plan done), interrupt path | Codex (transport / substrate), Claude (session artifacts) |
+| **Evaluation surface build** | Execution | 2 | In progress | draft drift-audit rubric (spec 005 landed via PR [#50](https://github.com/mentatzoe/peer-coordination/pull/50) + `observations/drift-audits/RUBRIC.md` v1) | drift-audit workflow, intervention tagging mechanism, intervention log shape, KPI rollup logic / framing, session summary workflow | Claude (evaluation pipeline), Codex (schema / tagging), Zoe (summary UX design) |
 | **Two-peer baseline run** | Execution | 3 | Blocked on 1–2 | baseline session count, H1/H2 evidence rules, operator model | runnable harness, preserved session bundles, completed baseline sessions | Zoe (operator), responder assigned per session |
 | **Gemini extension** | Execution | 4 | Blocked on 3 | in-scope condition, preferred `cc-connect` adapter path | Gemini adapter decision and implementation, 1–2 extension sessions if baseline is credible | Gemini (adapter ownership after bootstrap), Codex (guidance), Zoe (dispatch) |
 | **POC exit and handoff** | Execution | 5 | Blocked on 3–4 | exit criteria, required artifacts, hypothesis stance structure | KPI rollup, `observations/poc-exit.md`, operator ratification | Claude (first-pass synthesis), Codex (audit), Zoe (ratification) |
@@ -76,12 +76,16 @@ is meant to stay **slice-local** and **handoff-based**.
 | Needed artifact / deliverable | Why it is needed | Status |
 |---|---|---|
 | contained `cc-connect/` workspace | resolves where the probe implementation lives and how it is versioned against this repo | Landed |
-| Transcript export path | required for the canonical episode bundle | Open |
-| Session bundle skeleton under `observations/sessions/` | required before counted sessions can start | Open |
-| Draft drift-audit rubric | required for Phase 2 to exit cleanly | Landed (spec 005 + `observations/drift-audits/RUBRIC.md` v1 seed) |
-| Drift-audit workflow | required to actually produce `drift-audit.json` from the rubric, first manually and later with LLM assistance | Open |
+| Session bundle skeleton under `observations/sessions/` | required before counted sessions can start | Landed (spec 001) |
+| Pinned-rules authoring workflow | required before counted sessions can start | Landed (spec 003) |
+| Discord session controls | required for operator-visible session open/close | Landed (spec 004) |
+| Transcript export path | required for the canonical episode bundle | Landed (spec 006 merged via PR [#52](https://github.com/mentatzoe/peer-coordination/pull/52)) |
+| Session-bundle init CLI | lets the operator materialize a bundle before the session starts | In progress (spec 007, plan complete — Codex owns) |
+| Draft drift-audit rubric | required for Phase 2 to exit cleanly | Landed (spec 005 merged via PR [#50](https://github.com/mentatzoe/peer-coordination/pull/50) + `observations/drift-audits/RUBRIC.md` v1) |
+| Drift-audit workflow | required to actually produce `drift-audit.json` from the rubric, first manually and later with LLM assistance | Open — next Claude cut |
+| Session-summary workflow | required so Phase 3 sessions produce a ratifiable post-session artifact | Open |
 | Intervention tagging mechanism | required so the operator can capture intervention type/reason without ad hoc drift | Open |
-| KPI rollup path | required for POC exit and hypothesis stance-taking | Open |
+| KPI rollup logic / framing | required for POC exit and hypothesis stance-taking | Open |
 
 ### Remaining staffing questions
 
