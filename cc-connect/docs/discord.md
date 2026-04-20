@@ -110,6 +110,8 @@ type = "discord"
 [projects.platforms.options]
 token = "MTk4NjIyNDgzNDcOTY3NDUxMg.G8vKqh.xxx..."
 # channel_id = "123456789012345678" # Optional: bind Discord intake to one channel/thread parent
+# allow_from_bots = ["123456789012345678"] # Optional: allow specific peer bots onto the shared channel without @mention
+#                                       # Also accepts a comma-separated string: "123...,456..."
 # thread_isolation = true  # Optional: isolate each agent session in its own Discord thread
 # progress_style = "legacy" # Optional: legacy | compact | card
 ```
@@ -119,6 +121,9 @@ token = "MTk4NjIyNDgzNDcOTY3NDUxMg.G8vKqh.xxx..."
 > With `channel_id` set, only that channel (or its child threads when `thread_isolation = true`) can enter the runtime.
 > On a bound surface, the session starts closed; the first operator post opens it, `!stop` closes it, and `!resume` opens a fresh session.
 > For the current Phase 1 probe, the operator is taken from the first user ID in `allow_from`.
+> `allow_from_bots` is a separate allowlist for specific peer bot IDs. Those bots can speak on the bound shared channel without `@mention` and do not need to appear in `allow_from`.
+> Under the usual bound-channel probe config (`allow_from` begins with a specific operator ID), they still do not open a closed session by themselves.
+> If `allow_from = "*"`, peer bots are treated like any other allowed user for the session gate and can open a closed session.
 > `progress_style = "compact"` merges thinking/tool updates into one editable message; `progress_style = "card"` renders a Discord-native embed progress card and still sends the final answer as a normal message.
 
 ---
@@ -202,6 +207,7 @@ If you configured `channel_id` for the Phase 1 open-floor probe:
 - only the bound channel is accepted
 - if `thread_isolation = true`, child threads under that channel are accepted too
 - the first user ID in `allow_from` is treated as the operator
+- allowlisted peer bot IDs in `allow_from_bots` can post there without `@mention`
 - the first operator post opens the session
 - `!stop` closes the current session
 - `!resume` starts a fresh session after a stop
