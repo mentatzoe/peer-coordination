@@ -50,6 +50,21 @@ See [`_template/`](_template/) for copyable stubs of each file.
 3. Commit per the authoring discipline above.
 4. If corrections are needed later, amend with a follow-up commit (never rewrite history).
 
+## Local defaults for bundle-init tooling
+
+Repo-owned bundle-init tooling reads repeated operator/session defaults from:
+
+```text
+observations/sessions/defaults.toml
+```
+
+- `defaults.toml` is operator-local and intentionally ignored from git.
+- Start from the committed sample at
+  [`defaults.example.toml`](defaults.example.toml).
+- The defaults file is for repeated init-time inputs such as operator handle,
+  peer handles, and Discord channel ID; session-specific overrides still belong
+  at command time.
+
 ## Using a bundle for review
 
 - **H1 intervention-rate** (count-based KPI): count entries in `interventions.json` by `type`; deterministic script can compute rate per turn.

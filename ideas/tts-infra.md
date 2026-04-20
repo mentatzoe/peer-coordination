@@ -38,7 +38,11 @@ Voice-mode off by default so existing text flows aren't slowed. Operator sets `v
 
 ## v1 spec scope (when we run `/speckit.specify`)
 
-**Slice name**: `008-local-tts-mcp` or similar; let speckit assign.
+**Slice name**: `900-tts-local-mcp` (working). Per the 2026-04-20 numbering convention, `900-999` is reserved for **personal agentic-comms infrastructure** — operator ↔ agent ergonomics that isn't part of the peer-coord standard itself, but could plausibly **graduate** to it (agent-to-agent voice is the forcing example: once agents can speak, the peer-coord standard will want to say something about it).
+
+The 9xx block is *not* a junk drawer: slices that wouldn't make sense as peer-coord standard additions shouldn't land here. The hygiene keeps the block meaningful.
+
+Speckit's `create-new-feature.sh` auto-picks `max(existing)+1`; override by pre-creating the spec directory at `900-<slug>` or branching manually before invoking.
 
 **Surface**: small MCP server (`tts-local` working name) exposing:
 - `synthesize(text, voice?, emotion?) -> path`
