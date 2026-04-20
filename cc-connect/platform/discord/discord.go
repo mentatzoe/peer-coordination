@@ -706,7 +706,11 @@ func (p *Platform) handleMessageCreate(m *discordgo.MessageCreate) {
 		return
 	}
 
-	if m.Author == nil || m.Author.ID == p.botID {
+	if m.Author == nil {
+		slog.Debug("discord: ignoring message with nil author", "msg_id", m.ID)
+		return
+	}
+	if m.Author.ID == p.botID {
 		return
 	}
 	allowedPeerBot := p.isAllowedPeerBot(m.Author)

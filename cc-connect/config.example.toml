@@ -918,6 +918,8 @@ app_secret = "your-feishu-app-secret"
 #                   # When channel_id is set for the Phase 1 probe, the first allow_from ID is treated as the operator for open/stop/resume
 #                   # 当为 Phase 1 探针设置 channel_id 时，allow_from 的第一个 ID 会被视为 operator，用于 open/stop/resume
 # allow_from_bots = ["123456789012345678"]  # Optional peer bot IDs that may post without @mention on the bound shared channel
+#                                           # Also accepts a comma-separated string: "123...,456..."
+#                                           # When allow_from = "*", these bots can open a closed session like any other allowed user
 #                                           # 可选：允许在绑定共享频道内无需 @mention 即可发言的 peer bot ID
 # guild_id = ""     # Optional: set for instant slash command registration (per-guild)
 #                   # 可选：设置后 slash 命令秒级生效（仅该服务器）

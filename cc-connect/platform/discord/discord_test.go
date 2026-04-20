@@ -762,6 +762,43 @@ func TestHandleMessageCreate_DispatchesAllowlistedPeerBotWithoutMention(t *testi
 	}
 }
 
+func TestHandleMessageCreate_ClosedSessionDropsAllowlistedPeerBot(t *testing.T) {
+	p := &Platform{
+		session:       &discordgo.Session{State: discordgo.NewState()},
+		allowFrom:     "operator",
+		allowFromBots: map[string]struct{}{"peer-bot": {}},
+		channelID:     "bound-channel",
+		botID:         "self-bot",
+		groupReplyAll: false,
+		sessionOpen:   false,
+	}
+	p.session.State.ChannelAdd(&discordgo.Channel{ID: "bound-channel", Name: "bound"})
+	p.botRoleIDs.Store("guild-1", "managed-role")
+
+	var got []*core.Message
+	p.handler = func(_ core.Platform, msg *core.Message) {
+		got = append(got, msg)
+	}
+
+	p.handleMessageCreate(&discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			ID:        "m-peer-bot-closed",
+			ChannelID: "bound-channel",
+			GuildID:   "guild-1",
+			Content:   "peer bot while closed",
+			Timestamp: time.Now(),
+			Author:    &discordgo.User{ID: "peer-bot", Username: "Dalgos", Bot: true},
+		},
+	})
+
+	if len(got) != 0 {
+		t.Fatalf("dispatched messages = %d, want 0", len(got))
+	}
+	if p.sessionOpen {
+		t.Fatal("session gate opened from allowlisted peer bot")
+	}
+}
+
 func TestHandleMessageCreate_IgnoresUnallowlistedPeerBot(t *testing.T) {
 	p := &Platform{
 		session:       &discordgo.Session{State: discordgo.NewState()},
