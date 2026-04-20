@@ -45,7 +45,7 @@ What this slice DOES own is a set of **workflow-level entities** that exist at t
 
 **No third "blocked-pending-calibration" value** in this slice — the FR-008 resolution (Q1→C) is that arbitration is always sufficient to commit; the calibration signal is the discoverable `[arbitrated]` token, not a hold-state.
 
-**Relationship to spec 005's `auditor` field**: when `operator-arbitrated`, the `auditor` field records both auditor identities + the operator identity as arbitrator, e.g. `"Zoe (arbitrating Dalgos/LLM-judge-v1)"`. Free-text string consistent with spec 005's schema.
+**Relationship to spec 005's `auditor` field**: when `operator-arbitrated`, the `auditor` field records both auditor identities `+`-combined inside the arbitration parenthesis (per spec 005's hybrid convention), e.g. `"Zoe (arbitrating Dalgos+LLM-judge-v1)"`. Free-text string consistent with spec 005's schema.
 
 ---
 

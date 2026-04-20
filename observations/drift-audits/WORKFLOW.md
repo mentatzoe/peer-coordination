@@ -86,7 +86,7 @@ No taxonomy token — Path A's default is untagged (see [`COMMIT-TAXONOMY.md`](C
 
 ### Step 5 — Run sanity checks
 
-See **Post-commit sanity checks** below. If any check fails, fix and re-commit with `--amend` (same commit, not a new one) before marking the audit complete.
+See **Post-commit sanity checks** below. If any check fails, fix the JSON and land a follow-up amend commit — do NOT rewrite session-bundle history per [spec 001 FR-014](../../specs/001-session-bundle-skeleton/spec.md).
 
 **Done.** Session now carries a committed single-auditor audit. If this session is intended as counted Phase 3 evidence, flag it for upgrade via Path C.
 
@@ -326,7 +326,14 @@ Stop and fix upstream — do NOT produce a partial or placeholder `drift-audit.j
 
 ## Post-commit sanity checks
 
-Run these after every committed audit (Path A, B, or C). If any check fails, the audit has drifted from [contract C2](../../specs/008-drift-audit-workflow/contracts/workflow-contracts.md) — fix and re-commit with `git commit --amend` before marking the audit complete.
+Run these after every committed audit (Path A, B, or C). If any check fails, the audit has drifted from [contract C2](../../specs/008-drift-audit-workflow/contracts/workflow-contracts.md) — **do NOT** use `git commit --amend` on the session-bundle history ([spec 001 FR-014](../../specs/001-session-bundle-skeleton/spec.md) forbids rewriting bundle history). Instead, fix the JSON and land a **follow-up** session-bundle amend commit:
+
+```bash
+git add observations/sessions/$SID/drift-audit.json
+git commit -m "session bundle amend: $SID — drift-audit fix: <reason> @ $RUBRIC_SHORT"
+```
+
+This preserves the full evidence trail for the correction — spec 001's discipline that bundle corrections are follow-up commits, never history rewrites.
 
 ```bash
 SID=<session-id>

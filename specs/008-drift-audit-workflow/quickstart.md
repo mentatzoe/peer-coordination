@@ -90,7 +90,7 @@ Compute `|A.load_bearing_findings_count − B.load_bearing_findings_count|`.
 
 The primary auditor merges the two drafts into a single `drift-audit.json`:
 - findings: union of A and B, deduplicated by `(category, turn_ref, severity)`
-- `auditor`: `"<primary-id>, <cross-reviewer-id>"` (comma-separated)
+- `auditor`: `"<primary-id>+<cross-reviewer-id>"` (`+`-combined per spec 005's hybrid convention, e.g. `zoe+llm:claude-opus`)
 - `audited_by`: `"manual"` if both human, `"hybrid"` if one is LLM
 
 Commit:
@@ -107,7 +107,7 @@ git commit -m "session bundle amend: <session-id> — drift-audit @ $RUBRIC_SHOR
 
 The operator reviews both drafts, decides which findings stand, and authors the final `drift-audit.json`:
 - findings: operator-selected set
-- `auditor`: `"<operator-id> (arbitrating <primary-id>/<cross-reviewer-id>)"`
+- `auditor`: `"<operator-id> (arbitrating <primary-id>+<cross-reviewer-id>)"` (`+`-combined inside the parenthesis per spec 005's hybrid convention)
 
 Commit with the `[arbitrated]` token (critical — this is the arbitration ledger per C7):
 

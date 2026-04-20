@@ -87,7 +87,7 @@ Where `<taxonomy-token>` is one of:
 3. Reconciliation compares `load_bearing_findings_count` against spec 005 FR-016 tolerance (±1 for ≤200-turn sessions).
 4. If within tolerance: commit reconciled `drift-audit.json`, no taxonomy token (C4).
 5. If diverged: operator arbitrates per FR-008 + E2; commit carries `[arbitrated]` (C4).
-6. In either case, the `auditor` field on `drift-audit.json` lists both primary and cross-reviewer identities, comma-separated per spec 005's free-text schema.
+6. In either case, the `auditor` field on `drift-audit.json` lists both primary and cross-reviewer identities `+`-combined per spec 005's hybrid convention (e.g. `zoe+llm:claude-opus`), free-text within spec 005's schema.
 
 **Does NOT guarantee**:
 - That the cross-reviewer's findings are merged mechanically — arbitration is a human judgment, not a union/intersection of sets.
