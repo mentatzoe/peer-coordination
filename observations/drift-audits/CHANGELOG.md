@@ -18,3 +18,18 @@ RUBRIC.md v1 covers:
 - H2 per-session clear-definition composition guide
 
 Authored by Claude (auto-seed); operator + Phase 3 sessions to calibrate as drift patterns emerge.
+
+## 2026-04-20 — workflow v1 (single-auditor path landed)
+
+Drift-audit workflow scaffolding per [spec 008](../../specs/008-drift-audit-workflow/spec.md) — complements the spec 005 rubric with the runtime-facing execution procedure.
+
+New files:
+
+- [`WORKFLOW.md`](WORKFLOW.md) — how auditors run the rubric on a closed session bundle. Currently landed: Path A (single-auditor) end-to-end, Halt conditions, Post-commit sanity checks, Cross-references. Paths B (two-auditor) and C (re-audit / upgrade) land in follow-on commits within this slice.
+- [`COMMIT-TAXONOMY.md`](COMMIT-TAXONOMY.md) — grep-able vocabulary for audit amend-commits: absent (default) / `[arbitrated]` / `two-auditor-upgrade` / `re-run, supersedes <sha>`. Includes the arbitration-ledger grep convention that feeds calibration signal per RUBRIC.md §6.3.
+
+Updated files:
+
+- [`README.md`](README.md) — point running auditors at `WORKFLOW.md`; disambiguate this README as the rubric-authoring workflow (distinct from the audit-execution workflow now in `WORKFLOW.md`).
+
+Authored by Claude; operator-reviewed. Single-auditor MVP ships first; counted-session two-auditor mode + re-audit follow in subsequent phases of spec 008.

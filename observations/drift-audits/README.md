@@ -2,15 +2,19 @@
 
 This directory holds the canonical **drift-audit rubric** for the peer-coordination POC. The rubric evaluates whether a session's preserved transcript + pinned-rules state exhibits H2 legibility drift (undeclared conventions, private shorthand, hidden side channels, meaning-requires-context-outside-the-record). Used post-session in Phase 2 and Phase 3.
 
-**Authoritative spec**: [`specs/005-drift-audit-rubric/spec.md`](../../specs/005-drift-audit-rubric/spec.md).
+**Authoritative specs**: [`specs/005-drift-audit-rubric/spec.md`](../../specs/005-drift-audit-rubric/spec.md) (rubric), [`specs/008-drift-audit-workflow/spec.md`](../../specs/008-drift-audit-workflow/spec.md) (audit-execution workflow).
 **Parent framework**: [`design/poc.md`](../../design/poc.md) Measurement model + H2 legibility observables.
 **Governing principle**: Constitution [Principle VI](../../.specify/memory/constitution.md) — coordination is human-legible, not over-protocolized.
 
+> **Running an audit?** Jump to [`WORKFLOW.md`](WORKFLOW.md) — it's the operator-facing procedure. This README is about how the *rubric itself* is authored and versioned.
+
 ## What lives here
 
-- [`RUBRIC.md`](RUBRIC.md) — the substantive audit procedure: category definitions, severity rules, verdict logic, manual-audit checklist, LLM-judge prompt template.
-- [`CHANGELOG.md`](CHANGELOG.md) — convenience log of rubric changes. Git log is authoritative.
-- This `README.md` — workflow + cross-refs.
+- [`RUBRIC.md`](RUBRIC.md) — the substantive audit procedure (spec 005): category definitions, severity rules, verdict logic, manual-audit checklist, LLM-judge prompt template.
+- [`WORKFLOW.md`](WORKFLOW.md) — how auditors actually run the procedure on a closed session bundle and commit the result (spec 008). Paired with `RUBRIC.md`: rubric = *what* drift is; workflow = *how* the audit is executed, reconciled, committed.
+- [`COMMIT-TAXONOMY.md`](COMMIT-TAXONOMY.md) — grep-able vocabulary for audit amend-commits (spec 008). Reference card for the arbitration ledger, upgrade ledger, and re-audit ledger.
+- [`CHANGELOG.md`](CHANGELOG.md) — convenience log of rubric + workflow changes. Git log is authoritative.
+- This `README.md` — rubric-authoring workflow + cross-refs.
 
 ## What does NOT live here
 
