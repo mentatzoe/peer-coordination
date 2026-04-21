@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [ ] No [NEEDS CLARIFICATION] markers remain
+- [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
 - [x] Success criteria are technology-agnostic (no implementation details)
@@ -31,10 +31,11 @@
 
 ## Notes
 
-- Three [NEEDS CLARIFICATION] markers are **intentionally preserved** per the user's explicit instruction to defer them to `/speckit-clarify`:
-  - FR-023: `kpi.json` schema documentation location (template README vs. spec only vs. both)
-  - FR-024: H2 fresh-reader outcome location (`summary.md` field vs. separate `fresh-reader-audit.json` vs. `kpi.json` field)
-  - FR-025: `poc-exit.md` commit/history model (edit-in-place vs. per-run files vs. append-only)
+- `/speckit-clarify` session 2026-04-21 resolved all four open questions surfaced during `/speckit-specify` + scan:
+  - **FR-024** → separate `fresh-reader-audit.json` bundle file (option B)
+  - **FR-013** → split behavior: refuse on hard data gaps, draft-mark on `ambiguous` per-session-clear (option C)
+  - **FR-025** → per-run `poc-exit-<timestamp>.md` files with `poc-exit.md` as pointer (option B)
+  - **FR-023** → schemas live in `observations/sessions/_template/README.md` (option A), per the broader principle: specs describe concept + minimum requirements; schemas live in the template README as the single operator-facing lookup surface
 - Python stdlib is named as an implementation constraint in FR-020 and Assumptions. This matches the posture set by spec 007 (which names Python stdlib likewise) and is kept for consistency with that precedent; it is a scope-boundary constraint, not a framework choice.
 - `peer-session` CLI name and subcommand names (`tally`, `rollup`) are named concretely in FR-001, FR-010. This is intentional: the slice's design position is to *extend the existing CLI*, so the surface is part of the scope. Spec 007 established this naming convention.
-- Items marked incomplete require spec updates before `/speckit-plan` (but clarification items proceed via `/speckit-clarify` first).
+- Spec is ready for `/speckit-plan`.
