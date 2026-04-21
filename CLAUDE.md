@@ -12,7 +12,7 @@
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
 shell commands, and other important information, read the current plan
-at [`specs/008-drift-audit-workflow/plan.md`](specs/008-drift-audit-workflow/plan.md).
+at [`specs/009-session-summary-workflow/plan.md`](specs/009-session-summary-workflow/plan.md).
 <!-- SPECKIT END -->
 
 ## Purpose
