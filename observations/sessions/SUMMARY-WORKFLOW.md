@@ -157,6 +157,63 @@ Same as Path A Step 5. See **Post-commit sanity checks** below.
 
 **Done.** Bundle now carries a committed agent-drafted + operator-ratified summary.
 
+## Drift section guidance (shared across Path A + Path B)
+
+Per [spec 009 FR-008](../../specs/009-session-summary-workflow/spec.md) + [contract C2](../../specs/009-session-summary-workflow/contracts/workflow-contracts.md), the `## Drift` section of `summary.md` cites `drift-audit.json.verdict` and specific load-bearing findings — it does NOT re-derive drift findings from transcript. The drift-audit is the source of truth; the summary narrates around it.
+
+### Worked examples
+
+**When `drift-audit.json.verdict` is `load_bearing_drift`** (one or more `severity: "finding"` entries):
+
+```markdown
+## Drift
+
+Verdict: `load_bearing_drift` (see drift-audit.json @ abc1234). Two
+load-bearing findings:
+
+- Turn 07 (`undeclared_emoji`): Dalgos used 🎯 to signal "that's the key
+  point" — not in session palette, carries load-bearing meaning per the
+  rubric. Blocks H2 reconstruction of which points were emphasized.
+- Turn 14 (`private_shorthand`): Vigil referenced "the usual gotcha"
+  without prior in-transcript context; uninvolved reviewer can't reach
+  the referent.
+```
+
+**When `drift-audit.json.verdict` is `minor_drift`** (only `severity: "warn"` entries, no `finding`-severity):
+
+```markdown
+## Drift
+
+Verdict: `minor_drift` (see drift-audit.json @ abc1234). One warn-severity
+finding on `hidden_channel_reference` at turn 11 — Vigil referenced an
+earlier DM discussion without quoting it. Not load-bearing for the
+exchange's core resolution; flagged for rubric calibration but does not
+block H2.
+```
+
+**When `drift-audit.json.verdict` is `no_drift`** (empty findings or only `info` severity):
+
+```markdown
+## Drift
+
+Verdict: `no_drift` (see drift-audit.json @ abc1234). Drift is not the
+blocker for H2 on this session; any H2 judgment proceeds on other grounds
+(transcript completeness, per-peer contribution clarity, etc.).
+```
+
+### Discipline reminders
+
+1. **Cite verbatim**. The `verdict` string (`no_drift` / `minor_drift` / `load_bearing_drift`) is the spec 005 enum — use it exactly, backtick-quoted.
+2. **Reference, don't re-narrate**. Findings get cited by `turn_ref` or `category`; their content isn't paraphrased into your own drift story.
+3. **Don't introduce new categories**. If `drift-audit.json.findings[]` doesn't have it, the summary doesn't claim it.
+4. **Disagreement path**: if you disagree with the drift-audit after reading the bundle, re-audit via [spec 008 Path C](../drift-audits/WORKFLOW.md) — update `drift-audit.json` first, THEN refresh the summary's drift section via [Path C (revision)](#path-c--revision) below with `revision: drift-refresh, supersedes <old-sha>` token.
+
+### The drift-audit short SHA
+
+The short SHA in `(see drift-audit.json @ <short-sha>)` MUST match the `@ <drift-audit-short-sha>` at the end of the amend-commit subject — same value, two surfaces. Provenance is pinned at both the file level and the commit level.
+
+---
+
 ## Path C — Revision
 
 *Filled by US3 — see [`specs/009-session-summary-workflow/quickstart.md`](../../specs/009-session-summary-workflow/quickstart.md) Path C until this section lands.*

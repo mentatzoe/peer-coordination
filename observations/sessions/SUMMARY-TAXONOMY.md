@@ -159,6 +159,26 @@ DA_SHORT=$(git rev-parse --short "$DA_SHA")
 echo "Drafting summary against drift-audit @ $DA_SHA (short: $DA_SHORT)"
 ```
 
+### Finding summaries authored against a specific drift-audit version
+
+```bash
+# All summaries drafted against drift-audit short SHA abc1234:
+git log --all --grep="@ abc1234" --format='%H %s' -- observations/sessions/*/summary.md
+```
+
+Useful for cross-referencing which summaries are stale after a drift-audit re-audit per spec 008 Path C — those summaries typically need a `revision: drift-refresh, supersedes <old-short-sha>` follow-up commit to refresh the drift citation.
+
+### Re-audit → drift-refresh flow
+
+When spec 008 Path C lands a new `drift-audit.json` for a session, any previously-committed summary citing the old drift-audit becomes stale on its drift section. The lifecycle:
+
+1. Spec 008 Path C commits a new `drift-audit.json` (new commit SHA).
+2. This workflow's Path C revision fires with `revision: drift-refresh, supersedes <old-drift-short-sha>` token (taxonomy token #4 above).
+3. The summary's `## Drift` section is updated to cite the new verdict + new short SHA.
+4. The new amend commit's subject pins the new `@ <drift-audit-short-sha>`; the token body carries the superseded old SHA for traceability.
+
+Cross-references [spec 009 data-model E3 (Drift Citation) + E4 (Revision Event) + E6 (Drift-Audit Version Pin)](../../specs/009-session-summary-workflow/data-model.md).
+
 ---
 
 ## Cross-references
