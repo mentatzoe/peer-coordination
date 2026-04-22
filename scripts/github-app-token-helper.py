@@ -28,18 +28,22 @@ def load_profile(agent_name: str) -> dict:
     if not profile_path.exists():
         print(f"Error: Profile not found at {profile_path}")
         print(f"\nCreate the profile first:")
-        print(f"  cp peer-coordination/config/app-profile.template {profile_path}")
+        print(f"  cp config/app-profile.template {profile_path}")
         print(f"  # Then edit {profile_path} with your app's credentials")
         sys.exit(1)
     
-    # Parse profile (simple key=value format)
+    # Parse profile (simple key=value format; strips surrounding single/double
+    # quotes so the template's quoted-or-unquoted style both work).
     profile = {}
     with open(profile_path) as f:
         for line in f:
             line = line.strip()
             if line and not line.startswith('#') and '=' in line:
                 key, value = line.split('=', 1)
-                profile[key.strip()] = value.strip()
+                value = value.strip()
+                if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+                    value = value[1:-1]
+                profile[key.strip()] = value
     
     required = ['APP_ID', 'INSTALLATION_ID', 'PRIVATE_KEY_PATH']
     missing = [k for k in required if not profile.get(k)]

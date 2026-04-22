@@ -5,18 +5,17 @@
 #
 # Example:
 #   mkdir -p ~/.config/peer-coordination
-#   cp peer-coordination/config/app-profile.template ~/.config/peer-coordination/codex-app-profile
+#   cp config/app-profile.template ~/.config/peer-coordination/codex-app-profile
+#
+# Format: KEY=value (no surrounding quotes; the parser does not strip them).
+# Values starting/ending with whitespace are not supported.
 
 # App ID from GitHub App settings (numeric ID)
-APP_ID=""
+APP_ID=
 
 # Installation ID from the installed app (numeric ID)
-INSTALLATION_ID=""
+INSTALLATION_ID=
 
-# Path to the private key PEM file
-# Generate with: openssl genrsa -out private-key.pem 4096
-# Upload the public key to GitHub App settings
-PRIVATE_KEY_PATH=""
-
-# Repository to install on (usually just one)
-REPO="mentatzoe/peer-coordination"
+# Path to the private key PEM file (mode 600; never commit)
+# Generate: GitHub App settings → Private keys → Generate a private key
+PRIVATE_KEY_PATH=

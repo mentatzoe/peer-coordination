@@ -46,17 +46,39 @@ HTTPS push also works (git treats `GITHUB_TOKEN` as the password for `x-access-t
 1. Create the app via GitHub UI at `https://github.com/settings/apps/new`. Name must be globally unique (use the `pc-<name>` prefix).
 2. Generate a private key, save to `~/.config/peer-coordination/peer-coordination-<name>.pem` (mode 600).
 3. Install on `mentatzoe/peer-coordination` (Only select repositories → peer-coordination). Permissions: Contents/Issues/PRs/Discussions write, Metadata read.
-4. Write the profile:
+4. Write the profile (only these three fields are parsed — anything else is
+   ignored):
    ```ini
    # ~/.config/peer-coordination/<name>-app-profile
-   APP_NAME=pc-<name>
-   APP_ID=<id>
-   CLIENT_ID=<Iv23…>
-   PRIVATE_KEY_PATH=/Users/zmll/.config/peer-coordination/peer-coordination-<name>.pem
-   INSTALLATION_ID=<id>
+   APP_ID=<numeric-app-id>
+   INSTALLATION_ID=<numeric-install-id>
+   PRIVATE_KEY_PATH=~/.config/peer-coordination/peer-coordination-<name>.pem
    ```
 5. Set `PEER_COORD_AGENT_NAME=<name>` on the Multica agent via the workspace API.
 6. Verify: `scripts/.venv/bin/python scripts/github-app-token-helper.py <name> --token-only`.
+
+## Commit / push attribution (important)
+
+`gh` comments, PRs, and issue operations via `gh api` attribute correctly to
+the app bot once `GH_TOKEN` is set. **`git push` attribution is a separate
+concern**: the commit author and committer are read from local git config,
+not from the token. HTTPS push succeeds with `GITHUB_TOKEN`, but the commits
+will show whatever `user.name` / `user.email` are configured in the shell
+(often `mentatzoe`).
+
+To make commits attribute to the bot, set per-session identity before committing:
+
+```bash
+# After eval'ing the token helper:
+git config user.name  "pc-${PEER_COORD_AGENT_NAME}[bot]"
+git config user.email "<app-id>+pc-${PEER_COORD_AGENT_NAME}[bot]@users.noreply.github.com"
+```
+
+The `<app-id>` is the numeric App ID from the table above (not the install
+ID). Alternatively, commit via the `createCommitOnBranch` GraphQL mutation,
+which attributes solely from the token and ignores local git config — use
+that when you need guaranteed bot authorship without trusting the shell
+state.
 
 ## Troubleshooting
 
