@@ -24,7 +24,6 @@ stale rather than silently trusted.
 |---|---|---|---|---|---|---|---|---|
 | `010-kpi-rollup` | Claude | `.worktrees/kpi-rollup` | `010-kpi-rollup` | brainstorm | active | 2026-04-20 | `.worktrees/kpi-rollup/specs/010-kpi-rollup/**` | Phase 2 evaluation-surface slice; consumes `interventions.json` + `drift-audit.json` + `summary.md` across counted sessions to produce H1/H2 KPI rollup per `design/poc.md` measurement model; blocks POC exit (Phase 5) |
 | `009-session-summary-workflow` | Codex (handoff from Claude) | `.worktrees/session-summary-workflow` | `009-session-summary-workflow` | review + implement | active | 2026-04-22 | `.worktrees/session-summary-workflow/specs/009-session-summary-workflow/**` | Open PR [#68](https://github.com/mentatzoe/peer-coordination/pull/68) — full spec chain landed (specify → clarify → plan → tasks → analyze); 0 CRITICAL/HIGH from analyze; 2 MEDIUM + 2 LOW fast-follows applied. Codex owns cross-review + `/speckit-implement`; Claude has not started runtime-doc authoring; `observations/sessions/**` untouched. |
-| `060-github-apps-spike` | Codex | `.worktrees/github-apps-spike` | `codex-060-github-apps-spike` | review | active | 2026-04-21 | `.worktrees/github-apps-spike/**` | Open PR [#67](https://github.com/mentatzoe/peer-coordination/pull/67) tracks the spike note for issue #60; issue #61 remains claimed as the connected parked follow-on under the same owner |
 
 ## Update rules
 
