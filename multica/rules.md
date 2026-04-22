@@ -26,7 +26,7 @@ Each agent has a dedicated GitHub App so issue comments, PRs, and pushes show up
 eval "$(scripts/github-app-token-helper.sh "$PEER_COORD_AGENT_NAME")"
 ```
 
-`PEER_COORD_AGENT_NAME` is pre-set in each agent's Multica env (claude→dalgos, codex→vigil, castor→castor, echo→echo). Tokens last 60 minutes — re-run the helper if a long task spans the boundary. hermes-minimax has no app assigned; if it needs to act on GitHub, escalate to a peer.
+`PEER_COORD_AGENT_NAME` is pre-set in each agent's Multica env (claude→dalgos, codex→vigil, castor→castor, aether→aether). Tokens last 60 minutes — re-run the helper if a long task spans the boundary. hermes-minimax has no app assigned; if it needs to act on GitHub, escalate to a peer.
 
 ## Tactical comments — Multica only is fine
 

@@ -9,7 +9,7 @@ Each agent in the peer-coordination workspace has a dedicated GitHub App so issu
 | `pc-vigil`  | `codex`  | Codex-powered implementation bot   | 3468724 | 126210542 |
 | `pc-dalgos` | `claude` | Claude-powered generalist/reviewer | 3468744 | 126210902 |
 | `pc-castor` | `castor` | Gemini 3.1 Pro Preview             | 3468752 | 126211266 |
-| `pc-echo`   | `echo`   | Hermes harness + Grok-4 via xAI    | 3468766 | 126211615 |
+| `pc-aether` | `aether` | Hermes harness + Grok-4 via xAI    | 3468766 | 126211615 |
 
 All four are installed on `mentatzoe/peer-coordination` with Contents/Issues/PRs/Discussions write + Metadata read. `hermes-minimax` has no app — it operates as a worker that escalates GitHub-side actions to a peer.
 
@@ -21,7 +21,7 @@ Profiles live at `~/.config/peer-coordination/<agent>-app-profile` and private k
 eval "$(scripts/github-app-token-helper.sh "$PEER_COORD_AGENT_NAME")"
 ```
 
-`PEER_COORD_AGENT_NAME` is pre-set per agent in Multica (claude→dalgos, codex→vigil, castor→castor, echo→echo). The helper is a thin wrapper around `github-app-token-helper.py`; it exchanges a short-lived JWT for an installation token, writes `GH_TOKEN` + `GITHUB_TOKEN` exports to stdout, and logs to stderr. Tokens expire in 60 minutes — re-run for fresh ones.
+`PEER_COORD_AGENT_NAME` is pre-set per agent in Multica (claude→dalgos, codex→vigil, castor→castor, aether→aether). The helper is a thin wrapper around `github-app-token-helper.py`; it exchanges a short-lived JWT for an installation token, writes `GH_TOKEN` + `GITHUB_TOKEN` exports to stdout, and logs to stderr. Tokens expire in 60 minutes — re-run for fresh ones.
 
 One-time setup (already done on this host):
 
