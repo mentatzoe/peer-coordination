@@ -108,3 +108,50 @@ No CRITICAL or HIGH findings. Two MEDIUM findings (C1, C2) + one LOW spec patch 
 3. **After patches land**: ready for Codex cross-agent review + implement handoff.
 
 This report is the T016 output. T017 / T018 (cross-slice consistency checks) will run during the Polish phase to re-verify after implement.
+
+---
+
+## Polish addendum — T017 / T018 results (2026-04-22)
+
+### T017 — Amend-commit format vs spec 001 FR-014 + `--amend` scan
+
+- **Spec 001 FR-014 format**: `session bundle amend: <session-id> — <reason>`
+- **Spec 009 C4 format**: `session bundle amend: <session-id> — summary[ <taxonomy-token>] @ <drift-audit-short-sha>`
+
+**Verdict**: ✓ consistent. Spec 009 fills spec 001's `<reason>` slot with a structured sub-grammar (`summary[ <taxonomy-token>] @ <drift-audit-short-sha>`). No redefinition of FR-014's base convention.
+
+- **`git commit --amend` scan in SUMMARY-WORKFLOW.md**: 3 mentions, all negations ("NEVER", "do NOT") with proper cross-references to spec 001 FR-014 + contract C6. No instruction anywhere suggests using `--amend` on session-bundle history. The PR #66 I1 lesson is encoded in the runtime doc as well as the spec chain.
+
+### T018 — `drift-audit.json` field usage vs spec 005 data-model + spec 008 commit-taxonomy
+
+Fields / enums this slice references in `observations/sessions/SUMMARY-WORKFLOW.md`: `verdict` enum (`no_drift` / `minor_drift` / `load_bearing_drift`), `findings[]`, `severity` enum (`finding` / `warn` / `info` implied), `turn_ref`, `category`.
+
+All values match [spec 005 data-model](../005-drift-audit-rubric/data-model.md) exactly:
+- `Drift-Audit Output.verdict` enum: `no_drift`, `minor_drift`, `load_bearing_drift` ✓
+- `Finding.severity` enum: `info`, `warn`, `finding` ✓
+- `Finding.category` enum: not enumerated in summary-workflow (generic cross-reference only) — correct, spec 005 owns the category enum.
+
+**Commit-taxonomy pattern vs spec 008**: bracket-token + `@ <short-sha>` grammar reused identically. Token ordering convention (bracket first, `revision:` or `re-run, supersedes` second) mirrors spec 008's `[arbitrated]` → `two-auditor-upgrade` → `re-run, supersedes` ordering.
+
+**Verdict**: ✓ consistent. No schema extension, no enum drift, no taxonomy-pattern deviation.
+
+### Implement-phase absorbed findings (from the Next Actions of the initial analyze)
+
+All 4 LOW findings flagged for inline absorption during T006/T009 authoring were addressed:
+
+- **C3 (FR-007 poc.md criteria pointer)** — addressed inline in Path A Step 2's "Verdict rubric" subsection, which cites `design/poc.md` "Per-session clear definitions" and summarizes the three AND-gate conditions.
+- **F2 (sanity-check Mode: line conditional)** — addressed inline in check 5 of Post-commit sanity checks, which uses a subject-grep guard (`revision:|\[peer-audited`) to skip the Mode-line check on follow-up commits.
+
+No new findings surfaced during implement.
+
+### Codex review findings (PR #68) — applied 2026-04-22
+
+- **Finding 1** (FR-003 ↔ FR-010 inconsistency on "five sections" vs four headings): resolved in spec.md FR-003 + data-model E-series. FR-003 now says "five required content elements" with explicit mapping to four top-level headings. Normative chain consistent.
+- **Finding 2** (C1 interventions.json storage shape widened beyond spec 001 FR-011): resolved in contracts/workflow-contracts.md C1 + spec.md FR-016. Array-of-objects storage is honored per spec 001; opacity scope tightened to per-object tag schema only.
+
+No additional findings surfaced.
+
+### Final status
+
+Ready for Codex re-review on PR #68. All 21 tasks complete (T019 maps to a PR re-review comment on the existing open PR, not a new PR).
+
