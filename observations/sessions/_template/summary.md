@@ -1,37 +1,27 @@
-# Session summary — [FILL IN: session-id]
+# [FILL IN: session-id] — [FILL IN: short human title]
 
-> **Template note.** Copy-and-fill. This is the human-readable qualitative account that supports the H1 / H2 per-session clear definitions in `design/poc.md`. Keep it tight but complete — future agent sessions will read this to pick up context.
+> **Template note.** Copy-and-fill. Follows the hybrid inverted-pyramid structure from [spec 009 FR-010](../../../specs/009-session-summary-workflow/spec.md) — anchor first, load-bearing values next, qualitative prose last. See [`../SUMMARY-WORKFLOW.md`](../SUMMARY-WORKFLOW.md) for the full authoring procedure (Paths A/B/C/D).
 
-## Session goal / seed
+## Seed
 
-[FILL IN: what was the session about? what seed prompt or topic did the operator introduce?]
+[FILL IN: what was the session about? what seed prompt, question, or task did the operator introduce? One paragraph.]
 
-## Per-peer contribution
+## Verdicts
 
-*Add one bullet per peer that participated in the session (2 peers in the Phase 3 baseline; 3 when the Gemini extension runs; N in general). Include operator contributions only if the operator explicitly participated as a content contributor beyond their arbiter role.*
+Per `design/poc.md` "Per-session clear definitions". Use values `clear` / `partial` / `fail` / `pending`.
 
-- **[FILL IN: peer handle]**: [FILL IN: what distinct useful contribution did this peer make?]
-- **[FILL IN: peer handle]**: [FILL IN: what distinct useful contribution did this peer make?]
-- *[add more bullets as needed — repeatable, not fixed at two]*
+- **H1 stability**: `<value>` — [FILL IN: one-sentence rationale citing the three AND-gate conditions (no majority directive-redirects, no persistent loop, no one-sided dominance).]
+- **H1 complementarity**: `<value>` — [FILL IN: one-sentence rationale pointing to distinct-contributions-taken-up across peers.]
+- **H2 fresh-reader-pass**: `<value>` — [FILL IN: one-sentence rationale; mark `pending` if fresh-reader test hasn't run yet.]
 
-*Complementarity test: each peer should have at least one distinct contribution that was taken up, answered, or built on. If peers produced parallel independent content with only light mutual acknowledgment, H1 complementarity did not clear — document that honestly.*
+## Drift
 
-## Observed coordination patterns
+Verdict: `<drift-audit.json.verdict>` (see `drift-audit.json` @ <drift-audit-short-sha>).
 
-[FILL IN: how did the peers organize turn-taking, yielding, claiming, and building? Did they reference pinned rules? Was there an escalation? Were there loops, deadlocks, or one-sided dominance?]
+[FILL IN: if `load_bearing_drift` or `minor_drift`, cite specific load-bearing `findings[]` entries by `turn_ref` or `category`. If `no_drift`, state that drift is not the blocker for H2. Do NOT re-derive findings from transcript — the drift-audit is the source of truth per FR-008.]
 
-## Notable drift
+## What happened
 
-[FILL IN: any new conventions / shorthand / off-palette emoji / message patterns that require context to decode? If none, say "none observed."]
+[FILL IN: free-form prose covering: per-peer contributions (one block per peer or flowing prose — at least one distinct contribution per peer that was taken up, answered, or built on); observed coordination patterns (loops, dominance, interruptions, operator directive-redirects — the qualitative texture the drift-audit doesn't capture); turn-by-turn nuance for an uninvolved reviewer running the H2 fresh-reader test.]
 
-## Operator verdict on per-session clear definitions
-
-Per `design/poc.md` "Per-session clear definitions":
-
-- **H1 — Stable coordination**: [FILL IN: clear / not-clear / uncertain]. [FILL IN: one-sentence rationale citing the three AND-gate conditions.]
-- **H1 — Complementarity**: [FILL IN: clear / not-clear / uncertain]. [FILL IN: one-sentence rationale pointing to distinct-contributions-taken-up.]
-- **H2 — Fresh-reader pass**: [FILL IN: pending / clear / not-clear]. [FILL IN: one-sentence rationale; mark `pending` if fresh-reader test not yet run.]
-
-## Next-step suggestions (optional)
-
-[FILL IN: any follow-on cuts, rubric adjustments, or operator UX notes this session surfaced. Safe to leave empty.]
+[Optional: next-step suggestions or follow-on cuts the session surfaced. Safe to leave out.]
