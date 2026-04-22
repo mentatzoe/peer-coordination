@@ -94,7 +94,7 @@ All paths below are repository-relative from the worktree root `/Users/zmll/gith
 
 ### Tests
 
-- [ ] T021 [P] [US1] Add `tests/peer_session/test_tally.py` — implement the 9 contract tests from `contracts/tally-cli-behavior.md` §"Contract tests": happy path, idempotence (byte-identical modulo `tallied_at`), staleness (input change → hash change), missing fresh-reader-audit (soft), drift placeholder (soft), zero turns, bundle incomplete (refuse exit 2), unclosed session (refuse exit 3), invalid intervention type (refuse exit 4). Uses fixtures from T011–T016. Depends on T018, T019.
+- [ ] T021 [P] [US1] Add `tests/peer_session/test_tally.py` — implement the 9 contract tests from `contracts/tally-cli-behavior.md` §"Contract tests": happy path, idempotence (byte-identical modulo `tallied_at` — this scenario also satisfies SC-006's second-reviewer reproducibility since the function is pure over its inputs), staleness (input change → hash change), missing fresh-reader-audit (soft), drift placeholder (soft), zero turns, bundle incomplete (refuse exit 2), unclosed session (refuse exit 3), invalid intervention type (refuse exit 4). Uses fixtures from T011–T016. Depends on T018, T019.
 - [ ] T022 [US1] Extend `tests/peer_session/test_cli.py` with a `test_cli_tally_dispatch` case — verifies `peer-session tally <session-id>` from the CLI entry point reaches `tally.run_tally` with the expected arguments and propagates its exit code. Depends on T020, T021.
 
 **Checkpoint**: `peer-session tally` works end-to-end; operator can tally any closed bundle deterministically. US1 is independently deliverable as the MVP for this slice.
@@ -136,7 +136,7 @@ All paths below are repository-relative from the worktree root `/Users/zmll/gith
 - [ ] T027 [US3] Author `observations/kpi-rollup/WORKFLOW.md` with the four required sections per FR-016, using the spec-008 drift-audit-workflow authoring pattern (plain prose, operator-facing, explicit section per step, rationale subsection):
   - **§A Authoring `fresh-reader-audit.json`** — who the fresh reader is (per `design/poc.md` H2 definition), what they read, how the operator ratifies the reconstruction, how to write the file referencing the schema in `observations/sessions/_template/README.md` (no schema duplication per FR-023).
   - **§B Recording H3 complementarity narrative** — where in the bundle this goes (likely in `summary.md` — note coordination with spec 009 is not tight because spec 010 does not read the complementarity narrative from any structured field; H3 at the per-session level is consumed via `per_session_clear_breakdown.h1_complementarity`'s `reason` field when ambiguous).
-  - **§C Resolving `ambiguous` per-session-clear** — how operators record an explicit verdict override when sub-judgments are ambiguous, and how subsequent tally runs honor that override deterministically (FR-018). Candidate mechanism: a dedicated field or an amend-commit convention — pick and document.
+  - **§C Resolving `ambiguous` per-session-clear via amend-commit** — per FR-018, the resolution mechanism is the amend-commit convention (not an override field in `kpi.json`). Operators resolve ambiguity by amending the underlying bundle input (e.g., `fresh-reader-audit.json`'s `verdict`, or running a real drift audit that replaces the spec-001 placeholder in `drift-audit.json`) with an amend commit following spec 001 FR-014's discipline, then re-running `peer-session tally` to recompute `per_session_clear` deterministically from the amended inputs. The workflow MUST document this convention explicitly, name the permissible amend targets per sub-judgment, and describe the pre-commit review expectations so amend commits remain auditable.
   - **§D Ratification gate for a per-run `poc-exit-<timestamp>.md`** — how the operator reviews the per-run file, what to fill in the ratification-gate subsection, the convention for recording ratification (text in the section + commit metadata), and what it means for a per-run file to be ratified vs. superseded by a later per-run file.
 
 **Checkpoint**: Human-judgment KPI capture is operator-legible without asking the spec authors; US3 delivered.
@@ -150,8 +150,9 @@ All paths below are repository-relative from the worktree root `/Users/zmll/gith
 - [ ] T028 Run the full `python3 -m unittest discover tests/peer_session` test suite from the worktree root and confirm all new and existing tests pass. No skipped tests. Depends on T019–T026.
 - [ ] T029 Run the 11-item manual smoke-test checklist from [`quickstart.md`](./quickstart.md) §"Manual smoke-test checklist" against a real operator-style invocation of the CLI from the worktree root. Document any deviations. Per the user memory "Interactive CLIs require manual testing". Depends on T028.
 - [ ] T030 Verify `readlink observations/poc-exit.md` (after a successful rollup) resolves to the expected `poc-exit-<timestamp>.md` filename. Confirms research §3 symlink implementation is working. Part of T029 but called out explicitly because it's easy to miss.
-- [ ] T031 [P] Update the `010-kpi-rollup` row in `ACTIVE-SLICES.md` at the repo root from phase `brainstorm` → `review` (or whatever the current phase is when the PR is posted). Ensure the `Last confirmed` date and `Notes` column are current.
+- [ ] T031 [P] Update the `010-kpi-rollup` row in `ACTIVE-SLICES.md` from phase `brainstorm` → `review` (and subsequently → `implement` once PR review begins). **Note**: `ACTIVE-SLICES.md` lives on `main`, not on this branch — land the row update as a separate direct-to-`main` commit following the project's slice-claim convention (see the `2f49e85` claim commit for spec 009 as reference). Do NOT commit the row change on `010-kpi-rollup`. Ensure the `Last confirmed` date and `Notes` column are current.
 - [ ] T032 [P] Author a PR description for this slice summarizing: spec/clarify/plan/tasks landing, 3 user stories implemented, all contract tests passing, manual smoke-test completed, deferrals (LLM-assisted KPI extraction per spec 008 FR-014 pattern, Phase 4 Gemini-extension rollup), and any known limitations discovered during implementation. This becomes the `gh pr create --body` input.
+- [ ] T033 Validate `observations/kpi-rollup/WORKFLOW.md` usability against SC-005 — hand the workflow to a fresh reviewer (Codex or Zoe, whoever has not co-authored the doc) and ask them to walk through §A (authoring `fresh-reader-audit.json`) and §D (ratification gate) without author assistance. Document clarifications they had to ask for; revise the workflow inline before PR finalization so the "first-try without asking" threshold is met. Depends on T027.
 
 **Checkpoint**: Slice is implementation-complete, verified end-to-end, and ready for peer review.
 
@@ -182,7 +183,7 @@ Phase 2 (Foundational: T003–T018)
    │
    ▼ (All user stories complete)
    │
-Phase 6 (Polish: T028 → T029, T030; T031 [P], T032 [P])
+Phase 6 (Polish: T028 → T029, T030; T031 [P], T032 [P]; T033 after T027)
 ```
 
 ### Story-level dependency summary
