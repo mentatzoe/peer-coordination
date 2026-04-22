@@ -1,0 +1,22 @@
+# GitHub App Profile Template
+# Copy this file to app-profile for each agent and fill in the values
+#
+# Location: ~/.config/peer-coordination/<agent>-app-profile
+#
+# Example:
+#   mkdir -p ~/.config/peer-coordination
+#   cp peer-coordination/config/app-profile.template ~/.config/peer-coordination/codex-app-profile
+
+# App ID from GitHub App settings (numeric ID)
+APP_ID=""
+
+# Installation ID from the installed app (numeric ID)
+INSTALLATION_ID=""
+
+# Path to the private key PEM file
+# Generate with: openssl genrsa -out private-key.pem 4096
+# Upload the public key to GitHub App settings
+PRIVATE_KEY_PATH=""
+
+# Repository to install on (usually just one)
+REPO="mentatzoe/peer-coordination"
