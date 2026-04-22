@@ -3,6 +3,7 @@ package discord
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -19,6 +20,8 @@ type historyFetcher interface {
 	ChannelMessages(channelID string, limit int, beforeID, afterID, aroundID string, options ...discordgo.RequestOption) ([]*discordgo.Message, error)
 }
 
+const discordEpochMillis int64 = 1420070400000
+
 // FetchChannelHistory fetches Discord messages for a bounded window and returns
 // them in chronological order.
 func FetchChannelHistory(fetcher historyFetcher, channelID string, after, before time.Time) ([]*discordgo.Message, error) {
@@ -33,7 +36,7 @@ func FetchChannelHistory(fetcher historyFetcher, channelID string, after, before
 	}
 
 	var (
-		beforeID  string
+		beforeID  = beforeCursorForTime(before)
 		collected []*discordgo.Message
 	)
 	for {
@@ -76,6 +79,18 @@ func FetchChannelHistory(fetcher historyFetcher, channelID string, after, before
 		return ti.Before(tj)
 	})
 	return collected, nil
+}
+
+func beforeCursorForTime(t time.Time) string {
+	return snowflakeIDForTime(t.UTC().Add(time.Millisecond))
+}
+
+func snowflakeIDForTime(t time.Time) string {
+	millis := t.UTC().UnixMilli() - discordEpochMillis
+	if millis < 0 {
+		millis = 0
+	}
+	return strconv.FormatUint(uint64(millis)<<22, 10)
 }
 
 // RenderTranscript renders Discord messages into a bundle-compatible markdown transcript.
