@@ -216,11 +216,145 @@ The short SHA in `(see drift-audit.json @ <short-sha>)` MUST match the `@ <drift
 
 ## Path C — Revision
 
-*Filled by US3 — see [`specs/009-session-summary-workflow/quickstart.md`](../../specs/009-session-summary-workflow/quickstart.md) Path C until this section lands.*
+Use this when a committed summary needs correction — typo, late-arriving H1 or H2 verdict resolution, wording cleanup after peer feedback, or drift-refresh after spec 008 Path C re-audit.
+
+**CRITICAL**: revisions are ALWAYS follow-up amend commits. **NEVER** `git commit --amend` on the prior summary commit — that rewrites session-bundle history per spec 001 FR-014 + contract C6. This lesson is encoded throughout the slice; don't break it.
+
+### Step 1 — Identify the reason
+
+Pick the taxonomy-token form per [SUMMARY-TAXONOMY.md](SUMMARY-TAXONOMY.md) token #3 / #4:
+
+- `revision: typo-fix` — spelling / grammar correction
+- `revision: wording-cleanup` — minor rewording with no verdict change
+- `revision: H2-verdict-resolved` — H2 `pending` → concrete value after fresh-reader test completes
+- `revision: H1-stability-resolved` / `revision: H1-complementarity-resolved` — analogous for H1 verdicts
+- `revision: drift-refresh, supersedes <old-drift-short-sha>` — drift-audit was re-audited; Drift section refreshed
+- `revision: <short reason>` — anything else, with a self-describing slug
+
+### Step 2 — Edit `summary.md`
+
+Open the file, make the correction. For drift-refresh, update the `## Drift` section to cite the new verdict and the new `@ <drift-audit-short-sha>`. For verdict resolution, change `pending` to the resolved value and update the rationale.
+
+### Step 3 — Pin the current drift-audit version
+
+```bash
+SID=<session-id>
+DA_SHA=$(git log -1 --format=%H -- "observations/sessions/$SID/drift-audit.json")
+DA_SHORT=$(git rev-parse --short "$DA_SHA")
+```
+
+For drift-refresh, the new `$DA_SHORT` differs from the superseded one — capture the old short SHA from the prior summary commit or from the superseded drift-audit:
+
+```bash
+OLD_DA_SHORT=$(git log -1 --format='%s' -- "observations/sessions/$SID/summary.md" | sed -E 's/.*@ ([a-f0-9]+)$/\1/')
+echo "Superseding old drift-audit $OLD_DA_SHORT; new is $DA_SHORT"
+```
+
+### Step 4 — Commit as a follow-up session-bundle amend
+
+Examples:
+
+```bash
+# Typo fix:
+git commit -m "session bundle amend: $SID — summary revision: typo-fix @ $DA_SHORT"
+
+# Late H2 verdict resolution:
+git commit -m "session bundle amend: $SID — summary revision: H2-verdict-resolved @ $DA_SHORT" \
+           -m "Fresh-reader test completed; H2 verdict resolved from pending to clear."
+
+# Drift-refresh after spec 008 Path C re-audit:
+git commit -m "session bundle amend: $SID — summary revision: drift-refresh, supersedes $OLD_DA_SHORT @ $DA_SHORT" \
+           -m "Drift-audit re-audited per spec 008 Path C; verdict changed from minor_drift to no_drift."
+```
+
+No new `Mode:` body line — the mode of the original initial commit is inherited.
+
+### Step 5 — Verify the prior version is preserved
+
+```bash
+git log --all --follow --format='%H %s' -- "observations/sessions/$SID/summary.md"
+git show <prior-commit>:"observations/sessions/$SID/summary.md"
+```
+
+The prior summary is retrievable; the current file on disk is the consumer-relevant version per contract C8.
+
+### Step 6 — Run sanity checks
+
+Same as Path A Step 5. See **Post-commit sanity checks** — note that check 5 (`Mode:` line) is conditionally skipped for revision commits since they inherit mode from the initial commit.
+
+**Done.** Revision landed; prior version retrievable from git history.
 
 ## Path D — Peer-audit
 
-*Filled by US3 — see [`specs/009-session-summary-workflow/quickstart.md`](../../specs/009-session-summary-workflow/quickstart.md) Path D until this section lands.*
+Use this when a peer reviewer (another agent, operator colleague, or uninvolved human) audits a previously-committed summary. Peer-audit is **optional** per FR-018 — counted-session eligibility does NOT require it. But when it happens, the ledger lets POC-exit synthesis count independent-review coverage across counted sessions.
+
+### Step 1 — Read the existing summary
+
+```bash
+SID=<session-id>
+cat "observations/sessions/$SID/summary.md"
+```
+
+The reviewer reads the summary, cross-references the bundle inputs (transcript / meta / interventions / drift-audit), and forms an independent judgment.
+
+### Step 2 — Decide audit outcome
+
+One of three outcomes:
+
+- **No material findings**: the summary accurately represents the session; verdicts stand; no wording changes needed.
+- **Wording suggestions**: minor edits to improve clarity without changing verdicts. These get incorporated into the file.
+- **Material disagreement**: the reviewer disagrees with a verdict value or a factual claim. **Peer-audit itself does NOT resolve this** — the reviewer records their disagreement; the operator decides whether to revise (Path C) or accept the reviewer's dissent on-record.
+
+### Step 3 — Pin the current drift-audit version
+
+```bash
+DA_SHA=$(git log -1 --format=%H -- "observations/sessions/$SID/drift-audit.json")
+DA_SHORT=$(git rev-parse --short "$DA_SHA")
+```
+
+### Step 4 — Commit the peer-audit event
+
+**No material findings OR disagreement-without-changes** (summary text unchanged) — use an empty commit:
+
+```bash
+git commit --allow-empty \
+  -m "session bundle amend: $SID — summary [peer-audited by Vigil] @ $DA_SHORT" \
+  -m "Peer audit by Vigil. No material findings."
+```
+
+Or for disagreement-without-changes:
+
+```bash
+git commit --allow-empty \
+  -m "session bundle amend: $SID — summary [peer-audited by Vigil] @ $DA_SHORT" \
+  -m "Peer audit by Vigil. Disagree with H1 complementarity verdict (I read it as partial, not clear because Vigil's reciprocal contribution at turn 14 wasn't clearly load-bearing). Flagging for operator judgment — no summary change requested."
+```
+
+**Peer-audit with wording changes incorporated** — combined token, staged edit:
+
+```bash
+git add "observations/sessions/$SID/summary.md"
+git commit -m "session bundle amend: $SID — summary [peer-audited by Dalgos] revision: wording-cleanup @ $DA_SHORT" \
+           -m "Peer audit by Dalgos. Incorporated two wording suggestions in the What happened section. No verdict changes."
+```
+
+**Peer-audit that resolves a pending verdict** (the reviewer is also the one running the H2 fresh-reader test, for example):
+
+```bash
+git add "observations/sessions/$SID/summary.md"
+git commit -m "session bundle amend: $SID — summary [peer-audited by Vigil] revision: H2-verdict-resolved @ $DA_SHORT" \
+           -m "Peer audit by Vigil. Fresh-reader reconstruction produced; operator ratified as materially correct. H2 verdict resolved from pending to clear."
+```
+
+Combined-token ordering: `[peer-audited by <id>]` first, `revision: <reason>` second — matches [SUMMARY-TAXONOMY.md](SUMMARY-TAXONOMY.md) convention.
+
+### Step 5 — Verify the peer-audit ledger
+
+```bash
+git log --all --grep='peer-audited' --format='%H %s' -- observations/sessions/*/summary.md
+```
+
+**Done.** Peer-audit event landed; cumulative `git log --all --grep='peer-audited'` shows the full ledger across all sessions. Cross-reference with spec 008's `[arbitrated]` ledger for dual independent-review coverage analysis (see SUMMARY-TAXONOMY.md "Dual-ledger cross-reference" recipe).
 
 ---
 
