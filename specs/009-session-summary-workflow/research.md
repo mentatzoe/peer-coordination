@@ -22,7 +22,7 @@ Taxonomy tokens:
 | Token | When | Counting signal |
 |---|---|---|
 | *(absent)* | Single-author OR agent-drafted + operator-ratified (default case, mode recorded in commit body) | — |
-| `[peer-audited by <id>]` | Follow-up commit landing a peer-audit review of a previously-committed summary | Per FR-018 — `git log --all --grep='peer-audited'` returns the audit ledger |
+| `[peer-audited by <id>]` | Follow-up commit landing a peer-audit review of a previously-committed summary | Per FR-018 — `git log --all --grep='peer-audited' -- observations/sessions/*/summary.md` returns the audit ledger |
 | `revision: <reason>` | Follow-up commit correcting a previously-committed summary (typo, late-arriving H2 verdict, rewording after peer feedback) | Discoverable with `git log --all --grep='summary revision'` |
 | `revision: drift-refresh, supersedes <old-drift-short-sha>` | Follow-up commit when the cited `drift-audit.json` was re-audited per spec 008 Path C and the summary's drift section needs to cite the refreshed verdict | Traceability tying summary revisions to drift-audit re-audits |
 
@@ -31,6 +31,7 @@ Taxonomy tokens:
 ### Rationale
 
 - **Reuses spec 008's pattern**: the bracket-token + grep-able convention is already established and operator-familiar. No new mechanism needed.
+- **Path-limited ledger stays honest**: peer-audit discovery is intentionally path-limited to `summary.md`, so a no-prose-change audit still needs a minimal file touch. The workflow uses a non-rendered HTML audit marker for that case rather than a sidecar file or an empty commit.
 - **`<drift-audit-short-sha>` as version anchor**: parallel to how spec 008 uses `<rubric-short-sha>` for drift-audit commits. Gives the commit subject a stable "what version of the upstream input was this based on" signal.
 - **Author-mode in commit body, not subject**: per FR-004 Q/A — mode choice (single-author vs agent-drafted) is recorded via a `Mode: single-author` or `Mode: agent-drafted, drafted-by: <id>, ratified-by: <id>` body line, not subject. Keeps the subject grep-signal focused on workflow events (peer audit, revision) rather than routine authoring metadata.
 - **Revision reason inline**: putting `<reason>` after `revision:` rather than in a separate token keeps the subject one line and self-describing.
@@ -38,7 +39,7 @@ Taxonomy tokens:
 ### Alternatives considered
 
 - **Mode in subject (e.g. `[agent-drafted]`)** — rejected: clutters the subject for the common case; mode info is orthogonal to grep-worthy workflow events.
-- **Separate sidecar file for peer-audit events** — rejected: adds a second artifact to manage; commit-message token is the cheapest legible convention and mirrors spec 008's proven arbitration-ledger.
+- **Separate sidecar file for peer-audit events** — rejected: adds a second artifact to manage; commit-message token plus a minimal non-rendered `summary.md` audit marker is still cheaper and keeps the ledger path-limited to the summary.
 - **Reuse `[reviewed]` instead of `[peer-audited by <id>]`** — rejected: `[reviewed]` implies pre-commit review (as in spec 008 Path B two-auditor mode); `[peer-audited by <id>]` makes the post-commit nature and reviewer identity explicit.
 
 ---
@@ -203,7 +204,7 @@ This workflow explicitly does NOT specify the rollup — just the contract it wi
 
 - **FR-004 author discipline** (clarify Q1): tiered — operator picks single-author or agent-drafted per-session; mode in commit body (R4).
 - **FR-010 summary structure** (clarify Q2): hybrid inverted-pyramid (Seed → Verdicts → Drift → What happened); verdict lines follow R2 grep-stable format.
-- **FR-018 cross-review discipline** (clarify Q3): optional post-commit peer audit via follow-up `[peer-audited by <id>]` token (R1).
+- **FR-018 cross-review discipline** (clarify Q3): optional post-commit peer audit via follow-up `[peer-audited by <id>]` token (R1); no-change peer-audits append a non-rendered `summary.md` audit marker so the path-limited ledger remains complete.
 - **Revision lifecycle**: append-only follow-up commits per R5, inherit spec 001 FR-014; no `--amend`.
 - **Commit format**: `session bundle amend: <session-id> — summary[ <taxonomy-token>] @ <drift-audit-short-sha>` (R1).
 - **Idempotency**: structural determinism only, not prose determinism (R3).

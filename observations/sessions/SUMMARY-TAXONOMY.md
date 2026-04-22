@@ -47,6 +47,8 @@ session bundle amend: 2026-05-01-spec-010-split — summary [peer-audited by Vig
 
 This is the **peer-audit ledger** per [spec 009 contract C7](../../specs/009-session-summary-workflow/contracts/workflow-contracts.md). POC-exit synthesis and any mid-POC independent-review-coverage review count peer-audits across counted sessions here. Peer-audit is NOT required for counted-session eligibility — but when it happens, the ledger is the discoverable signal.
 
+The peer-audit commit must touch `summary.md`. If the review produces no wording change, append a non-rendered HTML audit marker so the event still appears in the path-limited ledger without changing the rendered narrative.
+
 **Commit body recommendation**: name the reviewer identity and either "No material findings" OR a one-line summary of findings and any wording changes incorporated. Example:
 
 ```
@@ -56,6 +58,12 @@ Peer audit by Vigil. Disagree with H1 complementarity verdict (I read it as
 partial, not clear because Vigil's reciprocal contribution at turn 14 wasn't
 clearly load-bearing). Flagging for operator judgment — no summary change
 requested.
+```
+
+Minimal no-change marker example inside `summary.md`:
+
+```html
+<!-- Peer audit: Vigil. No material findings. -->
 ```
 
 ---

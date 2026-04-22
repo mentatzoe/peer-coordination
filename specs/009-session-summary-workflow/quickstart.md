@@ -194,6 +194,7 @@ Use this when a peer reviewer (another agent, operator colleague, or uninvolved 
 ### Step 1 — Read the existing summary
 
 ```bash
+SID=<session-id>
 cat "observations/sessions/$SID/summary.md"
 ```
 
@@ -207,12 +208,21 @@ One of:
 - **Wording suggestions**: minor edits to improve clarity without changing verdicts.
 - **Material disagreement**: the reviewer disagrees with a verdict value or a factual claim. **NOT resolved by the peer-audit itself** — the reviewer records their disagreement; the operator decides whether to revise (Path C).
 
-### Step 3 — Commit the peer-audit event
-
-If the summary text does NOT change (no material findings OR disagreement-without-changes):
+### Step 3 — Pin the current drift-audit version
 
 ```bash
-git commit --allow-empty \
+DA_SHA=$(git log -1 --format=%H -- "observations/sessions/$SID/drift-audit.json")
+DA_SHORT=$(git rev-parse --short "$DA_SHA")
+```
+
+### Step 4 — Commit the peer-audit event
+
+If the summary's rendered prose does NOT change (no material findings OR disagreement-without-changes), append a non-rendered audit marker so the event still touches `summary.md` and appears in the path-limited peer-audit ledger:
+
+```bash
+printf '\n<!-- Peer audit: Vigil. No material findings. -->\n' >> "observations/sessions/$SID/summary.md"
+git add "observations/sessions/$SID/summary.md"
+git commit \
   -m "session bundle amend: $SID — summary [peer-audited by Vigil] @ $DA_SHORT" \
   -m "Peer audit by Vigil. No material findings."
 ```
@@ -220,7 +230,9 @@ git commit --allow-empty \
 Or for disagreement-without-changes:
 
 ```bash
-git commit --allow-empty \
+printf '\n<!-- Peer audit: Vigil. Disagreement recorded; no summary text changes requested. -->\n' >> "observations/sessions/$SID/summary.md"
+git add "observations/sessions/$SID/summary.md"
+git commit \
   -m "session bundle amend: $SID — summary [peer-audited by Vigil] @ $DA_SHORT" \
   -m "Peer audit by Vigil. Disagree with H1 complementarity verdict (I read it as partial, not clear because Vigil's reciprocal contribution at turn 14 wasn't clearly load-bearing). Flagging for operator judgment — no summary change requested."
 ```
@@ -233,7 +245,7 @@ git commit -m "session bundle amend: $SID — summary [peer-audited by Dalgos] r
            -m "Peer audit by Dalgos. Incorporated two wording suggestions in the What happened section. No verdict changes."
 ```
 
-### Step 4 — Verify the peer-audit ledger
+### Step 5 — Verify the peer-audit ledger
 
 ```bash
 git log --all --grep='peer-audited' --format='%H %s' -- "observations/sessions/$SID/summary.md"
@@ -287,7 +299,9 @@ git log -1 --format='%s' -- "$SUMMARY"
 # Expected: "session bundle amend: <sid> — summary[ <taxonomy-token>] @ <drift-short-sha>"
 
 # 5. Commit body carries the Mode: line (for initial commits)
-git log -1 --format='%b' -- "$SUMMARY" | grep -E '^Mode:'
+git log -1 --format='%s' -- "$SUMMARY" | grep -qE 'revision:|\[peer-audited' \
+  && echo "skipping Mode check (follow-up commit)" \
+  || git log -1 --format='%b' -- "$SUMMARY" | grep -E '^Mode:'
 # Expected for initial commits: one match (Mode: single-author OR Mode: agent-drafted, ...)
 
 # 6. Drift-audit SHA in subject resolves to an existing commit

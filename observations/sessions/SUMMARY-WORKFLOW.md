@@ -314,10 +314,12 @@ DA_SHORT=$(git rev-parse --short "$DA_SHA")
 
 ### Step 4 — Commit the peer-audit event
 
-**No material findings OR disagreement-without-changes** (summary text unchanged) — use an empty commit:
+**No material findings OR disagreement-without-changes** (rendered prose unchanged) — append a non-rendered audit marker so the peer-audit still touches `summary.md` and appears in the path-limited ledger:
 
 ```bash
-git commit --allow-empty \
+printf '\n<!-- Peer audit: Vigil. No material findings. -->\n' >> "observations/sessions/$SID/summary.md"
+git add "observations/sessions/$SID/summary.md"
+git commit \
   -m "session bundle amend: $SID — summary [peer-audited by Vigil] @ $DA_SHORT" \
   -m "Peer audit by Vigil. No material findings."
 ```
@@ -325,7 +327,9 @@ git commit --allow-empty \
 Or for disagreement-without-changes:
 
 ```bash
-git commit --allow-empty \
+printf '\n<!-- Peer audit: Vigil. Disagreement recorded; no summary text changes requested. -->\n' >> "observations/sessions/$SID/summary.md"
+git add "observations/sessions/$SID/summary.md"
+git commit \
   -m "session bundle amend: $SID — summary [peer-audited by Vigil] @ $DA_SHORT" \
   -m "Peer audit by Vigil. Disagree with H1 complementarity verdict (I read it as partial, not clear because Vigil's reciprocal contribution at turn 14 wasn't clearly load-bearing). Flagging for operator judgment — no summary change requested."
 ```
@@ -354,7 +358,7 @@ Combined-token ordering: `[peer-audited by <id>]` first, `revision: <reason>` se
 git log --all --grep='peer-audited' --format='%H %s' -- observations/sessions/*/summary.md
 ```
 
-**Done.** Peer-audit event landed; cumulative `git log --all --grep='peer-audited'` shows the full ledger across all sessions. Cross-reference with spec 008's `[arbitrated]` ledger for dual independent-review coverage analysis (see SUMMARY-TAXONOMY.md "Dual-ledger cross-reference" recipe).
+**Done.** Peer-audit event landed; because the commit touched `summary.md`, cumulative `git log --all --grep='peer-audited' -- observations/sessions/*/summary.md` shows the full ledger across all sessions. Cross-reference with spec 008's `[arbitrated]` ledger for dual independent-review coverage analysis (see SUMMARY-TAXONOMY.md "Dual-ledger cross-reference" recipe).
 
 ---
 

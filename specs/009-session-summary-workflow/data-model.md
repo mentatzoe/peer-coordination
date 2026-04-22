@@ -27,6 +27,8 @@ Every committed `summary.md` MUST contain these four top-level Markdown sections
 
 The section headings MUST be `## Seed`, `## Verdicts`, `## Drift`, `## What happened` (exact text, in order). The top of the file has a conventional `# <session-id> — <short human title>` heading and optional metadata line(s) before the first `## Seed` section.
 
+Non-rendered HTML comments MAY appear after the prose body as workflow metadata for peer-audit events. They do not count as additional sections and do not change the rendered narrative.
+
 **Example skeleton**:
 
 ```markdown
@@ -164,7 +166,8 @@ git log --all --grep='summary revision' --format='%H %s' -- observations/session
 
 **Invariants**:
 
-- MUST be a follow-up commit, NOT a revision to the summary file itself — the `summary.md` file may be unchanged by a peer-audit commit (if the reviewer had no findings or their observations are recorded only in the commit body). If the reviewer's observations lead to changes in `summary.md`, those changes land in the same commit (a "peer-audit + revision" combined commit — token combo allowed).
+- MUST be a follow-up commit whose subject carries the `[peer-audited by <id>]` token.
+- MUST touch `summary.md` so the peer-audit is reconstructible from path-limited git history. If the reviewer has no wording changes, the commit appends a non-rendered HTML audit marker to `summary.md`; if the reviewer proposes wording or verdict changes, those changes land in the same commit (a "peer-audit + revision" combined commit — token combo allowed).
 - MUST cite the reviewer identity in the token: `[peer-audited by Dalgos]`, `[peer-audited by Vigil]`, `[peer-audited by <human-name>]`, etc.
 - Commit body SHOULD record the reviewer's findings or "no material findings" + any wording changes incorporated.
 - Does NOT require operator ratification (the reviewer's audit is a reviewer-owned artifact; the operator retains authority over the final summary via their ability to further revise).

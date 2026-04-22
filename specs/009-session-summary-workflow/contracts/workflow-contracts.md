@@ -133,10 +133,11 @@ Where `<taxonomy-token>` is one of:
 **Guarantees**:
 
 1. Every peer-audit of a committed summary produces a commit whose subject contains the literal token `[peer-audited by <id>]` per C4.
-2. `git log --all --grep='peer-audited' --format='%H %s' -- observations/sessions/*/summary.md` returns the full peer-audit ledger with no additional tooling.
-3. The ledger is append-only (new peer-audits add history, never rewrite prior commits).
-4. Per-session peer-audit status is reconstructible from the session's amend-commit history alone.
-5. Reviewer identity is captured inside the token — the consumer can count unique reviewers, identify which agents or humans have audited which sessions, and cross-reference against the arbitration ledger (spec 008 C7) for sessions that received both kinds of independent review.
+2. Every peer-audit commit touches `observations/sessions/<session-id>/summary.md`. If the rendered prose stays unchanged, the workflow appends a non-rendered HTML audit marker so the commit still appears in path-limited history.
+3. `git log --all --grep='peer-audited' --format='%H %s' -- observations/sessions/*/summary.md` returns the full peer-audit ledger with no additional tooling.
+4. The ledger is append-only (new peer-audits add history, never rewrite prior commits).
+5. Per-session peer-audit status is reconstructible from the session's amend-commit history alone.
+6. Reviewer identity is captured inside the token — the consumer can count unique reviewers, identify which agents or humans have audited which sessions, and cross-reference against the arbitration ledger (spec 008 C7) for sessions that received both kinds of independent review.
 
 **Combined with spec 008 C7**: a POC-exit reviewer can compute per-session:
 
