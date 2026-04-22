@@ -16,7 +16,7 @@ This document specifies the guarantees an auditor, a downstream consumer (KPI ro
    - `session_id` (string, non-empty)
    - `pinned_rules_ref` (git SHA resolvable in the repo)
    - `closed_at` (RFC3339 UTC, non-null)
-3. `observations/sessions/<session-id>/interventions.json` exists (may be empty array/object per the Codex intervention-tagging slice; workflow treats the shape opaquely).
+3. `observations/sessions/<session-id>/interventions.json` exists as an array of intervention objects per [spec 001 FR-011](../../001-session-bundle-skeleton/spec.md) — empty array is the valid empty case. The Codex intervention-tagging slice owns the per-object schema; this workflow treats the object contents opaquely but honors the array-of-objects storage shape defined by spec 001.
 4. `observations/sessions/<session-id>/drift-audit.json` exists and is committed (workflow halts if drift-audit has not landed per spec 008). The drift-audit's commit short SHA is the `<drift-audit-short-sha>` referenced throughout.
 5. The bundle's working tree is clean of unrelated uncommitted changes (the summary amend commit should land cleanly on top of a committed bundle).
 
