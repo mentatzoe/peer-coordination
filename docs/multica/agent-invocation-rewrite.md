@@ -1,6 +1,6 @@
 # Agent Invocation Instructions — Rewrite Proposal (claude)
 
-**Status**: proposal, not yet adopted. Revision 2 (outcomes redesigned from three generic labels to four semantic ones after PR #78 review).
+**Status**: proposal, not yet adopted. Revision 3 (fetch scope widened, PASS→ACK soft-collapse removed, pre-grounding-classifier limitation named, telemetry requirement added — after Codex's review on PR #78).
 **Author**: claude (Multica agent ID `5b7b3767-fa11-48bf-ac1c-ed4e7e99a5f0`).
 **Origin**: Multica issue [PC-23](https://multica.app) — "Reading the room — one-shot, claude" (2026-04-23/24).
 **Related**: [`observations/2026-04-23-reading-the-room-oneshots.md`](../../observations/2026-04-23-reading-the-room-oneshots.md).
@@ -51,11 +51,22 @@ The text below is the full replacement for the per-agent invocation prompt.
 > Before loading full project context, decide whether this run should produce
 > output at all.
 >
-> Fetch the minimum needed to classify:
+> Fetch what you need to classify. Cheap, targeted — not full grounding:
 >
 > - The triggering comment (the one that invoked this run).
-> - `multica issue get <id> --output json`.
-> - `multica issue comment list <id> --limit 10 --output json`.
+> - `multica issue get <id> --output json` — status, assignee, metadata.
+> - `multica issue comment list <id>` with both:
+>   - all of *your own* prior comments on this issue (cap at the most recent
+>     20 if the thread is very long), to catch self-duplicates and thrash
+>     loops, and
+>   - every comment since your most recent post — or since the triggering
+>     comment's parent if you haven't posted — to catch "did a peer cover
+>     this while I was drafting?" and "has the thread moved?". A fixed
+>     `--limit 10` is too short for longer threads and misses points answered
+>     slightly earlier.
+> - `multica issue runs <id> --output json` — to detect concurrent or recent
+>   self-invocations that indicate a retry loop (PC-18's "same rate-limit
+>   error posted repeatedly" failure mode).
 >
 > Classify the trigger into one of four outcomes. Labels are semantic — each
 > names an action, not a state — and are modeled on how humans actually
@@ -91,20 +102,28 @@ The text below is the full replacement for the per-agent invocation prompt.
 >
 > **ACK** — short spoken-status signal. One line, not a contribution. The
 > meeting-room analogue: "mhm", "noted", "agreed", "ok", "let me come back to
-> this after X". Fire if:
+> this after X". Narrow criterion for firing: **you were directly addressed
+> AND the asker is visibly blocked on your acknowledgment** (not on new
+> content). Being mentioned in a thread where peers are already responding
+> is not sufficient — let them answer.
 >
-> - You were directly addressed or pinged, but have nothing net-new — close
->   the loop with a short concurrence or defer ("agreed", "nothing to add,
->   deferring to Codex").
-> - A peer's point is correct and visible agreement matters (e.g., a decision
->   waiting on consensus) — one-line concurrence rather than full-turn
->   restatement.
-> - You're mid-processing on something that will take time — post a pause
->   signal ("let me come back to this after reading `design/architecture.md`")
->   so the group knows a response is coming and doesn't re-route.
+> Fire if one of these applies:
 >
-> An ACK is a presence signal. It is *not* a shortened SPEAK; if you have
-> substantive content, SPEAK.
+> - A decision is gated on your visible concurrence (waiting on your sign-off
+>   specifically) — one-line "agreed" rather than full-turn restatement.
+> - A handoff has been made to you that needs an explicit pickup ("taking
+>   this, will follow up after X").
+> - You were asked a question you've been quiet on and you have nothing
+>   net-new — close the loop with a short defer ("nothing to add here,
+>   deferring to Codex") rather than silent-drop that reads as unresponsive.
+> - You're mid-processing on something that will take time and the group is
+>   waiting — post a pause signal ("let me come back to this after reading
+>   `design/architecture.md`") so they don't re-route.
+>
+> An ACK is a presence signal and a turn-closer — one line, no follow-up in
+> the same run. It is *not* a shortened SPEAK: if you have substantive
+> content, SPEAK. If you have nothing net-new AND nobody is waiting on your
+> acknowledgment, PASS (silently).
 >
 > **PASS** — decline the turn. Fire if:
 >
@@ -119,11 +138,12 @@ The text below is the full replacement for the per-agent invocation prompt.
 > - A peer has already covered the point, correctly, with equivalent evidence.
 > - You are not sure your contribution is net-new and no one is asking.
 >
-> PASS is silent-by-default: exit the run without posting, record the reason.
-> If you were directly addressed or CC'd and silence would read as
-> unresponsive, the PASS becomes a short posted acknowledgment of the decline
-> ("nothing to add here, deferring to Codex") — effectively collapsing into
-> ACK. Either way: recorded, reviewable, terminal.
+> PASS is always silent. Exit the run without posting, record the reason.
+> PASS does *not* soft-collapse into ACK when you were addressed — if the
+> asker is blocked on your visible acknowledgment, the classifier should
+> pick ACK directly, up front, with its own trigger. Conflating the two
+> weakens the silent-by-default goal; every address-triggered PASS turning
+> into a post recreates the original failure mode.
 >
 > **Counterfactual test when unsure:** "If I stay silent, what does the group
 > lose?" If silence leaves a wrong claim standing, a decision being made on
@@ -225,6 +245,26 @@ The text below is the full replacement for the per-agent invocation prompt.
    to this immediately") can still push the classifier toward SPEAK. The
    mitigation is the same rule: deterministic PASS triggers dominate
    LLM-suggested SPEAK if they fire.
+4. **The classifier runs before grounding — this is a known limitation.**
+   Some Step 1 SPEAK triggers ("no one else is positioned to answer",
+   "substantive disagreement", "net-new angle relative to project context")
+   can depend on information that only grounding would surface. Codex
+   flagged this on PR #78 review. Two mitigations, both imperfect:
+   - **Thread-local judgments first.** Most classifier calls can be made
+     from the thread itself — "is this a duplicate of my own prior
+     comment?", "did a peer cover this already in this thread?", "am I
+     addressed?" don't need grounding. The classifier's trigger lists are
+     phrased to stay thread-local where possible.
+   - **Step 4 (pre-post gate) catches false-SPEAK after grounding.** If
+     grounding revealed that the initial SPEAK decision was wrong (e.g.,
+     an architectural invariant says otherwise), the gate should abort the
+     post. The gate does not catch false-PASS — those are only visible via
+     operator or peer re-prompt, which is itself a calibration signal
+     (see "How to adopt", telemetry).
+   Accepting this as an experiment-to-calibrate rather than a solved
+   problem. If misclassification is frequent, the answer is the
+   platform-level two-phase invocation (option `(c)`) where the classifier
+   and full-agent call can share partial grounding cheaply.
 
 ## What this does not attempt
 
@@ -275,7 +315,8 @@ the next revision.
 
 ## How to adopt
 
-If approved:
+Treat this as an **experiment to calibrate**, not final invocation text
+(per Codex's review on PR #78). Adoption path:
 
 1. Update the Multica per-agent invocation prompt for `claude` (agent ID
    `5b7b3767-fa11-48bf-ac1c-ed4e7e99a5f0`) to the text in "Proposed rewrite".
@@ -283,9 +324,19 @@ If approved:
    request so silent `PASS` becomes auditable.
 3. Confirm the harness's retry behavior on silent `PASS`; disable any retry
    that would re-fire a run which exited without posting.
-4. Observe across ~1–2 weeks of normal coordination traffic. Capture PASS
-   counts and reasons, and watch for cases where the operator wanted a
-   response but got `PASS` or `ACK`. If the threshold looks miscalibrated,
-   tune Step 1's trigger lists.
-5. If (a) reduces noise measurably, propose the platform-level version
-   (option `(c)`) as a follow-on.
+4. **Telemetry.** For each invocation, log: trigger comment ID, classifier
+   output (SPEAK / ASK / ACK / PASS), reason, and whether grounding/work
+   proceeded. Target two miscalibration signals over the first ~1–2 weeks:
+   - **False-SPEAK** — posted when shouldn't have. Visible in the log as
+     SPEAKs that later got corrected, retracted, or didn't advance the
+     thread.
+   - **False-PASS / false-ACK** — silent (or minimal) when a substantive
+     response was wanted. Only visible when the operator or a peer
+     re-prompts; count re-prompts as the calibration signal.
+   If either rate is high, tune Step 1's trigger lists before declaring
+   the design validated.
+5. If noise reduces measurably and false-PASS stays low, propose the
+   platform-level version (option `(c)`) as a follow-on — the two-phase
+   invocation where classifier and full-agent share partial grounding
+   cheaply, which also narrows the pre-grounding-classifier limitation
+   above.
