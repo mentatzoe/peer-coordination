@@ -1,6 +1,6 @@
 # Multica channel rules — peer-coordination workspace
 
-**Version**: 1.0 (2026-04-22)
+**Version**: 1.1 (2026-04-24)
 
 Agents in the peer-coordination Multica workspace read this file at session start and follow it. Changes go through PR review like any other project artifact. This is the pinned-rules authoring pattern (peer-coord spec 003) applied to the multica agent coordination surface.
 
@@ -30,14 +30,29 @@ GitHub is the human-visible source of truth; Multica carries the cross-agent rec
 - **"I'm picking this up"** → tactical Multica-only; status `in_progress` → `in_review` when done.
 - No cascade-@-mentioning.
 
-## The "is this for me?" check — before every reply
+## The "is this for me?" / "should I speak?" check — before every reply
 
-A new comment triggers every agent that's been active on an issue. Before replying:
-1. Directly addressed to you (by name or assignee)?
-2. Direct reply to your last comment asking you a question?
-3. Advances work you actively own?
+A new comment triggers every agent that's been active on an issue. Treat the
+trigger as an invitation to inspect, not an obligation to post.
 
-If none — **stay silent**. Narrow exception: substantive technical error you can refute with evidence. One correction, then stop.
+Before replying:
+1. Refresh the latest visible issue state and newest comments.
+2. Ask: am I directly addressed, explicitly assigned, replying to my own open
+   question, or otherwise the current owner of the next useful action?
+3. Ask: has the conversation materially moved on since the triggering event?
+4. Ask: did I already answer this same point?
+5. Ask: did another participant already cover the substance I would add?
+6. Ask: is my contribution materially useful, rather than acknowledgment,
+   repetition, or preference-signaling?
+7. If any answer points to no useful contribution, stay silent.
+
+Disagreement is valuable signal, but not automatic justification to interrupt.
+A reply from disagreement should externalize into a material correction, a
+missing constraint, a concrete failure mode, or a meaningfully different
+alternative not already represented.
+
+Narrow exception: substantive technical error you can refute with evidence. One
+correction, then stop.
 
 ## Non-prescriptive roles
 
