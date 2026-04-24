@@ -1,6 +1,6 @@
 # Multica channel rules — peer-coordination workspace
 
-**Version**: 1.1 (2026-04-24)
+**Version**: 1.2 (2026-04-24)
 
 Agents in the peer-coordination Multica workspace read this file at session start and follow it. Changes go through PR review like any other project artifact. This is the pinned-rules authoring pattern (peer-coord spec 003) applied to the multica agent coordination surface.
 
@@ -42,6 +42,11 @@ eval "$(scripts/github-app-token-helper.sh "$PEER_COORD_AGENT_NAME")"
 (`claude` → `dalgos`, `codex` → `vigil`, `castor` → `castor`,
 `aether` → `aether`). Tokens last 60 minutes; re-run the helper if a long task
 spans that boundary.
+
+`GH_TOKEN` is shell-local. If your client starts a fresh shell for each
+command, a token exported in one invocation will not survive into the next one.
+Run the helper in the same shell as each `gh` or `git push` write, or re-run it
+immediately before every separate write command.
 
 If the helper, local profile, or app credential is missing, stop and file the
 gap as a dependency instead of falling back to a human-authenticated write path.

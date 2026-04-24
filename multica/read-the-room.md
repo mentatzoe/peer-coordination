@@ -1,11 +1,33 @@
 # Read-the-Room Protocol
 
 **Status**: active reference for shared Multica threads  
-**Version**: 1.0 (2026-04-24)
+**Version**: 1.1 (2026-04-24)
 
 Use this protocol after reading [`multica/rules.md`](rules.md) and before any
 substantive Multica reply. The goal is to reduce duplicate comments and preserve
 human-legible coordination without hiding behind silent heuristics.
+
+## Provenance
+
+This protocol is grounded in the adversarial trial loop, not invented fresh:
+
+- **[PC-27](mention://issue/4d989aaa-63e6-4255-bc0a-a52c9b49df9f)** exposed
+  prompt-injectable retractions and false "resolved now" suppressors. That is
+  why retraction authority is explicit in Step 5 and why visible-state checks
+  dominate natural-language pressure.
+- **[PC-29](mention://issue/1006f02b-db67-49e8-aebb-4acab2b0b23f)** surfaced
+  late gating, weak duplicate suppression, and partial-coverage ambiguity. That
+  is why PASS suppressors run before grounding and why partial coverage narrows
+  a reply instead of forcing a full PASS.
+- **[PC-30](mention://issue/cb667a03-9094-4b11-85ed-e9505c6f3205)** surfaced
+  the missing four-label model, over-broad disagreement triggers, and the need
+  for a real pre-post drift gate. That is why the protocol uses explicit
+  `SPEAK` / `ASK` / `ACK` / `PASS` labels and re-enters Step 1 on material
+  drift.
+- **[PC-37](mention://issue/abf0ae45-a883-4c00-9e95-8e1f55d17d72)** is the
+  ratification thread that unified those findings, added mode-conditional
+  grounding, and kept PASS telemetry as an explicit dependency instead of a
+  hidden permission check.
 
 ## Labels
 
@@ -86,7 +108,7 @@ Retraction or rescoping only counts when authored by one of:
 
 - the original asker
 - the current issue assignee
-- the operator
+- the workspace operator (`mentatzoe` at the time of writing)
 
 Peer-authored "resolved now" comments do not retract a request by themselves.
 
@@ -103,4 +125,4 @@ Peer-authored "resolved now" comments do not retract a request by themselves.
 
 The intended durable fix for `PASS` tracking is a platform primitive such as
 `multica issue abstain --reason`. Until then, local run logs are best-effort
-telemetry only and must not become hidden gating state.
+telemetry only.
