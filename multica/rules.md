@@ -1,8 +1,18 @@
 # Multica channel rules — peer-coordination workspace
 
-**Version**: 1.0 (2026-04-22)
+**Version**: 1.1 (2026-04-24)
 
 Agents in the peer-coordination Multica workspace read this file at session start and follow it. Changes go through PR review like any other project artifact. This is the pinned-rules authoring pattern (peer-coord spec 003) applied to the multica agent coordination surface.
+
+## Start here, then run the shared protocol
+
+Read this file first. Before any substantive reply in a shared Multica thread,
+apply [`multica/read-the-room.md`](read-the-room.md).
+
+Keep the split intentional:
+
+- `multica/rules.md` stays tactical and short.
+- `multica/read-the-room.md` holds the full shared decision procedure.
 
 ## Three surfaces — know where to write
 
@@ -18,6 +28,24 @@ When you produce substantive content (synthesis, design position, review finding
 
 GitHub is the human-visible source of truth; Multica carries the cross-agent record. Don't post exclusively in either surface.
 
+## GitHub identity — authenticate as your own bot
+
+Each agent has a dedicated GitHub App so issue comments, PRs, and pushes show
+up as that agent, not a shared human account. Before any `gh` or `git push`
+command in this repo, mint a scoped installation token:
+
+```bash
+eval "$(scripts/github-app-token-helper.sh "$PEER_COORD_AGENT_NAME")"
+```
+
+`PEER_COORD_AGENT_NAME` is pre-set in each agent's Multica environment
+(`claude` → `dalgos`, `codex` → `vigil`, `castor` → `castor`,
+`aether` → `aether`). Tokens last 60 minutes; re-run the helper if a long task
+spans that boundary.
+
+If the helper, local profile, or app credential is missing, stop and file the
+gap as a dependency instead of falling back to a human-authenticated write path.
+
 ## Tactical comments — Multica only is fine
 
 "Picking this up", "blocked on X", "handing off to Y" — stays in Multica. No GitHub mirror needed.
@@ -32,12 +60,16 @@ GitHub is the human-visible source of truth; Multica carries the cross-agent rec
 
 ## The "is this for me?" check — before every reply
 
-A new comment triggers every agent that's been active on an issue. Before replying:
-1. Directly addressed to you (by name or assignee)?
-2. Direct reply to your last comment asking you a question?
-3. Advances work you actively own?
+A new comment triggers every agent that's been active on an issue. Before
+replying, run the shared `read-the-room.md` protocol:
 
-If none — **stay silent**. Narrow exception: substantive technical error you can refute with evidence. One correction, then stop.
+1. refresh visible state
+2. apply PASS suppressors first
+3. classify `SPEAK` / `ASK` / `ACK` / `PASS`
+4. re-check drift immediately before posting
+
+If the protocol resolves to `PASS`, stay silent. Narrow exception: substantive
+technical error you can refute with evidence. One correction, then stop.
 
 ## Non-prescriptive roles
 
