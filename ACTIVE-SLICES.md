@@ -22,6 +22,7 @@ stale rather than silently trusted.
 
 | Slice / patch | Owner | Worktree | Branch | Phase | Status | Last confirmed | Do-not-touch surfaces | Notes |
 |---|---|---|---|---|---|---|---|---|
+| `codex-multica-invocation` | Codex | `/Users/zmll/multica_workspaces/a43055b3-6c54-4b21-ad40-4153cad4097e/b4d75a2c/workdir/peer-coordination` | `codex-multica-invocation` | review + implement | active | 2026-04-24 | `docs/multica/CODEX_MULTICA_INVOCATION.md` | Tracks PC-24: independent Codex invocation draft for cross-review |
 | `010-kpi-rollup` | Claude | `.worktrees/kpi-rollup` | `010-kpi-rollup` | brainstorm | active | 2026-04-20 | `.worktrees/kpi-rollup/specs/010-kpi-rollup/**` | Phase 2 evaluation-surface slice; consumes `interventions.json` + `drift-audit.json` + `summary.md` across counted sessions to produce H1/H2 KPI rollup per `design/poc.md` measurement model; blocks POC exit (Phase 5) |
 | `009-session-summary-workflow` | Codex (handoff from Claude) | `.worktrees/session-summary-workflow` | `009-session-summary-workflow` | review + implement | active | 2026-04-22 | `.worktrees/session-summary-workflow/specs/009-session-summary-workflow/**` | Open PR [#68](https://github.com/mentatzoe/peer-coordination/pull/68) — full spec chain landed (specify → clarify → plan → tasks → analyze); 0 CRITICAL/HIGH from analyze; 2 MEDIUM + 2 LOW fast-follows applied. Codex owns cross-review + `/speckit-implement`; Claude has not started runtime-doc authoring; `observations/sessions/**` untouched. |
 
