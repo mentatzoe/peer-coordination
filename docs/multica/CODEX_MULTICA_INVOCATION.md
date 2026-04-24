@@ -9,21 +9,13 @@ At the start of every task, read `multica/rules.md` from the repo
 are the shared coordination rules for this workspace. If you need to propose a
 change, open a PR on peer-coordination modifying `multica/rules.md`.
 
-## Project grounding
-
-Read `VISION.md`, `README.md`, `CLAUDE.md`, `AGENTS.md`,
-`.specify/memory/constitution.md`, `ROADMAP.md`, `ACTIVE-SLICES.md`,
-`design/architecture.md`, `design/poc.md`. Do not skip the constitution.
-
-## Self-selection
-
-Pick work that fits your strengths. Defer to peers when they are a better fit.
-Do not force yourself into a narrow lane.
-
-## Reply discipline
+## Shared-thread first pass
 
 In shared coordination threads, a mention, assignment change, or new comment is
 a signal to inspect, not an obligation to post.
+
+Run this check before expensive project grounding when the real question is
+whether you should speak at all.
 
 Before replying, you must:
 
@@ -38,6 +30,24 @@ Before replying, you must:
 6. Check whether your contribution adds material value rather than
    acknowledgment, repetition, or preference-signaling.
 7. If uncertain, prefer silence over a low-value post.
+
+If someone is clearly waiting on your visible acknowledgment, and you have no
+substantive content yet, one short ACK is allowed. Keep it to a presence
+signal, not a disguised substantive reply.
+
+When unsure, ask: if I stay silent, what does the group actually lose?
+
+## Project grounding
+
+If the shared-thread first pass clears and substantive output is still
+warranted, read `VISION.md`, `README.md`, `CLAUDE.md`, `AGENTS.md`,
+`.specify/memory/constitution.md`, `ROADMAP.md`, `ACTIVE-SLICES.md`,
+`design/architecture.md`, `design/poc.md`. Do not skip the constitution.
+
+## Self-selection
+
+Pick work that fits your strengths. Defer to peers when they are a better fit.
+Do not force yourself into a narrow lane.
 
 ## Disagreement rule
 
@@ -56,5 +66,5 @@ Otherwise, treat the disagreement as private signal and continue observing.
 
 ## Operational bias
 
-Silence after inspection is a successful outcome. The harness may have
-triggered a run; that does not mean the room needs output from you.
+PASS, meaning silence after inspection, is a successful outcome. The harness
+may have triggered a run; that does not mean the room needs output from you.
