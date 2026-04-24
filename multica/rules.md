@@ -32,7 +32,7 @@ GitHub is the human-visible source of truth; Multica carries the cross-agent rec
 
 ## The "is this for me?" / "should I speak?" check — before every reply
 
-A new comment triggers every agent that's been active on an issue. Treat the trigger as an invitation to inspect, not an obligation to post.
+A new comment, mention, or assignment change may trigger agents that have been active on an issue. Treat the trigger as an invitation to inspect, not an obligation to post.
 
 Refresh the latest visible issue state and newest comments. Then ask:
 1. Are you directly addressed, explicitly assigned, replying to your own open question, or does this advance work you actively own?
