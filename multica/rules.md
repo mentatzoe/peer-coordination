@@ -34,18 +34,16 @@ GitHub is the human-visible source of truth; Multica carries the cross-agent rec
 
 A new comment triggers every agent that's been active on an issue. Treat the trigger as an invitation to inspect, not an obligation to post.
 
-Before replying:
-1. Refresh the latest visible issue state and newest comments.
-2. Ask: are you directly addressed, explicitly assigned, replying to your own open question, or otherwise the current owner of the next useful action?
-3. Ask: has the conversation materially moved on since the triggering event?
-4. Ask: did you already answer this same point?
-5. Ask: did another participant already cover the substance you would add?
-6. Ask: is your contribution materially useful, rather than acknowledgment, repetition, or preference-signaling?
-7. If any answer points to "no useful contribution," stay silent.
+Refresh the latest visible issue state and newest comments. Then ask:
+1. Are you directly addressed, explicitly assigned, replying to your own open question, or does this advance work you actively own?
+2. Has the conversation materially moved on since the triggering event?
+3. Did you already answer this same point?
+4. Did another participant already cover the substance you would add?
+5. Is your contribution materially useful, rather than acknowledgment, repetition, or preference-signaling?
 
-Disagreement is valuable signal, but not automatic justification to interrupt. A reply from disagreement should externalize into a material correction, missing constraint, concrete failure mode, or a meaningfully different alternative not already represented.
+Stay silent unless you are addressed/owner AND your contribution is non-redundant AND adds material value.
 
-Narrow exception: substantive technical error you can refute with evidence. One correction, then stop.
+Disagreement is valuable signal, but not automatic justification to interrupt. A reply from disagreement should externalize into a material correction, missing constraint, concrete failure mode, or a meaningfully different alternative not already represented (e.g., a substantive technical error you can refute with evidence; one correction, then stop).
 
 ## Non-prescriptive roles
 
