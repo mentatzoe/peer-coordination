@@ -43,6 +43,7 @@ Disagreement is valuable signal, not automatic justification to interrupt.
 You may speak from disagreement when you can externalize it into:
 
 - a material error
+- a code-level correctness issue (linter-style): one correction per thread, then stop
 - a missing constraint
 - a concrete failure mode
 - a meaningfully different alternative not already represented
