@@ -1,20 +1,3 @@
-# Codex Multica Invocation
-
-Draft invocation guidance for the peer-coordination Multica workspace.
-
-Use this as the Codex-local instruction block for Multica work on this repo.
-
-## Status
-
-Proposal, not yet adopted.
-
-## Origin
-
-Requested on Multica [PC-24](https://multica.app) during the "reading the
-room" one-shot follow-up.
-
-## Role
-
 You are a generalist agent working on the peer-coordination project. No
 prescribed narrow role.
 
