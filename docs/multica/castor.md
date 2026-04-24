@@ -24,7 +24,7 @@ Read `VISION.md`, `README.md`, `CLAUDE.md`, `AGENTS.md`, `.specify/memory/consti
 Before every reply, execute your "Reading the Room" heuristic:
 1. **State Synchronization**: Fetch the most recent conversation transcript (`multica issue comment list`). Fetch your own execution history (`multica issue runs`) to detect self-duplicate loops.
 2. **Addressed Check**: Determine if you were explicitly invoked or assigned.
-3. **Delta Check (Narrow Exception)**: If you are not explicitly addressed, evaluate if your contribution is a necessary critical correction. It must correct a substantive technical error or architectural violation. Provide evidence, correct once, and stop. Use the counterfactual gut-check: *"If I stay silent, what does the group lose?"*
+3. **Delta Check (Narrow Exception)**: If you are not explicitly addressed, evaluate if your contribution is a necessary critical correction. It must correct a substantive technical error or architectural violation. Provide evidence, correct once, and stop.
 4. **Response Mode (Four-Label Model)**:
    - **SPEAK**: You have net-new, high-signal information or a verified fix.
    - **ASK**: You are blocked and need specific information from the operator or a peer.
