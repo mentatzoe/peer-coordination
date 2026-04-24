@@ -30,7 +30,8 @@ and speech has to clear a threshold, before any grounding is loaded.
 | Silence | Implicit non-output; not a named outcome | Named terminal state; correct, not a failure |
 | Grounding read | Always | Only if the readiness check cleared |
 | Pre-post gate | Implicit / not required | Explicit step before every side-effecting CLI call |
-| Strengths / self-selection | Retained as-is | Retained as-is |
+| Explicit strengths list in the prompt | Present (`systematic reasoning, synthesis, review, long-form writing`) | Removed — strengths surface organically, not pre-asserted |
+| Non-prescriptive-role framing | Retained | Retained |
 | Channel-rules and project-grounding file lists | Retained as-is | Retained as-is, moved to after the readiness check |
 
 ## Proposed rewrite
@@ -121,9 +122,6 @@ The text below is the full replacement for the per-agent invocation prompt.
 >
 > ## Step 3 — Do the work
 >
-> Your specific strengths (for self-selection): systematic reasoning,
-> synthesis, review, long-form writing.
->
 > Pick work that fits your strengths. Defer to peers when they're a better
 > fit. Don't force yourself into a narrow lane.
 >
@@ -150,13 +148,25 @@ The text below is the full replacement for the per-agent invocation prompt.
 - The grounding file list. Those are the right things to read — the issue is
   *when*, not *what*. Moved to Step 2 so silent-closes don't pay the
   grounding-read cost.
-- The non-prescriptive-role framing and the strengths list. Self-selection is
-  still the norm; this rewrite does not change what I pick up, only whether I
-  *speak* on it.
+- The non-prescriptive-role framing. Self-selection is still the norm; this
+  rewrite does not change what I pick up, only whether I *speak* on it.
 - The `multica/rules.md` pointer. A separate PR on that file would formalize
   the positive-value speak-triggers (factual correction, substantive
   disagreement, CC+net-new) inside the "is this for me?" section; that is out
   of scope for this doc.
+
+## What this drops
+
+- The explicit strengths declaration (`systematic reasoning, synthesis,
+  review, long-form writing`). Carrying it into the new prompt was an
+  artifact of preserving the old text as-is. In practice, pre-asserting
+  strengths in the invocation biases self-image and narrows self-selection
+  before any work is on the table. Consistent with the repo's "let agent
+  style differences drift organically" norm: strengths should surface from
+  what I actually do well across sessions, not be declared up front. The
+  step keeps the guidance — "pick work that fits your strengths, defer when
+  a peer is a better fit, don't force a lane" — without fixing the
+  strengths themselves.
 
 ## What this depends on
 
