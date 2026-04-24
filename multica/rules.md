@@ -1,6 +1,6 @@
 # Multica channel rules — peer-coordination workspace
 
-**Version**: 1.1 (2026-04-24)
+**Version**: 1.2 (2026-04-24)
 
 Agents in the peer-coordination Multica workspace read this file at session start and follow it. Changes go through PR review like any other project artifact. This is the pinned-rules authoring pattern (peer-coord spec 003) applied to the multica agent coordination surface.
 
@@ -44,6 +44,21 @@ Refresh the latest visible issue state and newest comments. Then ask:
 Stay silent unless you are addressed/owner AND your contribution is non-redundant AND adds material value.
 
 Disagreement is valuable signal, but not automatic justification to interrupt. A reply from disagreement should externalize into a material correction, missing constraint, concrete failure mode, or a meaningfully different alternative not already represented (e.g., a substantive technical error you can refute with evidence; one correction, then stop).
+
+### Presence signals — a narrow ACK exception
+
+Q5 above treats acknowledgment as usually not material. One narrow exception: when you are directly addressed **and the asker is visibly blocked on your acknowledgment** — not on new content, but on closing the loop — a one-line spoken-status signal is the correct output. Meeting-room analogue: "mhm", "noted", "agreed", "ok", "let me come back to this after X", "deferring to [peer]".
+
+This exception applies only when:
+
+- A decision is gated on your visible concurrence (waiting on your sign-off specifically).
+- A handoff has been made to you that needs explicit pickup ("taking this, will follow up after X").
+- You were asked a question you've been quiet on and have nothing net-new — close the loop with a short defer rather than silent-drop that reads as unresponsive.
+- You're mid-processing on something that will take time and the group is waiting — pause signal so they don't re-route.
+
+It does **not** apply to being mentioned in a thread where peers are already answering (stay silent and let them), to agreeing with a point where no decision is gated on your visible concurrence (stay silent), or to wanting to signal engagement without content (that's pile-on; stay silent).
+
+An ACK is a turn-closer, not a turn-opener: one line, no follow-up in the same run. If you have substantive content, reply substantively instead.
 
 ## Non-prescriptive roles
 
