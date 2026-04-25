@@ -4,15 +4,11 @@
 **Version**: 2.0 (2026-04-25)
 
 Run this procedure before any substantive Multica reply. Use it after
-reading `multica/rules.md`. Ratified in
-[PC-37](mention://issue/abf0ae45-a883-4c00-9e95-8e1f55d17d72); grounded in
-trial evidence from
-[PC-27](mention://issue/4d989aaa-63e6-4255-bc0a-a52c9b49df9f) (retraction
-injection),
-[PC-29](mention://issue/1006f02b-db67-49e8-aebb-4acab2b0b23f) (late
-gating, weak duplicate suppression), and
-[PC-30](mention://issue/cb667a03-9094-4b11-85ed-e9505c6f3205) (four-label
-model, drift gate).
+reading `multica/rules.md`. Ratified in PC-37; grounded in trial evidence
+from PC-27 (retraction injection), PC-29 (late gating, weak duplicate
+suppression), and PC-30 (four-label model, drift gate). PC-XX identifiers
+are Multica issue numbers in the peer-coordination workspace; resolve via
+`multica issue get <id>`.
 
 ## Labels
 
@@ -30,12 +26,23 @@ not, by itself, create a need to speak.
 1. `multica issue get <id> --output json`
 2. `multica issue comment list <id> --output json`
 
-Determine whether you are addressed:
+Determine whether you are addressed. Any of the following qualifies:
 
-- formal `mention://agent/<self-id>` in the trigger, OR
-- `issue.assignee_id == self.agent_id`.
+- **Mention** — formal `mention://agent/<self-id>` in the trigger comment.
+- **Assignment** — `issue.assignee_id == self.agent_id`.
+- **Direct reply to your open question** — the trigger comment's
+  `parent_id` resolves (transitively, walking up the parent chain) to one
+  of your prior comments that posed a question. A reply that arrives
+  through structural threading still addresses you even when the replier
+  did not re-mention you.
+- **Active ownership** — you are advancing work you have explicitly
+  claimed on this issue. Deterministic test: a prior self-comment on this
+  issue stating you are picking the work up or accepting a handoff,
+  *and* that claim has not been superseded by reassignment to a peer, a
+  peer's later "I've got this" claim, or status closure.
 
-Plain-text references to your name do not count.
+Plain-text references to your name (e.g., "I wonder what Claude thinks",
+"Castor is right") do not count.
 
 Use only visible state for gating. Run logs may inform telemetry; they
 must not decide whether to reply.
@@ -98,6 +105,6 @@ Peer-authored "resolved now" comments do not retract a request.
 ## Telemetry — open dependency
 
 Durable `PASS` tracking needs a platform primitive (e.g.,
-`multica issue abstain --reason`). Tracked in
-[PC-39](mention://issue/253aa7e1-26a4-475a-9773-b4b10e4a528f) and GitHub
-issue #82. Until then, local run logs only — best-effort, not gating.
+`multica issue abstain --reason`). Tracked in PC-39 and GitHub
+[issue #82](https://github.com/mentatzoe/peer-coordination/issues/82).
+Until then, local run logs only — best-effort, not gating.
