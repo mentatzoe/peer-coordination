@@ -24,7 +24,8 @@ not, by itself, create a need to speak.
 ## Step 1 — Visible-state sync
 
 1. `multica issue get <id> --output json`
-2. `multica issue comment list <id> --output json`
+2. `multica issue comment list <id> --limit 0 --output json`
+   - **Pagination**: You MUST fetch all comments (`--limit 0` retrieves all). All four PASS suppressors and the parent-chain addressed-check require complete comment history.
 
 Determine whether you are addressed. Any of the following qualifies:
 
