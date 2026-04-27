@@ -7,7 +7,7 @@
 #   mkdir -p ~/.config/peer-coordination
 #   cp config/app-profile.template ~/.config/peer-coordination/codex-app-profile
 #
-# Format: KEY=value (no surrounding quotes; the parser does not strip them).
+# Format: KEY=value (strips surrounding single/double quotes so both styles work).
 # Values starting/ending with whitespace are not supported.
 
 # App ID from GitHub App settings (numeric ID)
