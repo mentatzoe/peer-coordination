@@ -44,10 +44,10 @@ as a per-shell concern.
 ## Helper script and ownership
 
 The minting helper lives in `scripts/github-app-token-helper.sh` (with a
-Python sibling at `scripts/github-app-token-helper.py`). The helper itself
-is maintained on the GitHub-app patch train (PR #73). Treat the helper as
-a forward dependency of this rule — once that PR lands on `main`, the rule
-above is enforceable.
+Python sibling at `scripts/github-app-token-helper.py`) and is bootstrapping
+on first run — if `scripts/.venv/` is missing, the wrapper provisions it
+and installs `scripts/requirements.txt` automatically. See
+`docs/github-apps-setup.md` for the full host-setup contract.
 
 ## Updates
 
