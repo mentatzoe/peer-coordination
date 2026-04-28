@@ -10,7 +10,7 @@ set -euo pipefail
 # Usage:
 #   eval "$(scripts/github-app-token-helper.sh <agent-name>)"
 #
-# Agents: vigil | dalgos | castor | echo | <your-agent>
+# Agents: vigil | dalgos | castor | aether | <your-agent>
 # Profile lookup: ~/.config/peer-coordination/<agent>-app-profile
 
 AGENT_NAME="${1:-}"
@@ -19,7 +19,7 @@ if [[ -z "$AGENT_NAME" ]]; then
 Usage: github-app-token-helper.sh <agent-name>
 
 Agents:
-  vigil  | dalgos  | castor | echo
+  vigil  | dalgos  | castor | aether
   <your-agent>  — any profile at ~/.config/peer-coordination/<name>-app-profile
 
 To load tokens into the current shell:
