@@ -56,20 +56,36 @@ If bootstrap fails (no `python3` in PATH, network blocked, etc.), the wrapper ex
 
 ## Using the token
 
-`gh`, `git push` (HTTPS), and any in-process Octokit client all honor
-`GH_TOKEN`/`GITHUB_TOKEN`. After `source scripts/peer-coord-bootstrap.sh
-<agent>`, commands run as the agent's app:
+`gh` and any in-process Octokit client read `GH_TOKEN`/`GITHUB_TOKEN`
+from the environment automatically:
 
 ```bash
+source scripts/peer-coord-bootstrap.sh "$PEER_COORD_AGENT_NAME"
 gh pr comment 123 --body "Handing off to dalgos for review."
 gh api repos/mentatzoe/peer-coordination/issues -f title='...' -f body='...'
-git push origin claude-pc-62-gh-identity-fix
 ```
 
-HTTPS push works because git treats `GITHUB_TOKEN` as the password for
-`x-access-token`. For SSH-based remotes, the token does not replace the
-key — use HTTPS remotes when you want push attribution to flow through
-the app.
+`git push` over HTTPS needs an extra step — git itself doesn't read the
+env var. Two reliable patterns:
+
+```bash
+# (a) configure git to use gh as the credential helper (one-time per shell)
+gh auth setup-git
+git push fork codex-012-fork-abstain
+
+# (b) explicit per-push URL form (no credential-helper interference)
+git push "https://x-access-token:${GH_TOKEN}@github.com/<owner>/<repo>.git" \
+    codex-012-fork-abstain
+```
+
+Pattern (b) bypasses any system credential helper that might shadow the
+App token (macOS Keychain, libsecret, etc.). On hosts where a stale
+`mentatzoe` credential is cached in keychain, plain `git push <https
+remote>` will silently use the stale credential and 401 — pattern (b) or
+`gh auth setup-git` first.
+
+For SSH-based remotes, the token does not replace the SSH key — switch
+to an HTTPS URL when you want push attribution to flow through the app.
 
 ## Per-harness install steps
 

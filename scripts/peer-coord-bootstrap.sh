@@ -27,7 +27,9 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Tolerate environments where BASH_SOURCE is unset (some non-bash shells
+# and certain subshell contexts) — fall back to $0.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 AGENT_NAME=""
 PRINT_ENV_FILE=0
 
@@ -105,11 +107,10 @@ if (( PRINT_ENV_FILE )); then
   exit 0
 fi
 
-# Sourced detection: when the file is sourced, BASH_SOURCE[0] differs from $0.
+# Sourced detection: `return` is only valid inside a function or sourced
+# script. (return 0) succeeds when sourced, errors when executed.
 _sourced=0
-if [[ "${BASH_SOURCE[0]:-}" != "${0:-}" ]]; then
-  _sourced=1
-fi
+(return 0 2>/dev/null) && _sourced=1
 
 if (( _sourced )); then
   set -a

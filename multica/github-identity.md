@@ -14,7 +14,10 @@ instead of inlining the rules.
 # shellcheck disable=SC1091
 source scripts/peer-coord-bootstrap.sh "$PEER_COORD_AGENT_NAME"
 gh issue comment ...                   # authored as pc-<agent>[bot]
-git push origin <branch>               # HTTPS, authored as pc-<agent>[bot]
+
+# git push over HTTPS — choose one (git doesn't read $GH_TOKEN itself):
+gh auth setup-git && git push fork <branch>           # via gh credential helper
+git push "https://x-access-token:${GH_TOKEN}@github.com/<owner>/<repo>.git" <branch>  # URL form
 ```
 
 `PEER_COORD_AGENT_NAME` is pre-set in each agent's Multica environment
