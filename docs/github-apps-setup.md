@@ -18,10 +18,27 @@ Profiles live at `~/.config/peer-coordination/<agent>-app-profile` and private k
 ## Token minting
 
 ```bash
-eval "$(scripts/github-app-token-helper.sh "$PEER_COORD_AGENT_NAME")"
+# shellcheck disable=SC1091
+source scripts/peer-coord-bootstrap.sh "$PEER_COORD_AGENT_NAME"
 ```
 
-`PEER_COORD_AGENT_NAME` is pre-set per agent in Multica (claude→dalgos, codex→vigil, castor→castor, aether→aether). The helper is a thin wrapper around `github-app-token-helper.py`; it exchanges a short-lived JWT for an installation token, writes `GH_TOKEN` + `GITHUB_TOKEN` exports to stdout, and logs to stderr. Tokens expire in 60 minutes — re-run for fresh ones.
+`PEER_COORD_AGENT_NAME` is pre-set per agent in Multica (claude→dalgos,
+codex→vigil, castor→castor, aether→aether). The bootstrap mints a fresh
+App installation token via `github-app-token-helper.py`, writes it to a
+0600 env file at `${XDG_RUNTIME_DIR:-/tmp}/peer-coord-env-<agent>`, and
+when sourced exports `GH_TOKEN`/`GITHUB_TOKEN` into the current shell.
+Tokens last 60 minutes; the bootstrap auto re-mints after 55 minutes.
+
+`scripts/peer-coord-verify.sh <agent>` bootstraps and then asks GraphQL
+`viewer.login` — exits 0 only if the active identity is
+`pc-<agent>[bot]`. Use it as a pre-write smoke before any long-running
+task that includes GitHub writes.
+
+The previous documented pattern (`eval "$(github-app-token-helper.sh ...)"`)
+is **deprecated** — display redactors silently set `GH_TOKEN=***`, the
+call hits 401, and `gh` falls back to whatever stored credential the
+shell carries. The helper still supports it for back-compat; new code
+should use the bootstrap.
 
 ## Host setup
 
@@ -39,14 +56,39 @@ If bootstrap fails (no `python3` in PATH, network blocked, etc.), the wrapper ex
 
 ## Using the token
 
-`gh` and `git push` both honor `GH_TOKEN`/`GITHUB_TOKEN`. After `eval`, commands run as the agent's app:
+`gh`, `git push` (HTTPS), and any in-process Octokit client all honor
+`GH_TOKEN`/`GITHUB_TOKEN`. After `source scripts/peer-coord-bootstrap.sh
+<agent>`, commands run as the agent's app:
 
 ```bash
 gh pr comment 123 --body "Handing off to dalgos for review."
 gh api repos/mentatzoe/peer-coordination/issues -f title='...' -f body='...'
+git push origin claude-pc-62-gh-identity-fix
 ```
 
-HTTPS push also works (git treats `GITHUB_TOKEN` as the password for `x-access-token`). For SSH-based remotes, the token does not replace the key — use HTTPS remotes when you want push attribution to flow through the app.
+HTTPS push works because git treats `GITHUB_TOKEN` as the password for
+`x-access-token`. For SSH-based remotes, the token does not replace the
+key — use HTTPS remotes when you want push attribution to flow through
+the app.
+
+## Per-harness install steps
+
+`PEER_COORD_AGENT_NAME` and the bootstrap-source pattern are sufficient on
+any harness whose agent code can run a shell command before a GitHub
+write. Per-harness boot-script entries:
+
+| Harness                | Pre-write hook |
+|------------------------|----------------|
+| Claude Code (Multica)  | `source scripts/peer-coord-bootstrap.sh "$PEER_COORD_AGENT_NAME"` at task-start. |
+| Codex (Multica)        | Same. |
+| opencode / aether      | Same — sourced before opencode boots so its bundled Octokit reads `GITHUB_TOKEN` from process env. |
+| Hermes                 | Same — and run `scripts/peer-coord-verify.sh "$PEER_COORD_AGENT_NAME"` after, since the redactor previously corrupted the eval pattern silently. |
+
+The legacy `~/.peer-coord-bin/gh` shell wrapper is no longer required.
+It still works on hosts where it's installed and on PATH, but the
+bootstrap covers all three previously-observed bypasses (display
+redactor, bundled Octokit, runtime-PATH skip — see PC-62 and
+`multica/github-identity.md`).
 
 ## Adding a new agent
 
