@@ -2,10 +2,12 @@
 
 Each directory under `observations/sessions/` is a **session bundle** — the canonical preserved record for one peer-coordination POC session, used for post-hoc review, KPI computation, and H1/H2 evaluation.
 
-**Authoritative specs**: [`specs/001-session-bundle-skeleton/spec.md`](../../specs/001-session-bundle-skeleton/spec.md) (bundle shape), [`specs/008-drift-audit-workflow/spec.md`](../../specs/008-drift-audit-workflow/spec.md) (drift-audit authoring workflow), [`specs/009-session-summary-workflow/spec.md`](../../specs/009-session-summary-workflow/spec.md) (summary authoring workflow).
+**Authoritative specs**: [`specs/001-session-bundle-skeleton/spec.md`](../../specs/001-session-bundle-skeleton/spec.md) (bundle shape), [`specs/008-drift-audit-workflow/spec.md`](../../specs/008-drift-audit-workflow/spec.md) (drift-audit authoring workflow), [`specs/009-session-summary-workflow/spec.md`](../../specs/009-session-summary-workflow/spec.md) (summary authoring workflow), [`specs/011-intervention-tagging/spec.md`](../../specs/011-intervention-tagging/spec.md) (intervention-tagging schema/workflow).
 **Design context**: [`design/poc.md`](../../design/poc.md) Layer 3 artifact bundle + Measurement model.
 
 > **Authoring a summary?** Jump to [`SUMMARY-WORKFLOW.md`](SUMMARY-WORKFLOW.md) — the operator-facing procedure for Paths A/B/C/D (single-author / agent-drafted / revision / peer-audit). Paired with [`SUMMARY-TAXONOMY.md`](SUMMARY-TAXONOMY.md) for commit-message conventions. This README is about bundle-level composition and naming.
+>
+> **Tagging interventions?** Jump to [`INTERVENTIONS-WORKFLOW.md`](INTERVENTIONS-WORKFLOW.md) for post-session add/validate/revision steps and [`INTERVENTIONS-TAXONOMY.md`](INTERVENTIONS-TAXONOMY.md) for schema, citation keys, and directive-count semantics.
 
 ## Naming rule
 
@@ -31,7 +33,7 @@ Every committed session bundle must contain all five of:
 |---|---|
 | `transcript.md` | Turn-by-turn conversation in chronological order, with at minimum timestamp + author per turn. Preferred source is Discord export via the native plugin's `fetch_messages`; re-authored markdown is an explicit fallback recorded in `meta.json.transcript_source`. |
 | `meta.json` | Session metadata: `session_id`, `opened_at`, `closed_at`, `close_reason`, `participants`, `pinned_rules_ref`, `substrate`, `channel_id`, `transcript_source`. |
-| `interventions.json` | Array of tagged operator interventions. Each entry has `at`, `type` (from the fixed taxonomy: `safety_stop`, `clarification`, `directive_redirect`, `drift_catch`, `close_or_resume`, `other`), `reason`, optional `target_turn`. Empty array is valid. |
+| `interventions.json` | Array of tagged interventions. Each entry has stable `id`, `taxonomy_version`, `at`, `type` (fixed taxonomy: `safety_stop`, `clarification`, `directive_redirect`, `drift_catch`, `close_or_resume`, `other`), `reason`, `attribution`, `actor`, and `target` (turn/span/session). Empty array is valid. See [`INTERVENTIONS-TAXONOMY.md`](INTERVENTIONS-TAXONOMY.md). |
 | `summary.md` | Human-readable qualitative account: session goal, per-peer contribution, observed coordination patterns, notable drift, operator verdict on H1 stability / H1 complementarity / H2 fresh-reader KPIs per the POC's "Per-session clear definitions." |
 | `drift-audit.json` | Output of the drift-audit rubric (rubric spec pending Phase 2). Placeholder `{"status": "pending-phase-2"}` is acceptable until that rubric lands. |
 
@@ -69,7 +71,7 @@ observations/sessions/defaults.toml
 
 ## Using a bundle for review
 
-- **H1 intervention-rate** (count-based KPI): count entries in `interventions.json` by `type`; deterministic script can compute rate per turn.
+- **H1 intervention-rate** (count-based KPI): count entries in `interventions.json` by `type`; directive-intervention load is `type == "directive_redirect"` and `attribution == "operator_directed"` per [`INTERVENTIONS-TAXONOMY.md`](INTERVENTIONS-TAXONOMY.md).
 - **H1 stability / H1 complementarity** (per-session clear-definitions): read `transcript.md` + `summary.md`; apply the per-KPI clear rules from `design/poc.md`.
 - **H2 fresh-reader** (per-session clear-definitions): uninvolved human reviewer reads `transcript.md` + `meta.json` (for pinned-rules reference) + `summary.md`; reconstructs session goal, per-peer contribution, and resolution; operator judges materially correct.
 - **Drift audit** (Phase 2+): `drift-audit.json` produced by the Phase 2 drift-audit workflow against `transcript.md` + pinned rules.
@@ -78,6 +80,7 @@ observations/sessions/defaults.toml
 ## Related artifacts
 
 - [`specs/001-session-bundle-skeleton/spec.md`](../../specs/001-session-bundle-skeleton/spec.md) — the authoritative spec.
+- [`specs/011-intervention-tagging/spec.md`](../../specs/011-intervention-tagging/spec.md) — intervention-tagging schema and workflow.
 - [`specs/001-session-bundle-skeleton/plan.md`](../../specs/001-session-bundle-skeleton/plan.md) — the implementation plan that produced this scaffolding.
 - [`design/poc.md`](../../design/poc.md) — POC Layer 3 artifact bundle definition (parent authority).
 - [`design/architecture.md`](../../design/architecture.md) — Layer 3 capabilities (evaluation of emergence and success).

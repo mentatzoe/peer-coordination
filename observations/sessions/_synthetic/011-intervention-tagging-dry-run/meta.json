@@ -1,0 +1,15 @@
+{
+  "session_id": "011-intervention-tagging-dry-run",
+  "opened_at": "2026-05-05T17:00:00Z",
+  "closed_at": "2026-05-05T17:05:00Z",
+  "close_reason": "operator_close",
+  "participants": [
+    { "handle": "Vigil", "role": "peer" },
+    { "handle": "Dalgos", "role": "peer" },
+    { "handle": "Zoe", "role": "operator" }
+  ],
+  "pinned_rules_ref": { "inline": "Synthetic dry-run; no live pinned-rules snapshot." },
+  "substrate": "synthetic",
+  "channel_id": "synthetic-011",
+  "transcript_source": "reauthored"
+}

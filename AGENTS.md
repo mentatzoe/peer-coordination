@@ -11,11 +11,8 @@
 
 <!-- SPECKIT START -->
 For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the active plans in
-<<<<<<< HEAD
-`specs/*/plan.md`, especially `specs/007-session-bundle-init-cli/plan.md` for
-the current foreground slice and `specs/002-cc-connect-relocation/plan.md` for
-the contained-workspace context
+shell commands, and other important information, read the current plan at
+[`specs/011-intervention-tagging/plan.md`](specs/011-intervention-tagging/plan.md).
 <!-- SPECKIT END -->
 
 ## Purpose
