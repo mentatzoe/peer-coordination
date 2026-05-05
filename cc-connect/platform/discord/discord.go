@@ -251,7 +251,7 @@ func isDiscordThreadChannelType(typ discordgo.ChannelType) bool {
 
 func normalizeSessionControlCommand(content string) string {
 	switch strings.ToLower(strings.TrimSpace(content)) {
-	case "!stop":
+	case "!stop", "!cancel", "!interrupt":
 		return "/stop"
 	case "!resume":
 		return "/new"
