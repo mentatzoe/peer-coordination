@@ -1701,3 +1701,41 @@ func TestReplyContextForDeferredInteractionFallback(t *testing.T) {
 		})
 	}
 }
+
+func TestHandleMessageCreate_IncludesReferencedMessagePreamble(t *testing.T) {
+	p := &Platform{
+		session:       &discordgo.Session{State: discordgo.NewState()},
+		allowFrom:     "operator",
+		channelID:     "bound-channel",
+		groupReplyAll: true,
+		sessionOpen:   true,
+	}
+	p.session.State.ChannelAdd(&discordgo.Channel{ID: "bound-channel", Name: "bound"})
+
+	var got []*core.Message
+	p.handler = func(_ core.Platform, msg *core.Message) {
+		got = append(got, msg)
+	}
+
+	p.handleMessageCreate(&discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			ID:        "m-reply",
+			ChannelID: "bound-channel",
+			Content:   "this is my reply",
+			Timestamp: time.Now(),
+			Author:    &discordgo.User{ID: "operator", Username: "zoe"},
+			ReferencedMessage: &discordgo.Message{
+				ID: "parent-id",
+				Content: "this is the parent message\nwith two lines",
+				Author: &discordgo.User{ID: "bot-id", Username: "peer-bot", Bot: true},
+			},
+		},
+	})
+	if len(got) != 1 {
+		t.Fatalf("dispatched messages = %d, want 1", len(got))
+	}
+	expectedPreamble := "↳ [in reply to peer-bot (bot)]: this is the parent message with two lines\n\n"
+	if got[0].Content != expectedPreamble + "this is my reply" {
+		t.Errorf("got content %q, want preamble + reply", got[0].Content)
+	}
+}

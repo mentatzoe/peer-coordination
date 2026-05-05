@@ -814,12 +814,18 @@ func (p *Platform) handleMessageCreate(m *discordgo.MessageCreate) {
 		return
 	}
 
+	replyPreamble := formatReplyContext(m.ReferencedMessage)
+	finalContent := m.Content
+	if replyPreamble != "" {
+		finalContent = replyPreamble + finalContent
+	}
+
 	msg := &core.Message{
 		SessionKey: sessionKey, Platform: "discord",
 		MessageID: m.ID,
 		UserID:    m.Author.ID, UserName: m.Author.Username,
 		ChatName: p.resolveChannelName(m.ChannelID),
-		Content:  m.Content, Images: images, Files: files, Audio: audio,
+		Content:  finalContent, Images: images, Files: files, Audio: audio,
 		ChannelKey: p.boundChannelKey(m.ChannelID),
 		ReplyCtx:   rctx,
 	}
