@@ -106,17 +106,36 @@ def mint_token(profile: dict) -> str:
         sys.exit(1)
 
 
+def write_env_file(path: Path, token: str) -> None:
+    """Write GH_TOKEN/GITHUB_TOKEN to a 0600 file. Token bytes never touch
+    stdout/stderr — this is the redactor-safe channel (PC-62 Mechanism A)."""
+    path = path.expanduser()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, 'w') as f:
+        f.write(f"GH_TOKEN={token}\n")
+        f.write(f"GITHUB_TOKEN={token}\n")
+    os.chmod(path, 0o600)
+
+
 def main():
     parser = argparse.ArgumentParser(description='Mint GitHub App installation token')
     parser.add_argument('agent', help='Agent name (e.g., codex, hermes, castor)')
-    parser.add_argument('--token-only', action='store_true', 
-                        help='Output only the token (for scripting)')
+    parser.add_argument('--token-only', action='store_true',
+                        help='Output only the token (for scripting). DEPRECATED: prefer --write-env-file; '
+                             'piping a token through stdout is fragile under harness display redactors.')
+    parser.add_argument('--write-env-file', metavar='PATH', default=None,
+                        help='Write GH_TOKEN=<token>/GITHUB_TOKEN=<token> to PATH (mode 0600). '
+                             'Token bytes do not appear on stdout/stderr — safe under harness display redactors.')
     args = parser.parse_args()
-    
+
     profile = load_profile(args.agent)
     token = mint_token(profile)
-    
-    if args.token_only:
+
+    if args.write_env_file:
+        write_env_file(Path(args.write_env_file), token)
+        print(f"# wrote {args.write_env_file} (mode 0600); expires in 60m", file=sys.stderr)
+    elif args.token_only:
         print(token)
     else:
         print(f"✅ Successfully minted installation token for {args.agent}")
