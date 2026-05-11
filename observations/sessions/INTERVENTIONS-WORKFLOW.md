@@ -168,4 +168,3 @@ git show <prior-commit>:"observations/sessions/$SID/interventions.json"
 - Summary and drift-audit cite records by `interventions.json#iv-###`.
 - H1 directive load counts `directive_redirect` records whose attribution is `operator_directed`.
 - Consumers do not infer extra interventions from transcript prose when the log is present.
-

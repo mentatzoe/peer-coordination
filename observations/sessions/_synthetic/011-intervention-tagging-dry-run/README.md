@@ -20,4 +20,3 @@ Expected output:
 ```text
 2 1
 ```
-

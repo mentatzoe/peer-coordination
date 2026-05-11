@@ -133,4 +133,3 @@ git log --all --grep='— interventions' --format='%H %s' -- observations/sessio
 # All intervention revisions:
 git log --all --grep='interventions revision' --format='%H %s' -- observations/sessions/*/interventions.json
 ```
-

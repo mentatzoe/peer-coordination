@@ -75,4 +75,3 @@ None. All implementation tasks map to FRs, runtime docs, validation, or PR-gate 
 ## Next Actions
 
 Proceed to PR review. Claude is the useful cross-reviewer because spec 009 consumes intervention citations in `summary.md`; Aleph/Zoe should ratify any policy-boundary concern about the post-session-only v1 path.
-

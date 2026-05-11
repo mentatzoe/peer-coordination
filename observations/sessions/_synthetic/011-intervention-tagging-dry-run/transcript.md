@@ -6,4 +6,3 @@
 - 2026-05-05T17:02:15Z Zoe: Redirect: stay on intervention tagging only; KPI rollup is out of scope for this dry-run.
 - 2026-05-05T17:03:00Z Vigil: Then one span-targeted directive_redirect should cover the detour.
 - 2026-05-05T17:04:00Z Dalgos: Agreed. The citation key can point to interventions.json#iv-002.
-
