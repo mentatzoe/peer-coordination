@@ -3,6 +3,7 @@ package discord
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -100,14 +101,16 @@ func formatReplyContext(ref *discordgo.Message) string {
 			authorType = "bot"
 		}
 	}
-	
+
 	content := ref.Content
-	if len(content) > 300 {
-		content = content[:297] + "..."
+	runes := []rune(content)
+	if len(runes) > 300 {
+		content = string(runes[:297]) + "..."
 	}
-	
+
 	// Normalize newlines in referenced content so it fits well in preamble
 	content = strings.ReplaceAll(content, "\n", " ")
-	
-	return fmt.Sprintf("↳ [in reply to %s (%s)]: %s\n\n", authorName, authorType, content)
+
+	timestamp := ref.Timestamp.Format(time.RFC3339)
+	return fmt.Sprintf("↳ [in reply to %s (%s) | ID: %s | Time: %s]: %s\n\n", authorName, authorType, ref.ID, timestamp, content)
 }

@@ -1725,17 +1725,20 @@ func TestHandleMessageCreate_IncludesReferencedMessagePreamble(t *testing.T) {
 			Timestamp: time.Now(),
 			Author:    &discordgo.User{ID: "operator", Username: "zoe"},
 			ReferencedMessage: &discordgo.Message{
-				ID: "parent-id",
+				ID:      "parent-id",
 				Content: "this is the parent message\nwith two lines",
-				Author: &discordgo.User{ID: "bot-id", Username: "peer-bot", Bot: true},
+				Author:  &discordgo.User{ID: "bot-id", Username: "peer-bot", Bot: true},
 			},
 		},
 	})
 	if len(got) != 1 {
 		t.Fatalf("dispatched messages = %d, want 1", len(got))
 	}
-	expectedPreamble := "↳ [in reply to peer-bot (bot)]: this is the parent message with two lines\n\n"
-	if got[0].Content != expectedPreamble + "this is my reply" {
-		t.Errorf("got content %q, want preamble + reply", got[0].Content)
+	expectedPreamble := "↳ [in reply to peer-bot (bot) | ID: parent-id | Time: 0001-01-01T00:00:00Z]: this is the parent message with two lines\n\n"
+	if got[0].ExtraContent != expectedPreamble {
+		t.Errorf("got ExtraContent %q, want %q", got[0].ExtraContent, expectedPreamble)
+	}
+	if got[0].Content != "this is my reply" {
+		t.Errorf("got Content %q, want 'this is my reply'", got[0].Content)
 	}
 }
