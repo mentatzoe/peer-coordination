@@ -97,20 +97,19 @@ A POSIX symlink whose target is the most recent `POCExitFile`. Created by the fi
 The ephemeral aggregate computed by `peer-session rollup` when processing the counted-session set. Consumes `KPIFile` + `FreshReaderAudit` per session and produces exactly one `POCExitFile`.
 
 **Computed fields:**
-- `counted_session_total` — number of bundles that passed discovery + completeness checks.
+- `counted_session_total` — number of bundles that passed discovery + completeness checks. Authoritative denominator for FR-014's H1 range check and FR-012's H2 fresh-reader pass-rate per research §9.
 - `cleared_count` — count where `per_session_clear == "cleared"`.
 - `not_cleared_count` — count where `per_session_clear == "not-cleared"`.
 - `ambiguous_count` — count where `per_session_clear == "ambiguous"`.
-- `decidable_total` — `cleared_count + not_cleared_count` (research §9).
-- `h1_stable_coord_pass` — per research §9 decision rule.
+- `h1_stable_coord_pass` — per research §9 decision rule keyed on `counted_session_total`; `pending` (no pass/fail) when `ambiguous_count > 0`.
 - `h1_intervention_load_pass` — ditto.
 - `h1_complementarity_pass` — ditto.
-- `h2_fresh_reader_pass_rate` — `pass`-count over `decidable_total` (or total, depending on how `ambiguous` is counted — consistent with research §9).
+- `h2_fresh_reader_pass_rate` — `pass`-count over `counted_session_total` per FR-012's "across counted sessions" contract. Sessions whose FRA verdict is `fail`, `inconclusive`, or otherwise pending count toward the denominator but not the numerator; the rate is never silently inflated by holding ambiguous sessions out of the denominator.
 - `h2_drift_pass` — all counted sessions have no load-bearing drift.
 - `h2_episode_record_completeness` — 100% (hard gate per FR-013).
-- `ratifiability` — `ratifiable` iff `ambiguous_count == 0` and `decidable_total` is in range; else `draft, not ratifiable`.
+- `ratifiability` — `ratifiable` iff `ambiguous_count == 0` and `counted_session_total` is in range `[3, 5]`; else `draft, not ratifiable`.
 - `ambiguous_sessions` — list of session IDs flagged ambiguous; enumerated in the artifact.
-- `out_of_range` — `true` iff `decidable_total < 3` or `decidable_total > 5`.
+- `out_of_range` — `true` iff `counted_session_total < 3` or `counted_session_total > 5` (FR-014).
 
 ---
 

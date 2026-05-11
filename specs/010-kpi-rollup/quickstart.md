@@ -56,7 +56,7 @@ Expected result:
 - Re-running tally against unchanged inputs produces byte-identical output modulo `tallied_at` (spec SC-002).
 - Commit the updated `kpi.json`.
 
-If `per_session_clear` is still `ambiguous`, the workflow's §"Resolving ambiguous per-session-clear" section explains how to convert the ambiguity into a `cleared` / `not-cleared` verdict via an operator-recorded override.
+If `per_session_clear` is still `ambiguous`, the workflow's §"Resolving ambiguous per-session-clear" section explains how to resolve it per FR-018: amend the underlying bundle input that produced the ambiguity (most commonly `fresh-reader-audit.json`'s `verdict`, or running the real drift audit to replace the spec-001 placeholder in `drift-audit.json`) following spec 001 FR-014's amend-commit discipline, then re-run `peer-session tally`. `kpi.json` carries no override field — the re-run recomputes `per_session_clear` deterministically from the amended inputs.
 
 ---
 
@@ -88,7 +88,7 @@ Follow the workflow's §"Ratification gate".
 
 - If the per-run file is marked `ratifiable`, the operator reviews the content, fills the ratification-gate subsection per the workflow's convention, and commits the ratified file.
 - If the per-run file is marked `draft, not ratifiable` (ambiguous sessions enumerated or out-of-range):
-  - For ambiguous sessions: follow the workflow to resolve each ambiguity (may require re-authoring `fresh-reader-audit.json`, adding an ambiguity-resolution record, or re-running tally), then re-run `peer-session rollup` to produce a new per-run file.
+  - For ambiguous sessions: follow the workflow to resolve each ambiguity per FR-018 — amend the underlying bundle input (e.g., `fresh-reader-audit.json`'s `verdict`, or commit the real drift audit over the spec-001 placeholder) via amend-commit and re-run `peer-session tally` to recompute `per_session_clear` deterministically; then re-run `peer-session rollup` to produce a new per-run file. No override field, no override-specific code path — resolution rides entirely on the amend-commit + re-tally loop.
   - For out-of-range: either the baseline is not yet complete (too few sessions) or the counted-session set has grown beyond the H1 decision-rule window (investigate). Do not force-ratify an out-of-range draft.
 
 ---

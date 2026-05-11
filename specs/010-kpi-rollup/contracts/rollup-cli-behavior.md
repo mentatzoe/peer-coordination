@@ -42,7 +42,7 @@ peer-session rollup
 
 ### Success output (ratifiable)
 
-All counted sessions resolve to `per_session_clear ∈ {cleared, not-cleared}` (no ambiguous); `decidable_total` is in `[3, 5]`.
+All counted sessions resolve to `per_session_clear ∈ {cleared, not-cleared}` (no ambiguous); `counted_session_total` is in `[3, 5]`.
 
 - Writes `observations/poc-exit-<YYYYMMDDTHHMMSSZ>.md` conforming to the POCExitFile entity in `data-model.md`. Ratifiability state: `ratifiable`.
 - Removes `observations/poc-exit.md` (if present) and creates it as a symlink pointing to the newly written per-run file.
@@ -69,11 +69,11 @@ Any of: missing `kpi.json`, missing `fresh-reader-audit.json`, stale `kpi.json.i
 
 ### Failure output (out-of-range counted-session total)
 
-`decidable_total < 3` or `decidable_total > 5`.
+`counted_session_total < 3` or `counted_session_total > 5` (FR-014's range key — see research §9).
 
 - Writes a per-run file marked `draft, not ratifiable` with the out-of-range condition surfaced explicitly in the artifact (per FR-014, "surface, not silently mis-apply").
 - Updates the `poc-exit.md` symlink pointer.
-- Stdout: `wrote observations/poc-exit-<timestamp>.md` + `out-of-range` with the observed `decidable_total`.
+- Stdout: `wrote observations/poc-exit-<timestamp>.md` + `out-of-range` with the observed `counted_session_total`.
 - Exit code: `0` — the rollup ran successfully, the H1 decision rule simply does not apply yet.
 
 Rationale: out-of-range is an operator-visible shape of the counted-session set (too few sessions yet, or too many — the latter implies a counting bug worth a manual review). It's not a tool error.
@@ -91,10 +91,10 @@ Each `poc-exit-<timestamp>.md` MUST contain the following sections in order:
 
 1. **Header** — rollup run timestamp, ratifiability state (`ratifiable` or `draft, not ratifiable`), counted-session total.
 2. **H1 decision rule outcome** — per-KPI pass/fail (stable coordination, intervention load, complementarity), showing the decision rule applied (3/3, 3/4, or 4/5) and the observed cleared-count.
-3. **H2 observations** — fresh-reader pass-rate across decidable sessions, undeclared-convention drift verdict across counted sessions, episode-record completeness.
+3. **H2 observations** — fresh-reader pass-rate across counted sessions (denominator = `counted_session_total` per FR-012; non-pass FRA verdicts and pending judgment count toward the denominator but not the numerator), undeclared-convention drift verdict across counted sessions, episode-record completeness.
 4. **Per-session table** — one row per counted session with columns: session_id, `per_session_clear`, and a compact breakdown indicator (e.g., `h1_sc=cleared, h1_int=cleared, h1_comp=ambiguous, h2_fr=cleared, h2_d=cleared, h2_er=cleared`).
 5. **Ambiguous sessions** (present only if any are ambiguous) — list of session IDs with their ambiguous sub-judgments and the captured `reason` fields.
-6. **Out-of-range note** (present only if `decidable_total` is outside `[3, 5]`).
+6. **Out-of-range note** (present only if `counted_session_total` is outside `[3, 5]`).
 7. **Ratification gate** — an operator-fillable subsection. When empty/unratified, the file's ratifiability state may be `ratifiable` but the operator has not yet signed off. When filled per the workflow, the file is operator-ratified.
 
 ---
@@ -110,6 +110,7 @@ Behavior tests (in `tests/peer_session/test_rollup.py`):
 5. **Missing fresh-reader-audit.json** — one counted bundle lacks FRA → refuses with exit 2.
 6. **Stale kpi.json** — `inputs_hash` mismatch → refuses with exit 2.
 7. **Session-id collision** — two bundles share a `meta.json.session_id` → refuses with exit 2.
-8. **Out-of-range, 2 sessions** — `decidable_total == 2` → writes draft-marked per-run file with out-of-range surface, exits 0.
+8. **Out-of-range, 2 sessions** — `counted_session_total == 2` → writes draft-marked per-run file with out-of-range surface, exits 0.
+   (Companion in-range test: a 3-session counted set with 2 cleared + 1 ambiguous must write a draft-marked per-run file enumerating the ambiguous session, NOT an out-of-range artifact — exercises FR-014's "counted-session total" range key vs. a `decidable_total` regression.)
 9. **Template excluded** — `_template/` present but not counted; doesn't affect totals.
 10. **Symlink update** — second successful rollup run updates `poc-exit.md` to point to the newer per-run file; prior file remains on disk unchanged.

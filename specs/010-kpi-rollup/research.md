@@ -159,21 +159,23 @@ When `substantive_turn_count == 0`, the rate is `null` and `kpi.json.zero_turn_s
 
 ## 9. H1 decision-rule application
 
-**Decision**: `peer-session rollup` counts sessions where `per_session_clear == "cleared"` (call this `C`) and sessions where `per_session_clear != "ambiguous"` (the "decidable" total `T`, i.e., counted sessions that are either cleared or not-cleared). The H1 pass/fail for each H1 KPI is computed against the decidable total `T`:
+**Decision**: `peer-session rollup` keys the H1 decision rule on `counted_session_total` — the discovered, fully-bundled set after hard-gap filtering per FR-013, prior to any subtraction for ambiguous sessions. Let `T = counted_session_total` and `C` = the count of sessions where `per_session_clear == "cleared"`. The H1 pass/fail rule per KPI:
 - `T == 3`: pass iff `C == 3`
 - `T == 4`: pass iff `C >= 3`
 - `T == 5`: pass iff `C >= 4`
 - `T < 3` or `T > 5`: surface an "out-of-range" flag in `poc-exit-<timestamp>.md`; do NOT attempt to apply the decision rule.
 
-Ambiguous sessions are enumerated in the draft-marked `poc-exit-<timestamp>.md` so the operator can resolve via the workflow.
+When one or more counted sessions have `per_session_clear == "ambiguous"`, the H1 verdict is not yet computable: the per-run file is marked `draft, not ratifiable` per FR-013, the cleared count and applicable threshold (3/3, 3/4, or 4/5) are still surfaced for operator visibility, and the ambiguous sessions are enumerated with their ambiguous sub-judgments. The operator resolves ambiguity per FR-018 (amend-commit on the underlying bundle input + re-tally), then re-runs `peer-session rollup` to produce a new per-run file with a decidable H1 verdict.
 
 **Rationale**:
-- Directly mirrors poc.md's KPI summary table's decision rule.
-- Using the "decidable total" (cleared + not-cleared only) avoids double-penalizing a session that is ambiguous — it's held out, not counted against.
+- FR-014 explicitly keys the in-range check on counted-session total, not on a derived denominator. A 3-session set with one ambiguous session is in range (3 counted) and must produce a draft artifact per FR-013 — not be misclassified as a 2-session out-of-range case by silently subtracting ambiguous sessions from the denominator.
+- Surfacing the cleared count and applicable threshold even in draft state preserves operator visibility into how close the counted set is to the H1 threshold; ratification is gated on full decidability via FR-013's draft branch.
+- Ambiguous sessions are visible per-row in the artifact, not silently held out of the denominator. Spec FR-018 carries the resolution path through amend-commit on the underlying inputs, not via overrides.
 - The out-of-range branch satisfies FR-014 explicitly.
 
 **Alternatives considered**:
-- **Apply the rule to the raw counted-session total regardless of ambiguity**: would unfairly penalize ambiguous sessions as "not-cleared" when the operator's judgment is still pending.
+- **Apply the rule against `decidable_total` (cleared + not-cleared only)**: rejected — silently shifts the H1 denominator off the counted-session set, contradicting FR-014. Concretely misclassifies a 3-session set with 2 cleared + 1 ambiguous as a 2-session out-of-range artifact rather than the in-range draft FR-013 requires.
+- **Count ambiguous sessions as `not-cleared` for the H1 rule**: would force a pass/fail verdict while operator judgment is still pending, contradicting FR-013's judgment-gap draft branch.
 - **Refuse any rollup with ambiguous sessions**: too strict; contradicts FR-013's judgment-gap draft branch.
 
 ---
