@@ -43,10 +43,17 @@ Fields:
 ```
 [
   {
+    "id": "iv-001",
+    "taxonomy_version": "poc-v1",
     "at": "<ISO-8601 timestamp, >=second precision>",
     "type": "<one of: safety_stop | clarification | directive_redirect | drift_catch | close_or_resume | other>",
     "reason": "<free-text operator note>",
-    "target_turn": "<optional: ISO-8601 timestamp string of a transcript turn>"
+    "attribution": "<one of: operator_directed | agent_self_flagged>",
+    "actor": "<operator or peer handle>",
+    "target": {
+      "kind": "turn",
+      "turn_ref": "<ISO-8601 timestamp string of a transcript turn>"
+    }
   },
   ...
 ]
@@ -54,7 +61,22 @@ Fields:
 
 Type taxonomy is fixed per `design/poc.md` measurement model; do not invent new types without spec amendment.
 
-`target_turn`, when present, MUST be the ISO-8601 timestamp of a turn in `transcript.md`. Turn timestamps are unique within a session per FR-009, so the timestamp is the canonical turn key — no separate `turn_id` scheme is needed.
+Each record has a stable session-local id (`iv-###`) and citation key `interventions.json#iv-###`. `taxonomy_version` is `poc-v1` for this POC taxonomy.
+
+`target` MUST be one of:
+
+```
+{ "kind": "turn", "turn_ref": "<turn timestamp>" }
+{ "kind": "span", "start_turn_ref": "<turn timestamp>", "end_turn_ref": "<turn timestamp>" }
+{ "kind": "session" }
+```
+
+Turn refs MUST be ISO-8601 timestamps from `transcript.md`. Use one span record for a continuous multi-turn redirect unless the operator made distinct interventions with distinct reasons.
+
+`attribution` separates operator load from peer self-flags:
+
+- `operator_directed` — operator made or directed the intervention.
+- `agent_self_flagged` — peer identified a correction/intervention need; operator later ratified it into the log.
 
 - `safety_stop` — any `!stop` or equivalent halting action taken for safety reasons.
 - `clarification` — operator asks a peer to clarify or restate something.
@@ -64,6 +86,8 @@ Type taxonomy is fixed per `design/poc.md` measurement model; do not invent new 
 - `other` — anything that doesn't fit the above. Use sparingly; if a pattern recurs, propose a new type via spec amendment.
 
 An empty array (`[]`) is valid if no interventions occurred.
+
+Full operator workflow: [`../INTERVENTIONS-WORKFLOW.md`](../INTERVENTIONS-WORKFLOW.md). Taxonomy/citation contract: [`../INTERVENTIONS-TAXONOMY.md`](../INTERVENTIONS-TAXONOMY.md).
 
 ### `drift-audit.json` schema (placeholder)
 
