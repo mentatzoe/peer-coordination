@@ -1408,6 +1408,32 @@ func TestUpdateMessage_PlainTextClearsEmbeds(t *testing.T) {
 	}
 }
 
+func TestSend_WithMessageIDDoesNotCreateDiscordReply(t *testing.T) {
+	var payload map[string]any
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Fatalf("decode request: %v", err)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprint(w, `{"id":"msg-send","channel_id":"ch-1"}`)
+	}))
+	defer server.Close()
+
+	s := newTestDiscordSession(t, server)
+	p := &Platform{session: s}
+
+	err := p.Send(context.Background(), replyContext{channelID: "ch-1", messageID: "operator-msg"}, "agent final output")
+	if err != nil {
+		t.Fatalf("Send() error = %v", err)
+	}
+	if payload["content"] != "agent final output" {
+		t.Fatalf("content = %#v, want agent final output", payload["content"])
+	}
+	if _, ok := payload["message_reference"]; ok {
+		t.Fatalf("message_reference = %#v, want omitted for agent final output", payload["message_reference"])
+	}
+}
+
 func TestSendChannelReply_WithoutMessageIDFallsBackToChannelSend(t *testing.T) {
 	var payload map[string]any
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

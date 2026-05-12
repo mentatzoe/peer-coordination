@@ -756,6 +756,9 @@ func (p *Platform) handleMessageCreate(m *discordgo.MessageCreate) {
 		slog.Debug("discord: ignoring message outside bound surface", "message", m.ID, "channel", m.ChannelID, "bound_channel", p.channelID)
 		return
 	}
+	// Guardrail/system feedback is emitted through Reply, which Discord encodes
+	// as a message reference. Agent final output uses Send, which intentionally
+	// omits message references so peer final replies continue into core.
 	if allowedPeerBot && m.MessageReference != nil {
 		slog.Debug("discord: ignoring allowlisted peer bot reply notice", "message", m.ID, "channel", m.ChannelID)
 		return
