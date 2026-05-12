@@ -27,9 +27,15 @@ def load_profile(agent_name: str) -> dict:
     
     if not profile_path.exists():
         print(f"Error: Profile not found at {profile_path}", file=sys.stderr)
-        print(f"\nCreate the profile first:", file=sys.stderr)
+        print(f"", file=sys.stderr)
+        print(f"NOTE: Profiles live at ~/.config/peer-coordination/<agent>-app-profile", file=sys.stderr)
+        print(f"      NOT at <repo>/config/<agent>-app-profile (the repo only holds the .template).", file=sys.stderr)
+        print(f"", file=sys.stderr)
+        print(f"To create the profile:", file=sys.stderr)
         print(f"  cp config/app-profile.template {profile_path}", file=sys.stderr)
         print(f"  # Then edit {profile_path} with your app's credentials", file=sys.stderr)
+        print(f"", file=sys.stderr)
+        print(f"See: docs/github-apps-setup.md", file=sys.stderr)
         sys.exit(1)
     
     # Parse profile (simple key=value format; strips surrounding single/double
@@ -106,17 +112,36 @@ def mint_token(profile: dict) -> str:
         sys.exit(1)
 
 
+def write_env_file(path: Path, token: str) -> None:
+    """Write GH_TOKEN/GITHUB_TOKEN to a 0600 file. Token bytes never touch
+    stdout/stderr — this is the redactor-safe channel (PC-62 Mechanism A)."""
+    path = path.expanduser()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd = os.open(str(path), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+    with os.fdopen(fd, 'w') as f:
+        f.write(f"GH_TOKEN={token}\n")
+        f.write(f"GITHUB_TOKEN={token}\n")
+    os.chmod(path, 0o600)
+
+
 def main():
     parser = argparse.ArgumentParser(description='Mint GitHub App installation token')
     parser.add_argument('agent', help='Agent name (e.g., codex, hermes, castor)')
-    parser.add_argument('--token-only', action='store_true', 
-                        help='Output only the token (for scripting)')
+    parser.add_argument('--token-only', action='store_true',
+                        help='Output only the token (for scripting). DEPRECATED: prefer --write-env-file; '
+                             'piping a token through stdout is fragile under harness display redactors.')
+    parser.add_argument('--write-env-file', metavar='PATH', default=None,
+                        help='Write GH_TOKEN=<token>/GITHUB_TOKEN=<token> to PATH (mode 0600). '
+                             'Token bytes do not appear on stdout/stderr — safe under harness display redactors.')
     args = parser.parse_args()
-    
+
     profile = load_profile(args.agent)
     token = mint_token(profile)
-    
-    if args.token_only:
+
+    if args.write_env_file:
+        write_env_file(Path(args.write_env_file), token)
+        print(f"# wrote {args.write_env_file} (mode 0600); expires in 60m", file=sys.stderr)
+    elif args.token_only:
         print(token)
     else:
         print(f"✅ Successfully minted installation token for {args.agent}")
