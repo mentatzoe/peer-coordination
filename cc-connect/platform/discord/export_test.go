@@ -10,14 +10,41 @@ import (
 
 type fakeHistoryFetcher struct {
 	batches map[string][]*discordgo.Message
+	calls   []historyCall
 }
 
-func (f fakeHistoryFetcher) ChannelMessages(channelID string, limit int, beforeID, afterID, aroundID string, options ...discordgo.RequestOption) ([]*discordgo.Message, error) {
-	key := beforeID
-	if key == "" {
-		key = "first"
-	}
+type historyCall struct {
+	channelID string
+	limit     int
+	beforeID  string
+	afterID   string
+	aroundID  string
+}
+
+func (f *fakeHistoryFetcher) ChannelMessages(channelID string, limit int, beforeID, afterID, aroundID string, options ...discordgo.RequestOption) ([]*discordgo.Message, error) {
+	f.calls = append(f.calls, historyCall{
+		channelID: channelID,
+		limit:     limit,
+		beforeID:  beforeID,
+		afterID:   afterID,
+		aroundID:  aroundID,
+	})
+
+	key := batchKey(beforeID, afterID, aroundID)
 	return f.batches[key], nil
+}
+
+func batchKey(beforeID, afterID, aroundID string) string {
+	switch {
+	case beforeID != "":
+		return "before:" + beforeID
+	case afterID != "":
+		return "after:" + afterID
+	case aroundID != "":
+		return "around:" + aroundID
+	default:
+		return "first"
+	}
 }
 
 func TestRenderTranscript_ChronologicalAndReadable(t *testing.T) {
@@ -103,10 +130,10 @@ func TestFetchChannelHistory_BoundedWindowAndChronological(t *testing.T) {
 		&discordgo.Message{ID: "4", Timestamp: time.Date(2026, 4, 19, 10, 0, 4, 0, time.UTC), Content: "in-range latest"},
 		&discordgo.Message{ID: "3", Timestamp: time.Date(2026, 4, 19, 10, 0, 3, 0, time.UTC), Content: "in-range middle"},
 	)
-	fetcher := fakeHistoryFetcher{
+	fetcher := &fakeHistoryFetcher{
 		batches: map[string][]*discordgo.Message{
-			"first": firstPage,
-			"3": {
+			"before:" + beforeCursorForTime(before): firstPage,
+			"before:3": {
 				{ID: "2", Timestamp: time.Date(2026, 4, 19, 10, 0, 1, 0, time.UTC), Content: "in-range oldest"},
 				{ID: "1", Timestamp: time.Date(2026, 4, 19, 9, 59, 59, 0, time.UTC), Content: "too old"},
 			},
@@ -122,5 +149,32 @@ func TestFetchChannelHistory_BoundedWindowAndChronological(t *testing.T) {
 	}
 	if got[0].ID != "2" || got[1].ID != "3" || got[2].ID != "4" {
 		t.Fatalf("FetchChannelHistory() order = [%s %s %s], want [2 3 4]", got[0].ID, got[1].ID, got[2].ID)
+	}
+}
+
+func TestFetchChannelHistory_AnchorsInitialRequestAtBeforeBoundary(t *testing.T) {
+	after := time.Date(2026, 4, 19, 10, 0, 1, 0, time.UTC)
+	before := time.Date(2026, 4, 19, 10, 0, 4, 0, time.UTC)
+	fetcher := &fakeHistoryFetcher{
+		batches: map[string][]*discordgo.Message{
+			"before:" + beforeCursorForTime(before): nil,
+		},
+	}
+
+	got, err := FetchChannelHistory(fetcher, "channel-1", after, before)
+	if err != nil {
+		t.Fatalf("FetchChannelHistory() error = %v", err)
+	}
+	if len(got) != 0 {
+		t.Fatalf("FetchChannelHistory() len = %d, want 0", len(got))
+	}
+	if len(fetcher.calls) != 1 {
+		t.Fatalf("ChannelMessages() calls = %d, want 1", len(fetcher.calls))
+	}
+	if fetcher.calls[0].beforeID != beforeCursorForTime(before) {
+		t.Fatalf("ChannelMessages() beforeID = %q, want %q", fetcher.calls[0].beforeID, beforeCursorForTime(before))
+	}
+	if fetcher.calls[0].afterID != "" {
+		t.Fatalf("ChannelMessages() afterID = %q, want empty", fetcher.calls[0].afterID)
 	}
 }
