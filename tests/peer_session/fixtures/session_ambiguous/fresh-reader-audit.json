@@ -1,0 +1,7 @@
+{
+  "session_id": "session-minimal",
+  "audited_at": "2026-04-22T10:00:00Z",
+  "auditor": "vesper",
+  "verdict": "inconclusive",
+  "reasoning": "Fresh reader could reconstruct alpha's contribution but not beta's; needs more transcript context."
+}

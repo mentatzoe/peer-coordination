@@ -1,0 +1,11 @@
+{
+  "rubric_version": "feedbeeffeedbeeffeedbeeffeedbeeffeedbeef",
+  "session_id": "session-minimal",
+  "pinned_rules_ref": "deadbeefcafebabe1234567890abcdef12345678",
+  "audited_at": "2026-04-21T16:00:00Z",
+  "audited_by": "manual",
+  "auditor": "zoe",
+  "findings": [],
+  "load_bearing_findings_count": 0,
+  "verdict": "no_drift"
+}

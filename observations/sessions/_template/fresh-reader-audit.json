@@ -1,0 +1,7 @@
+{
+  "session_id": "[FILL IN: YYYY-MM-DD-short-slug]",
+  "audited_at": "[FILL IN: ISO-8601 UTC timestamp, seconds precision]",
+  "auditor": "[FILL IN: fresh reader's handle or identity]",
+  "verdict": "[FILL IN: pass | fail | inconclusive]",
+  "reasoning": "[FILL IN: short free-text note on what the reader could/couldn't reconstruct]"
+}

@@ -1,0 +1,27 @@
+{
+  "session_id": "[FILL IN: YYYY-MM-DD-short-slug]",
+  "tallied_at": "[FILL IN: ISO-8601 UTC timestamp, seconds precision]",
+  "inputs_hash": "[FILL IN: SHA-256 hex digest written by peer-session tally]",
+  "intervention_count": 0,
+  "intervention_type_tally": {
+    "safety_stop": 0,
+    "clarification": 0,
+    "directive_redirect": 0,
+    "drift_catch": 0,
+    "close_or_resume": 0,
+    "other": 0
+  },
+  "intervention_rate_per_turn": null,
+  "zero_turn_session": false,
+  "drift_audit_verdict": null,
+  "per_session_clear": "[FILL IN: cleared | not-cleared | ambiguous]",
+  "per_session_clear_breakdown": {
+    "h1_stable_coordination": { "judgment": "[FILL IN]", "reason": "[FILL IN]" },
+    "h1_intervention_load":   { "judgment": "[FILL IN]", "reason": "[FILL IN]" },
+    "h1_complementarity":     { "judgment": "[FILL IN]", "reason": "[FILL IN]" },
+    "h2_fresh_reader":        { "judgment": "[FILL IN]", "reason": "[FILL IN]" },
+    "h2_drift":               { "judgment": "[FILL IN]", "reason": "[FILL IN]" },
+    "h2_episode_record":      { "judgment": "[FILL IN]", "reason": "[FILL IN]" }
+  },
+  "notes": []
+}

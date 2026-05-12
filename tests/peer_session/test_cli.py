@@ -90,11 +90,44 @@ class CliInitTest(unittest.TestCase):
                 0,
             )
 
-    def test_help_surface_exposes_init_and_intervention(self) -> None:
+    def test_help_surface_exposes_init_intervention_tally_rollup(self) -> None:
         help_text = build_parser().format_help()
 
-        self.assertIn("{init,intervention}", help_text)
+        self.assertIn("init", help_text)
         self.assertIn("intervention", help_text)
+        self.assertIn("tally", help_text)
+        self.assertIn("rollup", help_text)
+
+
+class CliTallyDispatchTest(unittest.TestCase):
+    def test_tally_dispatch_writes_kpi_and_returns_zero(self) -> None:
+        from tests.peer_session.test_support import install_fixture_bundle
+
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            install_fixture_bundle(repo_root, "session_minimal")
+            exit_code = main(["tally", "session-minimal"], repo_root=repo_root)
+            self.assertEqual(exit_code, 0)
+            kpi_path = repo_root / "observations" / "sessions" / "session-minimal" / "kpi.json"
+            self.assertTrue(kpi_path.is_file())
+
+
+class CliRollupDispatchTest(unittest.TestCase):
+    def test_rollup_dispatch_writes_artifact_and_pointer(self) -> None:
+        from tests.peer_session.test_support import install_fixture_bundle
+
+        with tempfile.TemporaryDirectory() as tmp:
+            repo_root = Path(tmp)
+            for sid in ("sess-a", "sess-b", "sess-c"):
+                install_fixture_bundle(repo_root, "session_minimal", session_id=sid)
+                self.assertEqual(main(["tally", sid], repo_root=repo_root), 0)
+
+            exit_code = main(["rollup"], repo_root=repo_root)
+            self.assertEqual(exit_code, 0)
+            artifacts = list((repo_root / "observations").glob("poc-exit-*.md"))
+            self.assertEqual(len(artifacts), 1)
+            pointer = repo_root / "observations" / "poc-exit.md"
+            self.assertTrue(pointer.is_symlink())
 
 
 if __name__ == "__main__":
