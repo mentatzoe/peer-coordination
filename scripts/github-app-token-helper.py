@@ -27,9 +27,15 @@ def load_profile(agent_name: str) -> dict:
     
     if not profile_path.exists():
         print(f"Error: Profile not found at {profile_path}", file=sys.stderr)
-        print(f"\nCreate the profile first:", file=sys.stderr)
+        print(f"", file=sys.stderr)
+        print(f"NOTE: Profiles live at ~/.config/peer-coordination/<agent>-app-profile", file=sys.stderr)
+        print(f"      NOT at <repo>/config/<agent>-app-profile (the repo only holds the .template).", file=sys.stderr)
+        print(f"", file=sys.stderr)
+        print(f"To create the profile:", file=sys.stderr)
         print(f"  cp config/app-profile.template {profile_path}", file=sys.stderr)
         print(f"  # Then edit {profile_path} with your app's credentials", file=sys.stderr)
+        print(f"", file=sys.stderr)
+        print(f"See: docs/github-apps-setup.md", file=sys.stderr)
         sys.exit(1)
     
     # Parse profile (simple key=value format; strips surrounding single/double
