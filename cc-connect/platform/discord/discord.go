@@ -820,8 +820,9 @@ func (p *Platform) handleMessageCreate(m *discordgo.MessageCreate) {
 		UserID:    m.Author.ID, UserName: m.Author.Username,
 		ChatName: p.resolveChannelName(m.ChannelID),
 		Content:  m.Content, Images: images, Files: files, Audio: audio,
-		ChannelKey: p.boundChannelKey(m.ChannelID),
-		ReplyCtx:   rctx,
+		ExtraContent: formatReplyContext(m.ReferencedMessage),
+		ChannelKey:   p.boundChannelKey(m.ChannelID),
+		ReplyCtx:     rctx,
 	}
 	prepared, ok := p.prepareInboundMessage(msg)
 	if !ok {

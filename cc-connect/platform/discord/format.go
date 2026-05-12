@@ -1,6 +1,12 @@
 package discord
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+	"time"
+
+	"github.com/bwmarrin/discordgo"
+)
 
 // wrapTablesInCodeBlocks detects markdown tables (contiguous pipe-delimited
 // lines that include a separator row like |---|---|) outside code blocks, and
@@ -81,4 +87,30 @@ func hasTableSeparator(lines []string) bool {
 		}
 	}
 	return false
+}
+
+func formatReplyContext(ref *discordgo.Message) string {
+	if ref == nil {
+		return ""
+	}
+	authorName := "unknown"
+	authorType := "human"
+	if ref.Author != nil {
+		authorName = ref.Author.Username
+		if ref.Author.Bot {
+			authorType = "bot"
+		}
+	}
+
+	content := ref.Content
+	runes := []rune(content)
+	if len(runes) > 300 {
+		content = string(runes[:297]) + "..."
+	}
+
+	// Normalize newlines in referenced content so it fits well in preamble
+	content = strings.ReplaceAll(content, "\n", " ")
+
+	timestamp := ref.Timestamp.Format(time.RFC3339)
+	return fmt.Sprintf("↳ [in reply to %s (%s) | ID: %s | Time: %s]: %s\n\n", authorName, authorType, ref.ID, timestamp, content)
 }
