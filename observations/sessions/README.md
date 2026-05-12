@@ -2,8 +2,10 @@
 
 Each directory under `observations/sessions/` is a **session bundle** — the canonical preserved record for one peer-coordination POC session, used for post-hoc review, KPI computation, and H1/H2 evaluation.
 
-**Authoritative spec**: [`specs/001-session-bundle-skeleton/spec.md`](../../specs/001-session-bundle-skeleton/spec.md).
+**Authoritative specs**: [`specs/001-session-bundle-skeleton/spec.md`](../../specs/001-session-bundle-skeleton/spec.md) (bundle shape), [`specs/008-drift-audit-workflow/spec.md`](../../specs/008-drift-audit-workflow/spec.md) (drift-audit authoring workflow), [`specs/009-session-summary-workflow/spec.md`](../../specs/009-session-summary-workflow/spec.md) (summary authoring workflow).
 **Design context**: [`design/poc.md`](../../design/poc.md) Layer 3 artifact bundle + Measurement model.
+
+> **Authoring a summary?** Jump to [`SUMMARY-WORKFLOW.md`](SUMMARY-WORKFLOW.md) — the operator-facing procedure for Paths A/B/C/D (single-author / agent-drafted / revision / peer-audit). Paired with [`SUMMARY-TAXONOMY.md`](SUMMARY-TAXONOMY.md) for commit-message conventions. This README is about bundle-level composition and naming.
 
 ## Naming rule
 
