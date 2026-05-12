@@ -1,0 +1,29 @@
+[
+  {
+    "id": "iv-001",
+    "taxonomy_version": "poc-v1",
+    "at": "2026-05-05T17:01:10Z",
+    "type": "clarification",
+    "reason": "Operator clarified that target shape is the open design question for the dry-run.",
+    "attribution": "operator_directed",
+    "actor": "Zoe",
+    "target": {
+      "kind": "turn",
+      "turn_ref": "2026-05-05T17:01:00Z"
+    }
+  },
+  {
+    "id": "iv-002",
+    "taxonomy_version": "poc-v1",
+    "at": "2026-05-05T17:02:15Z",
+    "type": "directive_redirect",
+    "reason": "Operator redirected the exchange away from KPI rollup and back to intervention-tagging scope.",
+    "attribution": "operator_directed",
+    "actor": "Zoe",
+    "target": {
+      "kind": "span",
+      "start_turn_ref": "2026-05-05T17:01:45Z",
+      "end_turn_ref": "2026-05-05T17:02:15Z"
+    }
+  }
+]
