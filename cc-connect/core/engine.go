@@ -3006,9 +3006,10 @@ func (e *Engine) processInteractiveEvents(state *interactiveState, session *Sess
 				compressor, ok := e.agent.(ContextCompressor)
 				if ok && compressor.CompressCommand() != "" {
 					if pendingSend != nil {
-						if err := <-pendingSend; err != nil {
-							slog.Debug("async send error before compress", "error", err)
+						if !e.waitForPendingSend(pendingSend, stopCh, "async send error before compress") {
+							return
 						}
+						pendingSend = nil
 					}
 					state.mu.Lock()
 					state.lastAutoCompressAt = time.Now()
@@ -3059,9 +3060,10 @@ func (e *Engine) processInteractiveEvents(state *interactiveState, session *Sess
 				drainEvents(state.agentSession.Events())
 
 				if pendingSend != nil {
-					if err := <-pendingSend; err != nil {
-						slog.Debug("async send error before queued turn", "error", err)
+					if !e.waitForPendingSend(pendingSend, stopCh, "async send error before queued turn") {
+						return
 					}
+					pendingSend = nil
 				}
 
 				queuedPrompt := e.buildSenderPrompt(queued.content, queued.userID, queued.userName, queued.msgPlatform, queued.msgSessionKey)
@@ -3111,9 +3113,10 @@ func (e *Engine) processInteractiveEvents(state *interactiveState, session *Sess
 			state.mu.Unlock()
 
 			if pendingSend != nil {
-				if err := <-pendingSend; err != nil {
-					slog.Debug("async send error after EventResult", "error", err)
+				if !e.waitForPendingSend(pendingSend, stopCh, "async send error after EventResult") {
+					return
 				}
+				pendingSend = nil
 			}
 
 			// Add a "done" reaction so the user knows the agent finished.
@@ -3177,6 +3180,20 @@ channelClosed:
 				}
 			}
 		}
+	}
+}
+
+func (e *Engine) waitForPendingSend(sendDone <-chan error, stopCh <-chan struct{}, debugMessage string) bool {
+	select {
+	case err := <-sendDone:
+		if err != nil {
+			slog.Debug(debugMessage, "error", err)
+		}
+		return true
+	case <-stopCh:
+		return false
+	case <-e.ctx.Done():
+		return false
 	}
 }
 
@@ -3270,7 +3287,7 @@ var builtinCommands = []struct {
 	{[]string{"cron"}, "cron"},
 	{[]string{"heartbeat", "hb"}, "heartbeat"},
 	{[]string{"compress", "compact"}, "compress"},
-	{[]string{"stop"}, "stop"},
+	{[]string{"stop", "cancel", "interrupt"}, "stop"},
 	{[]string{"help"}, "help"},
 	{[]string{"version"}, "version"},
 	{[]string{"commands", "command", "cmd"}, "commands"},

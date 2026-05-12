@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -7384,6 +7385,66 @@ func TestCmdStop_ReturnsWhileCloseBlockedAndStopsEventLoop(t *testing.T) {
 	case <-sess.closed:
 	case <-time.After(2 * time.Second):
 		t.Fatal("Close did not finish after release")
+	}
+}
+
+func TestCmdStop_ReleasesSessionLockWhenSendDoesNotReturnAfterResult(t *testing.T) {
+	p := &stubPlatformEngine{n: "test"}
+	sess := newBlockingSendSession("stop-send-blocked")
+	defer close(sess.unblock)
+
+	agent := &controllableAgent{nextSession: sess}
+	e := NewEngine("test", agent, []Platform{p}, "", LangEnglish)
+	key := "test:user1"
+	session := e.sessions.GetOrCreateActive(key)
+
+	e.handleMessage(p, &Message{
+		Platform:   "test",
+		SessionKey: key,
+		UserID:     "user1",
+		UserName:   "User",
+		Content:    "run long command",
+		ReplyCtx:   "ctx",
+	})
+
+	select {
+	case <-sess.sendStarted:
+	case <-time.After(2 * time.Second):
+		t.Fatal("agent Send did not start")
+	}
+
+	sess.events <- Event{Type: EventResult, Content: "done", Done: true}
+
+	deadline := time.After(2 * time.Second)
+	for {
+		if slices.Contains(p.getSent(), "done") {
+			break
+		}
+		select {
+		case <-deadline:
+			t.Fatal("result was not delivered before Send blocked")
+		case <-time.After(10 * time.Millisecond):
+		}
+	}
+
+	if session.TryLock() {
+		session.Unlock()
+		t.Fatal("session lock released before blocked Send returned")
+	}
+
+	e.cmdStop(p, &Message{SessionKey: key, ReplyCtx: "stop-ctx"})
+
+	deadline = time.After(2 * time.Second)
+	for {
+		if session.TryLock() {
+			session.Unlock()
+			return
+		}
+		select {
+		case <-deadline:
+			t.Fatal("/stop did not release the session lock while Send was blocked")
+		case <-time.After(10 * time.Millisecond):
+		}
 	}
 }
 
