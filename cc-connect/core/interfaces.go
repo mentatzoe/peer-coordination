@@ -14,6 +14,13 @@ type Platform interface {
 	Stop() error
 }
 
+// SystemNoticeReplier is an optional platform capability for bridge-authored
+// operational notices. Platforms can use it to keep these notices visible to
+// humans while preventing them from being re-ingested as conversational input.
+type SystemNoticeReplier interface {
+	ReplySystemNotice(ctx context.Context, replyCtx any, content string) error
+}
+
 // ErrNotSupported indicates a platform doesn't support a particular operation.
 var ErrNotSupported = errors.New("operation not supported by this platform")
 

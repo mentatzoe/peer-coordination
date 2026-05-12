@@ -760,6 +760,48 @@ func TestHandleMessageCreate_DispatchesAllowlistedPeerBotWithoutMention(t *testi
 	if got[0].Content != "peer bot says hello" {
 		t.Fatalf("content = %q, want peer bot content preserved", got[0].Content)
 	}
+	if !got[0].AuthorIsBot {
+		t.Fatal("AuthorIsBot = false, want true for allowlisted peer bot")
+	}
+	if !got[0].AllowedPeerBot {
+		t.Fatal("AllowedPeerBot = false, want true for allowlisted peer bot")
+	}
+}
+
+func TestHandleMessageCreate_IgnoresRecordedSystemNoticeFromAllowlistedPeerBot(t *testing.T) {
+	p := &Platform{
+		session:       &discordgo.Session{State: discordgo.NewState()},
+		allowFrom:     "operator",
+		allowFromBots: map[string]struct{}{"peer-bot": {}},
+		channelID:     "bound-channel",
+		botID:         "self-bot",
+		groupReplyAll: false,
+		sessionOpen:   true,
+	}
+	p.session.State.ChannelAdd(&discordgo.Channel{ID: "bound-channel", Name: "bound"})
+	p.botRoleIDs.Store("guild-1", "managed-role")
+
+	var got []*core.Message
+	p.handler = func(_ core.Platform, msg *core.Message) {
+		got = append(got, msg)
+	}
+
+	rememberSystemNoticeID("m-system-notice")
+
+	p.handleMessageCreate(&discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			ID:        "m-system-notice",
+			ChannelID: "bound-channel",
+			GuildID:   "guild-1",
+			Content:   "Message received - will process after the current task finishes.",
+			Timestamp: time.Now(),
+			Author:    &discordgo.User{ID: "peer-bot", Username: "Dalgos", Bot: true},
+		},
+	})
+
+	if len(got) != 0 {
+		t.Fatalf("dispatched messages = %d, want 0 for recorded system notice", len(got))
+	}
 }
 
 func TestHandleMessageCreate_ClosedSessionDropsAllowlistedPeerBot(t *testing.T) {

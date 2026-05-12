@@ -226,6 +226,24 @@ func rememberDedupID(store *sync.Map, id string) bool {
 	return true
 }
 
+var systemNoticeMsgs sync.Map
+
+func rememberSystemNoticeID(id string) {
+	if id == "" {
+		return
+	}
+	systemNoticeMsgs.Store(id, struct{}{})
+	time.AfterFunc(2*time.Minute, func() { systemNoticeMsgs.Delete(id) })
+}
+
+func isSystemNoticeID(id string) bool {
+	if id == "" {
+		return false
+	}
+	_, ok := systemNoticeMsgs.Load(id)
+	return ok
+}
+
 func buildSessionKey(channelID string, userID string, shareSessionInChannel bool) string {
 	if shareSessionInChannel {
 		return fmt.Sprintf("discord:%s", channelID)
@@ -713,6 +731,10 @@ func (p *Platform) handleMessageCreate(m *discordgo.MessageCreate) {
 	if m.Author.ID == p.botID {
 		return
 	}
+	if m.Author.Bot && isSystemNoticeID(m.ID) {
+		slog.Debug("discord: ignoring recorded system notice", "msg_id", m.ID, "author", m.Author.ID)
+		return
+	}
 	allowedPeerBot := p.isAllowedPeerBot(m.Author)
 	if m.Author.Bot && !allowedPeerBot {
 		return
@@ -820,9 +842,11 @@ func (p *Platform) handleMessageCreate(m *discordgo.MessageCreate) {
 		UserID:    m.Author.ID, UserName: m.Author.Username,
 		ChatName: p.resolveChannelName(m.ChannelID),
 		Content:  m.Content, Images: images, Files: files, Audio: audio,
-		ExtraContent: formatReplyContext(m.ReferencedMessage),
-		ChannelKey:   p.boundChannelKey(m.ChannelID),
-		ReplyCtx:     rctx,
+		ExtraContent:   formatReplyContext(m.ReferencedMessage),
+		ChannelKey:     p.boundChannelKey(m.ChannelID),
+		ReplyCtx:       rctx,
+		AuthorIsBot:    m.Author.Bot,
+		AllowedPeerBot: allowedPeerBot,
 	}
 	prepared, ok := p.prepareInboundMessage(msg)
 	if !ok {
@@ -1025,6 +1049,20 @@ func (p *Platform) Reply(ctx context.Context, rctx any, content string) error {
 	}
 }
 
+// ReplySystemNotice sends a bridge-authored operational notice. Channel replies
+// are recorded so the receive path can ignore the exact notice if Discord
+// re-delivers it through an allowlisted bot-to-bot path.
+func (p *Platform) ReplySystemNotice(ctx context.Context, rctx any, content string) error {
+	switch rc := rctx.(type) {
+	case *interactionReplyCtx:
+		return p.sendInteraction(rc, content)
+	case replyContext:
+		return p.sendChannelReplySystemNotice(rc, content)
+	default:
+		return fmt.Errorf("discord: invalid reply context type %T", rctx)
+	}
+}
+
 // Send sends a new message (not a reply).
 func (p *Platform) Send(ctx context.Context, rctx any, content string) error {
 	switch rc := rctx.(type) {
@@ -1070,17 +1108,29 @@ func (p *Platform) sendInteraction(ictx *interactionReplyCtx, content string) er
 }
 
 func (p *Platform) sendChannelReply(rc replyContext, content string) error {
+	return p.sendChannelReplyWithNoticeTracking(rc, content, false)
+}
+
+func (p *Platform) sendChannelReplySystemNotice(rc replyContext, content string) error {
+	return p.sendChannelReplyWithNoticeTracking(rc, content, true)
+}
+
+func (p *Platform) sendChannelReplyWithNoticeTracking(rc replyContext, content string, systemNotice bool) error {
 	chunks := core.SplitMessageCodeFenceAware(wrapTablesInCodeBlocks(content), maxDiscordLen)
 	for _, chunk := range chunks {
 		var err error
+		var sent *discordgo.Message
 		if rc.useThreadChannel() || rc.messageID == "" {
-			_, err = p.session.ChannelMessageSend(rc.targetChannelID(), chunk)
+			sent, err = p.session.ChannelMessageSend(rc.targetChannelID(), chunk)
 		} else {
 			ref := &discordgo.MessageReference{MessageID: rc.messageID}
-			_, err = p.session.ChannelMessageSendReply(rc.channelID, chunk, ref)
+			sent, err = p.session.ChannelMessageSendReply(rc.channelID, chunk, ref)
 		}
 		if err != nil {
 			return fmt.Errorf("discord: send: %w", err)
+		}
+		if systemNotice && sent != nil {
+			rememberSystemNoticeID(sent.ID)
 		}
 	}
 	return nil

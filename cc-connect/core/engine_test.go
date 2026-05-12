@@ -6375,6 +6375,39 @@ func TestQueueMessageForBusySession_FIFODequeue(t *testing.T) {
 	state.mu.Unlock()
 }
 
+func TestQueueMessageForBusySession_PeerBotQueuesSilently(t *testing.T) {
+	p := &stubPlatformEngine{n: "test"}
+	sess := newQueuingSession("qs-peer")
+	agent := &controllableAgent{nextSession: sess}
+	e := NewEngine("test", agent, []Platform{p}, "", LangEnglish)
+
+	key := "test:peer-bot"
+	state := &interactiveState{
+		agentSession: sess,
+		platform:     p,
+		replyCtx:     "ctx1",
+	}
+	e.interactiveMu.Lock()
+	e.interactiveStates[key] = state
+	e.interactiveMu.Unlock()
+
+	msg := &Message{
+		SessionKey:     key,
+		Content:        "peer final output",
+		ReplyCtx:       "ctx-peer",
+		AuthorIsBot:    true,
+		AllowedPeerBot: true,
+	}
+
+	if ok := e.queueMessageForBusySession(p, msg, key); !ok {
+		t.Fatal("expected peer bot message to queue")
+	}
+
+	if sent := p.getSent(); len(sent) != 0 {
+		t.Fatalf("platform replies = %d, want 0 for peer bot queued message: %v", len(sent), sent)
+	}
+}
+
 func TestProcessInteractiveEvents_DrainsQueuedMessages(t *testing.T) {
 	p := &stubPlatformEngine{n: "test"}
 	sess := newQueuingSession("qs2")
@@ -6781,6 +6814,78 @@ func TestQueueMessageOverflow_DropsOldestAndReturnsfalse(t *testing.T) {
 	sent := p.getSent()
 	if len(sent) != maxQueuedMessages {
 		t.Fatalf("platform replies = %d, want %d (one per accepted queue)", len(sent), maxQueuedMessages)
+	}
+}
+
+func TestQueueMessageOverflow_PeerBotRejectsSilently(t *testing.T) {
+	p := &stubPlatformEngine{n: "test"}
+	sess := newQueuingSession("qs-peer-overflow")
+	agent := &controllableAgent{nextSession: sess}
+	e := NewEngine("test", agent, []Platform{p}, "", LangEnglish)
+
+	key := "test:peer-overflow"
+	state := &interactiveState{
+		agentSession: sess,
+		platform:     p,
+		replyCtx:     "ctx",
+	}
+	e.interactiveMu.Lock()
+	e.interactiveStates[key] = state
+	e.interactiveMu.Unlock()
+
+	for i := 0; i < maxQueuedMessages; i++ {
+		msg := &Message{
+			SessionKey:     key,
+			Content:        fmt.Sprintf("peer-msg-%d", i),
+			ReplyCtx:       fmt.Sprintf("ctx-%d", i),
+			AuthorIsBot:    true,
+			AllowedPeerBot: true,
+		}
+		if ok := e.queueMessageForBusySession(p, msg, key); !ok {
+			t.Fatalf("expected peer msg-%d to be queued", i)
+		}
+	}
+
+	overflow := &Message{
+		SessionKey:     key,
+		Content:        "peer-overflow",
+		ReplyCtx:       "ctx-overflow",
+		AuthorIsBot:    true,
+		AllowedPeerBot: true,
+	}
+	if ok := e.queueMessageForBusySession(p, overflow, key); ok {
+		t.Fatal("expected peer overflow message to be rejected")
+	}
+
+	if sent := p.getSent(); len(sent) != 0 {
+		t.Fatalf("platform replies = %d, want 0 for peer bot queue pressure: %v", len(sent), sent)
+	}
+}
+
+func TestHandleMessage_RateLimitedPeerBotRepliesSilently(t *testing.T) {
+	p := &stubPlatformEngine{n: "test"}
+	e := NewEngine("test", &stubAgent{}, []Platform{p}, "", LangEnglish)
+	e.SetRateLimitCfg(RateLimitCfg{MaxMessages: 1, Window: time.Minute})
+
+	msg := &Message{
+		SessionKey:     "test:peer-rate",
+		Platform:       "test",
+		UserID:         "peer-bot",
+		UserName:       "Dalgos",
+		Content:        "peer output",
+		ReplyCtx:       "ctx-peer",
+		AuthorIsBot:    true,
+		AllowedPeerBot: true,
+	}
+
+	if !e.checkRateLimit(msg) {
+		t.Fatal("expected first peer bot rate-limit check to pass")
+	}
+
+	e.handleMessage(p, msg)
+
+	if sent := p.getSent(); len(sent) != 0 {
+		t.Fatalf("platform replies = %d, want 0 for rate-limited peer bot: %v", len(sent), sent)
 	}
 }
 

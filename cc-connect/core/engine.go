@@ -255,16 +255,18 @@ type workspaceInitFlow struct {
 // The message is NOT sent to agent stdin at queue time; the event loop
 // sends it after the current turn completes to avoid mid-turn interference.
 type queuedMessage struct {
-	platform      Platform
-	replyCtx      any
-	content       string
-	images        []ImageAttachment
-	files         []FileAttachment
-	fromVoice     bool
-	userID        string
-	userName      string // sender's display name for sender injection
-	msgPlatform   string // platform name for sender injection
-	msgSessionKey string // session key for extracting chat ID
+	platform       Platform
+	replyCtx       any
+	content        string
+	images         []ImageAttachment
+	files          []FileAttachment
+	fromVoice      bool
+	userID         string
+	userName       string // sender's display name for sender injection
+	msgPlatform    string // platform name for sender injection
+	msgSessionKey  string // session key for extracting chat ID
+	authorIsBot    bool
+	allowedPeerBot bool
 }
 
 // interactiveState tracks a running interactive agent session and its permission state.
@@ -1479,7 +1481,12 @@ func (e *Engine) handleMessage(p Platform, msg *Message) {
 	if !e.checkRateLimit(msg) {
 		slog.Info("message rate limited",
 			"session", msg.SessionKey, "user_id", msg.UserID, "user", msg.UserName)
-		e.reply(p, msg.ReplyCtx, e.i18n.T(MsgRateLimited))
+		if msg.AllowedPeerBot {
+			slog.Info("peer bot message rate limited silently",
+				"session", msg.SessionKey, "user_id", msg.UserID, "user", msg.UserName)
+			return
+		}
+		e.replySystemNotice(p, msg.ReplyCtx, e.i18n.T(MsgRateLimited))
 		return
 	}
 
@@ -1600,7 +1607,7 @@ func (e *Engine) handleMessage(p Platform, msg *Message) {
 			}
 			return
 		}
-		e.reply(p, msg.ReplyCtx, e.i18n.T(MsgPreviousProcessing))
+		e.replyPreviousProcessing(p, msg)
 		return
 	}
 
@@ -1701,16 +1708,18 @@ func (e *Engine) queueMessageForBusySession(p Platform, msg *Message, interactiv
 		return false // fall back to "previous processing" reply
 	}
 	state.pendingMessages = append(state.pendingMessages, queuedMessage{
-		platform:      p,
-		replyCtx:      msg.ReplyCtx,
-		content:       msg.Content,
-		images:        msg.Images,
-		files:         msg.Files,
-		fromVoice:     msg.FromVoice,
-		userID:        msg.UserID,
-		userName:      msg.UserName,
-		msgPlatform:   msg.Platform,
-		msgSessionKey: msg.SessionKey,
+		platform:       p,
+		replyCtx:       msg.ReplyCtx,
+		content:        msg.Content,
+		images:         msg.Images,
+		files:          msg.Files,
+		fromVoice:      msg.FromVoice,
+		userID:         msg.UserID,
+		userName:       msg.UserName,
+		msgPlatform:    msg.Platform,
+		msgSessionKey:  msg.SessionKey,
+		authorIsBot:    msg.AuthorIsBot,
+		allowedPeerBot: msg.AllowedPeerBot,
 	})
 	queueDepth := len(state.pendingMessages)
 	state.mu.Unlock()
@@ -1720,7 +1729,16 @@ func (e *Engine) queueMessageForBusySession(p Platform, msg *Message, interactiv
 		"user", msg.UserName,
 		"queue_depth", queueDepth,
 	)
-	e.reply(p, msg.ReplyCtx, e.i18n.T(MsgMessageQueued))
+	if msg.AllowedPeerBot {
+		slog.Info("peer bot message queued silently",
+			"session", msg.SessionKey,
+			"user_id", msg.UserID,
+			"user", msg.UserName,
+			"queue_depth", queueDepth,
+		)
+		return true
+	}
+	e.replySystemNotice(p, msg.ReplyCtx, e.i18n.T(MsgMessageQueued))
 	return true
 }
 
@@ -3207,6 +3225,15 @@ func (e *Engine) notifyDroppedQueuedMessages(state *interactiveState, reason err
 	state.pendingMessages = nil
 	state.mu.Unlock()
 	for _, q := range remaining {
+		if q.allowedPeerBot {
+			slog.Info("queued peer bot message dropped silently",
+				"session", q.msgSessionKey,
+				"user_id", q.userID,
+				"user", q.userName,
+				"reason", reason,
+			)
+			continue
+		}
 		e.send(q.platform, q.replyCtx, fmt.Sprintf(e.i18n.T(MsgError), reason))
 	}
 }
@@ -3234,6 +3261,15 @@ func (e *Engine) drainPendingMessages(state *interactiveState, session *Session,
 		prompt := e.buildSenderPrompt(queued.content, queued.userID, queued.userName, queued.msgPlatform, queued.msgSessionKey)
 
 		if state.agentSession == nil || !state.agentSession.Alive() {
+			if queued.allowedPeerBot {
+				slog.Info("queued peer bot message dropped silently; agent session ended",
+					"session", queued.msgSessionKey,
+					"user_id", queued.userID,
+					"user", queued.userName,
+				)
+				e.notifyDroppedQueuedMessages(state, fmt.Errorf("agent session ended"))
+				return false
+			}
 			e.send(queued.platform, queued.replyCtx, fmt.Sprintf(e.i18n.T(MsgError), "agent session ended"))
 			e.notifyDroppedQueuedMessages(state, fmt.Errorf("agent session ended"))
 			return false
@@ -6319,7 +6355,7 @@ func (e *Engine) cmdCompress(p Platform, msg *Message) {
 	_, sessions := e.sessionContextForKey(msg.SessionKey)
 	session := sessions.GetOrCreateActive(msg.SessionKey)
 	if !session.TryLock() {
-		e.reply(p, msg.ReplyCtx, e.i18n.T(MsgPreviousProcessing))
+		e.replyPreviousProcessing(p, msg)
 		return
 	}
 
@@ -7424,6 +7460,51 @@ func (e *Engine) replyWithError(p Platform, replyCtx any, content string) error 
 // reply wraps p.Reply with error logging, slow-operation warnings, and outgoing rate limiting.
 func (e *Engine) reply(p Platform, replyCtx any, content string) {
 	_ = e.replyWithError(p, replyCtx, content)
+}
+
+// replySystemNotice sends bridge-authored operational feedback. Platforms that
+// distinguish system notices can prevent these messages from being ingested as
+// conversational peer input.
+func (e *Engine) replySystemNotice(p Platform, replyCtx any, content string) {
+	_ = e.replySystemNoticeWithError(p, replyCtx, content)
+}
+
+func (e *Engine) replySystemNoticeWithError(p Platform, replyCtx any, content string) error {
+	if err := e.waitOutgoing(p); err != nil {
+		slog.Warn("outgoing rate limit: context cancelled", "platform", p.Name(), "error", err)
+		return err
+	}
+	start := time.Now()
+	var err error
+	if sr, ok := p.(SystemNoticeReplier); ok {
+		err = sr.ReplySystemNotice(e.ctx, replyCtx, content)
+	} else {
+		err = p.Reply(e.ctx, replyCtx, content)
+	}
+	if err != nil {
+		slog.Error("platform system notice reply failed", "platform", p.Name(), "error", err, "content_len", len(content))
+		return err
+	}
+	if elapsed := time.Since(start); elapsed >= slowPlatformSend {
+		slog.Warn("slow platform system notice reply", "platform", p.Name(), "elapsed", elapsed, "content_len", len(content))
+	}
+	return nil
+}
+
+func (e *Engine) replyPreviousProcessing(p Platform, msg *Message) {
+	if msg != nil && msg.AllowedPeerBot {
+		slog.Info("peer bot message dropped silently; previous request still processing",
+			"session", msg.SessionKey,
+			"user_id", msg.UserID,
+			"user", msg.UserName,
+		)
+		return
+	}
+	var replyCtx any
+	if msg != nil {
+		replyCtx = msg.ReplyCtx
+	}
+	e.replySystemNotice(p, replyCtx, e.i18n.T(MsgPreviousProcessing))
 }
 
 // replyWithButtons sends a reply with inline buttons if the platform supports it,
@@ -9659,7 +9740,7 @@ func (e *Engine) executeCustomCommand(p Platform, msg *Message, cmd *CustomComma
 
 	session := e.sessions.GetOrCreateActive(msg.SessionKey)
 	if !session.TryLock() {
-		e.reply(p, msg.ReplyCtx, e.i18n.T(MsgPreviousProcessing))
+		e.replyPreviousProcessing(p, msg)
 		return
 	}
 
@@ -9924,7 +10005,7 @@ func (e *Engine) executeSkill(p Platform, msg *Message, skill *Skill, args []str
 
 	session := e.sessions.GetOrCreateActive(msg.SessionKey)
 	if !session.TryLock() {
-		e.reply(p, msg.ReplyCtx, e.i18n.T(MsgPreviousProcessing))
+		e.replyPreviousProcessing(p, msg)
 		return
 	}
 
