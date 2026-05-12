@@ -760,6 +760,55 @@ func TestHandleMessageCreate_DispatchesAllowlistedPeerBotWithoutMention(t *testi
 	if got[0].Content != "peer bot says hello" {
 		t.Fatalf("content = %q, want peer bot content preserved", got[0].Content)
 	}
+	if got[0].AuthorKind != core.MessageAuthorPeerBot {
+		t.Fatalf("author kind = %q, want peer bot provenance", got[0].AuthorKind)
+	}
+}
+
+func TestHandleMessageCreate_IgnoresAllowlistedPeerBotReplyNotice(t *testing.T) {
+	p := &Platform{
+		session:       &discordgo.Session{State: discordgo.NewState()},
+		allowFrom:     "operator",
+		allowFromBots: map[string]struct{}{"peer-bot": {}},
+		channelID:     "bound-channel",
+		botID:         "self-bot",
+		groupReplyAll: false,
+		sessionOpen:   true,
+	}
+	p.session.State.ChannelAdd(&discordgo.Channel{ID: "bound-channel", Name: "bound"})
+	p.botRoleIDs.Store("guild-1", "managed-role")
+
+	var got []*core.Message
+	p.handler = func(_ core.Platform, msg *core.Message) {
+		got = append(got, msg)
+	}
+
+	p.handleMessageCreate(&discordgo.MessageCreate{
+		Message: &discordgo.Message{
+			ID:        "m-peer-bot-notice",
+			ChannelID: "bound-channel",
+			GuildID:   "guild-1",
+			Content:   "Message queued.",
+			Timestamp: time.Now(),
+			Author:    &discordgo.User{ID: "peer-bot", Username: "Dalgos", Bot: true},
+			MessageReference: &discordgo.MessageReference{
+				MessageID: "operator-msg",
+				ChannelID: "bound-channel",
+				GuildID:   "guild-1",
+			},
+			ReferencedMessage: &discordgo.Message{
+				ID:        "operator-msg",
+				ChannelID: "bound-channel",
+				GuildID:   "guild-1",
+				Content:   "operator prompt",
+				Author:    &discordgo.User{ID: "operator", Username: "zoe"},
+			},
+		},
+	})
+
+	if len(got) != 0 {
+		t.Fatalf("dispatched messages = %d, want 0 for peer-bot bridge notice", len(got))
+	}
 }
 
 func TestHandleMessageCreate_ClosedSessionDropsAllowlistedPeerBot(t *testing.T) {
@@ -1356,6 +1405,32 @@ func TestUpdateMessage_PlainTextClearsEmbeds(t *testing.T) {
 	}
 	if len(embeds) != 0 {
 		t.Fatalf("embeds = %#v, want empty embeds array", embeds)
+	}
+}
+
+func TestSend_WithMessageIDDoesNotCreateDiscordReply(t *testing.T) {
+	var payload map[string]any
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Fatalf("decode request: %v", err)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprint(w, `{"id":"msg-send","channel_id":"ch-1"}`)
+	}))
+	defer server.Close()
+
+	s := newTestDiscordSession(t, server)
+	p := &Platform{session: s}
+
+	err := p.Send(context.Background(), replyContext{channelID: "ch-1", messageID: "operator-msg"}, "agent final output")
+	if err != nil {
+		t.Fatalf("Send() error = %v", err)
+	}
+	if payload["content"] != "agent final output" {
+		t.Fatalf("content = %#v, want agent final output", payload["content"])
+	}
+	if _, ok := payload["message_reference"]; ok {
+		t.Fatalf("message_reference = %#v, want omitted for agent final output", payload["message_reference"])
 	}
 }
 

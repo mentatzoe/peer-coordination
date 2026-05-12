@@ -265,6 +265,7 @@ type queuedMessage struct {
 	userName      string // sender's display name for sender injection
 	msgPlatform   string // platform name for sender injection
 	msgSessionKey string // session key for extracting chat ID
+	authorKind    MessageAuthorKind
 }
 
 // interactiveState tracks a running interactive agent session and its permission state.
@@ -1479,7 +1480,9 @@ func (e *Engine) handleMessage(p Platform, msg *Message) {
 	if !e.checkRateLimit(msg) {
 		slog.Info("message rate limited",
 			"session", msg.SessionKey, "user_id", msg.UserID, "user", msg.UserName)
-		e.reply(p, msg.ReplyCtx, e.i18n.T(MsgRateLimited))
+		if !msg.FromPeerBot() {
+			e.reply(p, msg.ReplyCtx, e.i18n.T(MsgRateLimited))
+		}
 		return
 	}
 
@@ -1600,7 +1603,9 @@ func (e *Engine) handleMessage(p Platform, msg *Message) {
 			}
 			return
 		}
-		e.reply(p, msg.ReplyCtx, e.i18n.T(MsgPreviousProcessing))
+		if !msg.FromPeerBot() {
+			e.reply(p, msg.ReplyCtx, e.i18n.T(MsgPreviousProcessing))
+		}
 		return
 	}
 
@@ -1711,6 +1716,7 @@ func (e *Engine) queueMessageForBusySession(p Platform, msg *Message, interactiv
 		userName:      msg.UserName,
 		msgPlatform:   msg.Platform,
 		msgSessionKey: msg.SessionKey,
+		authorKind:    msg.AuthorKind,
 	})
 	queueDepth := len(state.pendingMessages)
 	state.mu.Unlock()
@@ -1720,7 +1726,9 @@ func (e *Engine) queueMessageForBusySession(p Platform, msg *Message, interactiv
 		"user", msg.UserName,
 		"queue_depth", queueDepth,
 	)
-	e.reply(p, msg.ReplyCtx, e.i18n.T(MsgMessageQueued))
+	if !msg.FromPeerBot() {
+		e.reply(p, msg.ReplyCtx, e.i18n.T(MsgMessageQueued))
+	}
 	return true
 }
 
@@ -3207,6 +3215,9 @@ func (e *Engine) notifyDroppedQueuedMessages(state *interactiveState, reason err
 	state.pendingMessages = nil
 	state.mu.Unlock()
 	for _, q := range remaining {
+		if q.authorKind == MessageAuthorPeerBot {
+			continue
+		}
 		e.send(q.platform, q.replyCtx, fmt.Sprintf(e.i18n.T(MsgError), reason))
 	}
 }
@@ -3234,7 +3245,9 @@ func (e *Engine) drainPendingMessages(state *interactiveState, session *Session,
 		prompt := e.buildSenderPrompt(queued.content, queued.userID, queued.userName, queued.msgPlatform, queued.msgSessionKey)
 
 		if state.agentSession == nil || !state.agentSession.Alive() {
-			e.send(queued.platform, queued.replyCtx, fmt.Sprintf(e.i18n.T(MsgError), "agent session ended"))
+			if queued.authorKind != MessageAuthorPeerBot {
+				e.send(queued.platform, queued.replyCtx, fmt.Sprintf(e.i18n.T(MsgError), "agent session ended"))
+			}
 			e.notifyDroppedQueuedMessages(state, fmt.Errorf("agent session ended"))
 			return false
 		}

@@ -6375,6 +6375,193 @@ func TestQueueMessageForBusySession_FIFODequeue(t *testing.T) {
 	state.mu.Unlock()
 }
 
+func TestHandleMessage_PeerBotRateLimitIsSilent(t *testing.T) {
+	p := &stubPlatformEngine{n: "test"}
+	e := NewEngine("test", &stubAgent{}, []Platform{p}, "", LangEnglish)
+	e.SetRateLimitCfg(RateLimitCfg{MaxMessages: 1, Window: time.Minute})
+	defer e.rateLimiter.Stop()
+
+	key := "test:peer-bot"
+	if !e.rateLimiter.Allow(key) {
+		t.Fatal("expected initial rate limiter allowance")
+	}
+
+	e.handleMessage(p, &Message{
+		SessionKey: key,
+		UserID:     "peer-bot",
+		UserName:   "Dalgos",
+		Content:    "peer final output",
+		ReplyCtx:   "ctx-peer",
+		AuthorKind: MessageAuthorPeerBot,
+	})
+
+	if sent := p.getSent(); len(sent) != 0 {
+		t.Fatalf("peer bot rate-limit replies = %v, want none", sent)
+	}
+}
+
+func TestHandleMessage_HumanRateLimitStillReplies(t *testing.T) {
+	p := &stubPlatformEngine{n: "test"}
+	e := NewEngine("test", &stubAgent{}, []Platform{p}, "", LangEnglish)
+	e.SetRateLimitCfg(RateLimitCfg{MaxMessages: 1, Window: time.Minute})
+	defer e.rateLimiter.Stop()
+
+	key := "test:operator"
+	if !e.rateLimiter.Allow(key) {
+		t.Fatal("expected initial rate limiter allowance")
+	}
+
+	e.handleMessage(p, &Message{
+		SessionKey: key,
+		UserID:     "operator",
+		UserName:   "zoe",
+		Content:    "operator follow-up",
+		ReplyCtx:   "ctx-operator",
+	})
+
+	sent := p.getSent()
+	if len(sent) != 1 || !strings.Contains(sent[0], e.i18n.T(MsgRateLimited)) {
+		t.Fatalf("human rate-limit replies = %v, want MsgRateLimited", sent)
+	}
+}
+
+func TestQueueMessageForBusySession_PeerBotQueuedSilently(t *testing.T) {
+	p := &stubPlatformEngine{n: "test"}
+	sess := newQueuingSession("qs-peer")
+	agent := &controllableAgent{nextSession: sess}
+	e := NewEngine("test", agent, []Platform{p}, "", LangEnglish)
+
+	key := "test:peer-bot"
+	state := &interactiveState{
+		agentSession: sess,
+		platform:     p,
+		replyCtx:     "ctx",
+	}
+	e.interactiveMu.Lock()
+	e.interactiveStates[key] = state
+	e.interactiveMu.Unlock()
+
+	ok := e.queueMessageForBusySession(p, &Message{
+		SessionKey: key,
+		UserID:     "peer-bot",
+		UserName:   "Dalgos",
+		Content:    "queued peer output",
+		ReplyCtx:   "ctx-peer",
+		AuthorKind: MessageAuthorPeerBot,
+	}, key)
+
+	if !ok {
+		t.Fatal("expected peer bot message to queue")
+	}
+	if sent := p.getSent(); len(sent) != 0 {
+		t.Fatalf("peer bot queue replies = %v, want none", sent)
+	}
+	state.mu.Lock()
+	defer state.mu.Unlock()
+	if len(state.pendingMessages) != 1 {
+		t.Fatalf("pendingMessages len = %d, want 1", len(state.pendingMessages))
+	}
+	if state.pendingMessages[0].authorKind != MessageAuthorPeerBot {
+		t.Fatalf("queued author kind = %q, want peer bot", state.pendingMessages[0].authorKind)
+	}
+}
+
+func TestHandleMessage_PeerBotBusyOverflowIsSilent(t *testing.T) {
+	p := &stubPlatformEngine{n: "test"}
+	sess := newQueuingSession("qs-overflow-peer")
+	agent := &controllableAgent{nextSession: sess}
+	e := NewEngine("test", agent, []Platform{p}, "", LangEnglish)
+
+	key := "test:peer-overflow"
+	session := e.sessions.GetOrCreateActive(key)
+	if !session.TryLock() {
+		t.Fatal("expected session lock")
+	}
+	defer session.Unlock()
+
+	state := &interactiveState{
+		agentSession: sess,
+		platform:     p,
+		replyCtx:     "ctx",
+	}
+	for i := 0; i < maxQueuedMessages; i++ {
+		state.pendingMessages = append(state.pendingMessages, queuedMessage{content: fmt.Sprintf("existing-%d", i)})
+	}
+	e.interactiveMu.Lock()
+	e.interactiveStates[key] = state
+	e.interactiveMu.Unlock()
+
+	e.handleMessage(p, &Message{
+		SessionKey: key,
+		UserID:     "peer-bot",
+		UserName:   "Dalgos",
+		Content:    "overflow peer output",
+		ReplyCtx:   "ctx-peer",
+		AuthorKind: MessageAuthorPeerBot,
+	})
+
+	if sent := p.getSent(); len(sent) != 0 {
+		t.Fatalf("peer bot busy overflow replies = %v, want none", sent)
+	}
+}
+
+func TestHandleMessage_HumanBusyOverflowStillReplies(t *testing.T) {
+	p := &stubPlatformEngine{n: "test"}
+	sess := newQueuingSession("qs-overflow-human")
+	agent := &controllableAgent{nextSession: sess}
+	e := NewEngine("test", agent, []Platform{p}, "", LangEnglish)
+
+	key := "test:human-overflow"
+	session := e.sessions.GetOrCreateActive(key)
+	if !session.TryLock() {
+		t.Fatal("expected session lock")
+	}
+	defer session.Unlock()
+
+	state := &interactiveState{
+		agentSession: sess,
+		platform:     p,
+		replyCtx:     "ctx",
+	}
+	for i := 0; i < maxQueuedMessages; i++ {
+		state.pendingMessages = append(state.pendingMessages, queuedMessage{content: fmt.Sprintf("existing-%d", i)})
+	}
+	e.interactiveMu.Lock()
+	e.interactiveStates[key] = state
+	e.interactiveMu.Unlock()
+
+	e.handleMessage(p, &Message{
+		SessionKey: key,
+		UserID:     "operator",
+		UserName:   "zoe",
+		Content:    "overflow human input",
+		ReplyCtx:   "ctx-human",
+	})
+
+	sent := p.getSent()
+	if len(sent) != 1 || !strings.Contains(sent[0], e.i18n.T(MsgPreviousProcessing)) {
+		t.Fatalf("human busy overflow replies = %v, want MsgPreviousProcessing", sent)
+	}
+}
+
+func TestNotifyDroppedQueuedMessages_SkipsPeerBotSenders(t *testing.T) {
+	p := &stubPlatformEngine{n: "test"}
+	e := NewEngine("test", &stubAgent{}, []Platform{p}, "", LangEnglish)
+	state := &interactiveState{
+		pendingMessages: []queuedMessage{
+			{platform: p, replyCtx: "ctx-peer", content: "peer queued", authorKind: MessageAuthorPeerBot},
+			{platform: p, replyCtx: "ctx-human", content: "human queued"},
+		},
+	}
+
+	e.notifyDroppedQueuedMessages(state, errors.New("session reset"))
+
+	sent := p.getSent()
+	if len(sent) != 1 || !strings.Contains(sent[0], "session reset") {
+		t.Fatalf("dropped queued replies = %v, want one human-facing reset notice", sent)
+	}
+}
+
 func TestProcessInteractiveEvents_DrainsQueuedMessages(t *testing.T) {
 	p := &stubPlatformEngine{n: "test"}
 	sess := newQueuingSession("qs2")
