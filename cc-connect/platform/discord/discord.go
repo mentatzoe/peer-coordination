@@ -1025,6 +1025,10 @@ func (p *Platform) handleComponentInteraction(s *discordgo.Session, i *discordgo
 }
 
 func (p *Platform) Reply(ctx context.Context, rctx any, content string) error {
+	if core.IsSilentPassResponse(content) {
+		logSilentPass(rctx)
+		return nil
+	}
 	switch rc := rctx.(type) {
 	case *interactionReplyCtx:
 		return p.sendInteraction(rc, content)
@@ -1037,6 +1041,10 @@ func (p *Platform) Reply(ctx context.Context, rctx any, content string) error {
 
 // Send sends a new message (not a reply).
 func (p *Platform) Send(ctx context.Context, rctx any, content string) error {
+	if core.IsSilentPassResponse(content) {
+		logSilentPass(rctx)
+		return nil
+	}
 	switch rc := rctx.(type) {
 	case *interactionReplyCtx:
 		return p.sendInteraction(rc, content)
@@ -1044,6 +1052,17 @@ func (p *Platform) Send(ctx context.Context, rctx any, content string) error {
 		return p.sendChannel(rc, content)
 	default:
 		return fmt.Errorf("discord: invalid reply context type %T", rctx)
+	}
+}
+
+func logSilentPass(rctx any) {
+	switch rc := rctx.(type) {
+	case replyContext:
+		slog.Info("discord: silent pass", "channel", rc.targetChannelID(), "message_id", rc.messageID)
+	case *interactionReplyCtx:
+		slog.Info("discord: silent pass", "channel", rc.channelID)
+	default:
+		slog.Info("discord: silent pass")
 	}
 }
 

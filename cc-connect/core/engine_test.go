@@ -994,6 +994,32 @@ func TestProcessInteractiveEvents_DoesNotSuppressDifferentFinalText(t *testing.T
 	}
 }
 
+func TestProcessInteractiveEvents_SilentPassSuppressesFinalReply(t *testing.T) {
+	p := &stubPlatformEngine{n: "test"}
+	e := NewEngine("test", &stubAgent{}, []Platform{p}, "", LangEnglish)
+	sessionKey := "test:user1"
+	session := e.sessions.GetOrCreateActive(sessionKey)
+	agentSession := newControllableSession("silent-pass")
+	state := &interactiveState{
+		agentSession: agentSession,
+		platform:     p,
+		replyCtx:     "ctx-1",
+	}
+	e.interactiveStates[sessionKey] = state
+
+	agentSession.events <- Event{Type: EventResult, Content: SilentPassResponse, Done: true}
+	e.processInteractiveEvents(state, session, e.sessions, sessionKey, "m1", time.Now(), nil, nil, nil)
+
+	if got := p.getSent(); len(got) != 0 {
+		t.Fatalf("sent text = %#v, want no visible reply", got)
+	}
+	for _, h := range session.GetHistory(0) {
+		if h.Role == "assistant" && h.Content == SilentPassResponse {
+			t.Fatal("silent pass sentinel was stored as assistant history")
+		}
+	}
+}
+
 func TestProcessInteractiveEvents_AppendsReplyFooterWhenEnabled(t *testing.T) {
 	homeDir := t.TempDir()
 	t.Setenv("HOME", homeDir)
