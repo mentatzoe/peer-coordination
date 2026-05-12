@@ -1434,6 +1434,53 @@ func TestSend_WithMessageIDDoesNotCreateDiscordReply(t *testing.T) {
 	}
 }
 
+func TestSend_SilentPassSuppressesDiscordSend(t *testing.T) {
+	var requests int
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requests++
+		t.Fatalf("unexpected Discord request for silent PASS: %s %s", r.Method, r.URL.Path)
+	}))
+	defer server.Close()
+
+	s := newTestDiscordSession(t, server)
+	p := &Platform{session: s}
+
+	for _, content := range []string{
+		core.SilentPassResponse,
+		" \n" + core.SilentPassResponse + "\n\t",
+	} {
+		if err := p.Send(context.Background(), replyContext{channelID: "ch-1"}, content); err != nil {
+			t.Fatalf("Send(%q) error = %v", content, err)
+		}
+	}
+	if requests != 0 {
+		t.Fatalf("requests = %d, want 0", requests)
+	}
+}
+
+func TestSend_SilentPassMixedContentStillSends(t *testing.T) {
+	var payload map[string]any
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+			t.Fatalf("decode request: %v", err)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = fmt.Fprint(w, `{"id":"msg-send","channel_id":"ch-1"}`)
+	}))
+	defer server.Close()
+
+	s := newTestDiscordSession(t, server)
+	p := &Platform{session: s}
+
+	content := "classifier said " + core.SilentPassResponse + " but with extra text"
+	if err := p.Send(context.Background(), replyContext{channelID: "ch-1"}, content); err != nil {
+		t.Fatalf("Send() error = %v", err)
+	}
+	if payload["content"] != content {
+		t.Fatalf("content = %#v, want %q", payload["content"], content)
+	}
+}
+
 func TestSendChannelReply_WithoutMessageIDFallsBackToChannelSend(t *testing.T) {
 	var payload map[string]any
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

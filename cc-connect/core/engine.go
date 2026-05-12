@@ -2892,149 +2892,169 @@ func (e *Engine) processInteractiveEvents(state *interactiveState, session *Sess
 			} else if fullResponse == "" && len(textParts) > 0 {
 				fullResponse = strings.Join(textParts, "")
 			}
-			if fullResponse == "" {
-				fullResponse = e.i18n.T(MsgEmptyResponse)
-			}
-
-			// Context usage indicator: prefer SDK tokens, fall back to self-reported.
-			sdkPlausible := event.InputTokens >= 100
-			selfPct := parseSelfReportedCtx(fullResponse)
-			cleanResponse := ctxSelfReportRe.ReplaceAllString(fullResponse, "")
-			cleanResponse = strings.TrimRight(cleanResponse, "\n ")
-			baseResponse := cleanResponse
-
-			contextEstimate := estimateTokensWithPendingAssistant(session.GetHistory(0), baseResponse)
-
-			// Evaluate auto-compress trigger (token estimate on user+assistant text,
-			// including this turn's assistant reply before it is appended to history).
-			if e.autoCompressEnabled && e.autoCompressMaxTokens > 0 {
-				estimate := contextEstimate
-				now := time.Now()
-				state.mu.Lock()
-				last := state.lastAutoCompressAt
-				state.mu.Unlock()
-				if estimate >= e.autoCompressMaxTokens && (last.IsZero() || now.Sub(last) >= e.autoCompressMinGap) {
-					triggerAutoCompress = true
-					state.mu.Lock()
-					state.lastAutoCompressTokens = estimate
-					state.mu.Unlock()
-				}
-			}
-
-			session.AddHistory("assistant", baseResponse)
-			sessions.Save()
-
-			if e.showContextIndicator {
-				if sdkPlausible {
-					cleanResponse += contextIndicator(event.InputTokens)
-				} else if selfPct > 0 {
-					cleanResponse += fmt.Sprintf("\n[ctx: ~%d%%]", selfPct)
-				}
-			}
-			if footer := e.buildReplyFooter(replyAgent, state.agentSession, workspaceDir, replyFooterContextText(replyFooterSessionContextUsage(state.agentSession), e.i18n)); footer != "" {
-				cleanResponse = appendReplyFooter(cleanResponse, footer)
-			}
-			fullResponse = cleanResponse
-
-			turnDuration := time.Since(turnStart)
-			slog.Info("turn complete",
-				"session", session.ID,
-				"agent_session", session.GetAgentSessionID(),
-				"msg_id", msgID,
-				"tools", toolCount,
-				"response_len", len(fullResponse),
-				"turn_duration", turnDuration,
-				"input_tokens", event.InputTokens,
-				"output_tokens", event.OutputTokens,
-			)
-
-			replyStart := time.Now()
-			normalizedBaseResponse := strings.TrimSpace(baseResponse)
-			state.mu.Lock()
-			suppressDuplicate := normalizedBaseResponse != "" && normalizedBaseResponse == state.sideText
-			state.sideText = ""
-			state.mu.Unlock()
-
-			// When tool calls happened and prior text was already surfaced in segments,
-			// only send the unsent remainder. When tool progress is hidden, tool events don't surface
-			// side-channel messages and segmentStart stays 0, so keep normal finalize flow.
-			if toolCount > 0 && segmentStart > 0 {
+			silentPass := IsSilentPassResponse(fullResponse)
+			if silentPass {
 				sp.discard()
-				if segmentStart < len(textParts) {
-					unsent := strings.Join(textParts[segmentStart:], "")
-					if unsent != "" {
-						for _, chunk := range splitMessage(unsent, maxPlatformMessageLen) {
+				state.mu.Lock()
+				state.sideText = ""
+				state.mu.Unlock()
+				turnDuration := time.Since(turnStart)
+				slog.Info("turn complete",
+					"session", session.ID,
+					"agent_session", session.GetAgentSessionID(),
+					"msg_id", msgID,
+					"tools", toolCount,
+					"response_len", 0,
+					"turn_duration", turnDuration,
+					"input_tokens", event.InputTokens,
+					"output_tokens", event.OutputTokens,
+					"silent_pass", true,
+				)
+			} else {
+				if fullResponse == "" {
+					fullResponse = e.i18n.T(MsgEmptyResponse)
+				}
+
+				// Context usage indicator: prefer SDK tokens, fall back to self-reported.
+				sdkPlausible := event.InputTokens >= 100
+				selfPct := parseSelfReportedCtx(fullResponse)
+				cleanResponse := ctxSelfReportRe.ReplaceAllString(fullResponse, "")
+				cleanResponse = strings.TrimRight(cleanResponse, "\n ")
+				baseResponse := cleanResponse
+
+				contextEstimate := estimateTokensWithPendingAssistant(session.GetHistory(0), baseResponse)
+
+				// Evaluate auto-compress trigger (token estimate on user+assistant text,
+				// including this turn's assistant reply before it is appended to history).
+				if e.autoCompressEnabled && e.autoCompressMaxTokens > 0 {
+					estimate := contextEstimate
+					now := time.Now()
+					state.mu.Lock()
+					last := state.lastAutoCompressAt
+					state.mu.Unlock()
+					if estimate >= e.autoCompressMaxTokens && (last.IsZero() || now.Sub(last) >= e.autoCompressMinGap) {
+						triggerAutoCompress = true
+						state.mu.Lock()
+						state.lastAutoCompressTokens = estimate
+						state.mu.Unlock()
+					}
+				}
+
+				session.AddHistory("assistant", baseResponse)
+				sessions.Save()
+
+				if e.showContextIndicator {
+					if sdkPlausible {
+						cleanResponse += contextIndicator(event.InputTokens)
+					} else if selfPct > 0 {
+						cleanResponse += fmt.Sprintf("\n[ctx: ~%d%%]", selfPct)
+					}
+				}
+				if footer := e.buildReplyFooter(replyAgent, state.agentSession, workspaceDir, replyFooterContextText(replyFooterSessionContextUsage(state.agentSession), e.i18n)); footer != "" {
+					cleanResponse = appendReplyFooter(cleanResponse, footer)
+				}
+				fullResponse = cleanResponse
+
+				turnDuration := time.Since(turnStart)
+				slog.Info("turn complete",
+					"session", session.ID,
+					"agent_session", session.GetAgentSessionID(),
+					"msg_id", msgID,
+					"tools", toolCount,
+					"response_len", len(fullResponse),
+					"turn_duration", turnDuration,
+					"input_tokens", event.InputTokens,
+					"output_tokens", event.OutputTokens,
+				)
+
+				replyStart := time.Now()
+				normalizedBaseResponse := strings.TrimSpace(baseResponse)
+				state.mu.Lock()
+				suppressDuplicate := normalizedBaseResponse != "" && normalizedBaseResponse == state.sideText
+				state.sideText = ""
+				state.mu.Unlock()
+
+				// When tool calls happened and prior text was already surfaced in segments,
+				// only send the unsent remainder. When tool progress is hidden, tool events don't surface
+				// side-channel messages and segmentStart stays 0, so keep normal finalize flow.
+				if toolCount > 0 && segmentStart > 0 {
+					sp.discard()
+					if segmentStart < len(textParts) {
+						unsent := strings.Join(textParts[segmentStart:], "")
+						if unsent != "" {
+							for _, chunk := range splitMessage(unsent, maxPlatformMessageLen) {
+								if err := sendWorkspaceWithError(p, replyCtx, chunk); err != nil {
+									return
+								}
+							}
+						}
+					}
+				} else if suppressDuplicate {
+					sp.discard()
+					if metaOnly := strings.TrimSpace(strings.TrimPrefix(fullResponse, baseResponse)); metaOnly != "" {
+						for _, chunk := range splitMessage(metaOnly, maxPlatformMessageLen) {
 							if err := sendWorkspaceWithError(p, replyCtx, chunk); err != nil {
 								return
 							}
 						}
 					}
-				}
-			} else if suppressDuplicate {
-				sp.discard()
-				if metaOnly := strings.TrimSpace(strings.TrimPrefix(fullResponse, baseResponse)); metaOnly != "" {
-					for _, chunk := range splitMessage(metaOnly, maxPlatformMessageLen) {
+					slog.Debug("EventResult: suppressed duplicate side-channel text", "response_len", len(fullResponse))
+				} else if sp.finish(fullResponse) {
+					slog.Debug("EventResult: finalized via stream preview", "response_len", len(fullResponse))
+				} else {
+					slog.Debug("EventResult: sending via p.Send (preview inactive or failed)", "response_len", len(fullResponse), "chunks", len(splitMessage(fullResponse, maxPlatformMessageLen)))
+					for _, chunk := range splitMessage(fullResponse, maxPlatformMessageLen) {
 						if err := sendWorkspaceWithError(p, replyCtx, chunk); err != nil {
 							return
 						}
 					}
 				}
-				slog.Debug("EventResult: suppressed duplicate side-channel text", "response_len", len(fullResponse))
-			} else if sp.finish(fullResponse) {
-				slog.Debug("EventResult: finalized via stream preview", "response_len", len(fullResponse))
-			} else {
-				slog.Debug("EventResult: sending via p.Send (preview inactive or failed)", "response_len", len(fullResponse), "chunks", len(splitMessage(fullResponse, maxPlatformMessageLen)))
-				for _, chunk := range splitMessage(fullResponse, maxPlatformMessageLen) {
-					if err := sendWorkspaceWithError(p, replyCtx, chunk); err != nil {
+
+				if elapsed := time.Since(replyStart); elapsed >= slowPlatformSend {
+					slog.Warn("slow final reply send", "platform", p.Name(), "elapsed", elapsed, "response_len", len(fullResponse))
+				}
+
+				// TTS: async voice reply if enabled
+				if e.tts != nil && e.tts.Enabled && e.tts.TTS != nil {
+					state.mu.Lock()
+					fromVoice := state.fromVoice
+					state.mu.Unlock()
+					mode := e.tts.GetTTSMode()
+					slog.Debug("tts: checking conditions", "mode", mode, "fromVoice", fromVoice, "will_send", mode == "always" || (mode == "voice_only" && fromVoice))
+					if mode == "always" || (mode == "voice_only" && fromVoice) {
+						go e.sendTTSReply(p, replyCtx, fullResponse)
+					}
+				} else {
+					slog.Debug("tts: not enabled", "tts_nil", e.tts == nil, "enabled", e.tts != nil && e.tts.Enabled, "tts_obj_nil", e.tts == nil || e.tts.TTS == nil)
+				}
+
+				// Auto-compress after finishing a turn, before sending any queued messages.
+				if triggerAutoCompress {
+					compressor, ok := e.agent.(ContextCompressor)
+					if ok && compressor.CompressCommand() != "" {
+						if pendingSend != nil {
+							if !e.waitForPendingSend(pendingSend, stopCh, "async send error before compress") {
+								return
+							}
+							pendingSend = nil
+						}
+						state.mu.Lock()
+						state.lastAutoCompressAt = time.Now()
+						tokenEst := state.lastAutoCompressTokens
+						state.mu.Unlock()
+						slog.Info("auto-compress: triggering", "session", sessionKey)
+
+						// Notify user before compressing so they know the context is about to change.
+						compressNotice := e.i18n.T(MsgCompressing)
+						if tokenEst > 0 {
+							compressNotice = fmt.Sprintf("%s (~%dk tokens)", compressNotice, tokenEst/1000)
+						}
+						e.send(state.platform, state.replyCtx, compressNotice)
+
+						// Run compress inline while the session is still locked.
+						e.runCompress(state, session, sessions, sessionKey, state.platform, state.replyCtx, true)
 						return
 					}
-				}
-			}
-
-			if elapsed := time.Since(replyStart); elapsed >= slowPlatformSend {
-				slog.Warn("slow final reply send", "platform", p.Name(), "elapsed", elapsed, "response_len", len(fullResponse))
-			}
-
-			// TTS: async voice reply if enabled
-			if e.tts != nil && e.tts.Enabled && e.tts.TTS != nil {
-				state.mu.Lock()
-				fromVoice := state.fromVoice
-				state.mu.Unlock()
-				mode := e.tts.GetTTSMode()
-				slog.Debug("tts: checking conditions", "mode", mode, "fromVoice", fromVoice, "will_send", mode == "always" || (mode == "voice_only" && fromVoice))
-				if mode == "always" || (mode == "voice_only" && fromVoice) {
-					go e.sendTTSReply(p, replyCtx, fullResponse)
-				}
-			} else {
-				slog.Debug("tts: not enabled", "tts_nil", e.tts == nil, "enabled", e.tts != nil && e.tts.Enabled, "tts_obj_nil", e.tts == nil || e.tts.TTS == nil)
-			}
-
-			// Auto-compress after finishing a turn, before sending any queued messages.
-			if triggerAutoCompress {
-				compressor, ok := e.agent.(ContextCompressor)
-				if ok && compressor.CompressCommand() != "" {
-					if pendingSend != nil {
-						if !e.waitForPendingSend(pendingSend, stopCh, "async send error before compress") {
-							return
-						}
-						pendingSend = nil
-					}
-					state.mu.Lock()
-					state.lastAutoCompressAt = time.Now()
-					tokenEst := state.lastAutoCompressTokens
-					state.mu.Unlock()
-					slog.Info("auto-compress: triggering", "session", sessionKey)
-
-					// Notify user before compressing so they know the context is about to change.
-					compressNotice := e.i18n.T(MsgCompressing)
-					if tokenEst > 0 {
-						compressNotice = fmt.Sprintf("%s (~%dk tokens)", compressNotice, tokenEst/1000)
-					}
-					e.send(state.platform, state.replyCtx, compressNotice)
-
-					// Run compress inline while the session is still locked.
-					e.runCompress(state, session, sessions, sessionKey, state.platform, state.replyCtx, true)
-					return
 				}
 			}
 
@@ -3130,8 +3150,10 @@ func (e *Engine) processInteractiveEvents(state *interactiveState, session *Sess
 			// Add a "done" reaction so the user knows the agent finished.
 			// The reaction is added after stopTyping (deferred) so the
 			// "doing" emoji is removed first.
-			if doneTI, ok := p.(TypingIndicatorDone); ok {
-				doneReaction = func() { doneTI.AddDoneReaction(replyCtx) }
+			if !silentPass {
+				if doneTI, ok := p.(TypingIndicatorDone); ok {
+					doneReaction = func() { doneTI.AddDoneReaction(replyCtx) }
+				}
 			}
 
 			return

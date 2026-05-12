@@ -145,6 +145,15 @@ const (
 	MessageAuthorPeerBot MessageAuthorKind = "peer_bot"
 )
 
+// SilentPassResponse is the exact final response sentinel an agent may emit
+// when a pre-response classifier decides the correct visible behavior is PASS.
+// The engine suppresses this sentinel instead of delivering it to the platform.
+const SilentPassResponse = "__CC_CONNECT_SILENT_PASS__"
+
+func IsSilentPassResponse(content string) bool {
+	return strings.TrimSpace(content) == SilentPassResponse
+}
+
 // Message represents a unified incoming message from any platform.
 type Message struct {
 	SessionKey   string // unique key for user context, e.g. "feishu:{chatID}:{userID}"
