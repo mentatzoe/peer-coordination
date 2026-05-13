@@ -40,8 +40,8 @@ func TestIsSilentPassResponse(t *testing.T) {
 		{"whitespace only", "   \n\t  ", false},
 		{"unrelated content", "no, I have something to say", false},
 		{"bare PASS word", "PASS", false},
-		{"angle-bracket near-miss", "<silent_pass>", false},
-		{"angle-bracket extra-space near-miss", "< SILENT_PASS >", false},
+		{"lowercase near-miss", "cc_connect_silent_pass", false},
+		{"extra-space near-miss", "CC_ CONNECT_SILENT_PASS", false},
 	}
 
 	for _, tc := range tests {

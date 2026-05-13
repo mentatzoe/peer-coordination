@@ -148,9 +148,9 @@ const (
 // SilentPassSentinel is the canonical final-response sentinel an agent may
 // emit when a pre-response classifier decides the correct visible behavior is
 // PASS. The engine suppresses this sentinel instead of delivering it to the
-// platform. Angle-bracket boundaries are chosen for low Markdown-activity and
+// platform. Namespaced identifier chosen for low Markdown-activity and
 // reduced typo surface relative to the underscore-fenced legacy sentinel.
-const SilentPassSentinel = "<SILENT_PASS>"
+const SilentPassSentinel = "CC_CONNECT_SILENT_PASS"
 
 // SilentPassResponse is the legacy underscore-fenced sentinel, retained for
 // backward compatibility while loader files transition to SilentPassSentinel.
