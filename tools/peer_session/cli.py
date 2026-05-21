@@ -9,6 +9,8 @@ from typing import Sequence
 
 from tools.peer_session.bundle_init import initialize_bundle
 from tools.peer_session.interventions import add_intervention, validate_interventions_file
+from tools.peer_session.rollup import run_rollup
+from tools.peer_session.tally import run_tally
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -81,6 +83,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     validate_parser.add_argument("session_id", help="Target session bundle ID")
 
+    tally_parser = subparsers.add_parser(
+        "tally",
+        help="Compute per-session KPIs from a closed bundle (writes kpi.json).",
+    )
+    tally_parser.add_argument("session_id", help="Target session bundle ID")
+
+    subparsers.add_parser(
+        "rollup",
+        help="Aggregate counted-session KPIs into observations/poc-exit-<timestamp>.md.",
+    )
+
     return parser
 
 
@@ -139,6 +152,16 @@ def main(argv: Sequence[str] | None = None, *, repo_root: Path | None = None) ->
         except Exception as exc:  # pragma: no cover - exact paths will be expanded in tests
             print(f"Error: {exc}", file=sys.stderr)
             return 1
+
+    if args.command == "tally":
+        effective_repo_root = repo_root or Path.cwd()
+        sessions_root = effective_repo_root / "observations" / "sessions"
+        return run_tally(args.session_id, sessions_root=sessions_root)
+
+    if args.command == "rollup":
+        effective_repo_root = repo_root or Path.cwd()
+        observations_root = effective_repo_root / "observations"
+        return run_rollup(observations_root=observations_root)
 
     parser.print_help()
     return 1

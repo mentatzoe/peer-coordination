@@ -99,6 +99,93 @@ Full operator workflow: [`../INTERVENTIONS-WORKFLOW.md`](../INTERVENTIONS-WORKFL
 
 Replace with the real rubric output once the drift-audit rubric spec lands.
 
+### `kpi.json` schema (spec 010)
+
+Written by `peer-session tally <session-id>`. Operator-readable, but **not**
+operator-authored — re-running tally against an unchanged bundle MUST produce a
+byte-identical file modulo `tallied_at` (spec 010 FR-004 / SC-002).
+
+```
+{
+  "session_id": "<matches meta.json.session_id>",
+  "tallied_at": "<ISO-8601 UTC timestamp, seconds precision>",
+  "inputs_hash": "<SHA-256 hex digest over the canonicalised bundle inputs>",
+  "intervention_count": <integer total count from interventions.json>,
+  "intervention_type_tally": {
+    "safety_stop": <int>,
+    "clarification": <int>,
+    "directive_redirect": <int>,
+    "drift_catch": <int>,
+    "close_or_resume": <int>,
+    "other": <int>
+  },
+  "intervention_rate_per_turn": <number or null>,
+  "zero_turn_session": <bool>,
+  "drift_audit_verdict": "<no_drift | minor_drift | load_bearing_drift>" | null,
+  "per_session_clear": "<cleared | not-cleared | ambiguous>",
+  "per_session_clear_breakdown": {
+    "h1_stable_coordination": { "judgment": "<...>", "reason": "<...>" },
+    "h1_intervention_load":   { "judgment": "<...>", "reason": "<...>" },
+    "h1_complementarity":     { "judgment": "<...>", "reason": "<...>" },
+    "h2_fresh_reader":        { "judgment": "<...>", "reason": "<...>" },
+    "h2_drift":               { "judgment": "<...>", "reason": "<...>" },
+    "h2_episode_record":      { "judgment": "<...>", "reason": "<...>" }
+  },
+  "notes": ["<diagnostic note>", ...]
+}
+```
+
+Fields:
+- `session_id`: MUST match the enclosing directory name and `meta.json.session_id`.
+- `tallied_at`: ISO-8601 UTC timestamp; updates on every tally run.
+- `inputs_hash`: SHA-256 hex digest over the canonicalised bundle inputs in a
+  fixed order (`meta.json` raw, `interventions.json` canonical JSON,
+  `drift-audit.json` canonical JSON, `summary.md` raw, `transcript.md` raw,
+  `fresh-reader-audit.json` canonical JSON when present). `peer-session rollup`
+  uses this field to detect stale tallies vs. current bundle content.
+- `intervention_count`: number of records in `interventions.json`.
+- `intervention_type_tally`: object keyed by the spec-001 FR-011 frozen taxonomy
+  (`safety_stop`, `clarification`, `directive_redirect`, `drift_catch`,
+  `close_or_resume`, `other`); zeros for absent types.
+- `intervention_rate_per_turn`: directive-redirect intervention count divided by
+  peer turn count. `null` when the transcript has zero peer turns.
+- `zero_turn_session`: `true` iff the transcript has zero peer turns.
+- `drift_audit_verdict`: snapshot of `drift-audit.json.verdict`; `null` when the
+  audit is still the spec-001 placeholder or has no `verdict`.
+- `per_session_clear`: composite over the breakdown — `not-cleared` if any
+  sub-judgment is `not-cleared`, else `ambiguous` if any is `ambiguous`, else
+  `cleared`.
+- `per_session_clear_breakdown`: six sub-judgments per spec 010 research §4.
+  Each has a `judgment` (`cleared | not-cleared | ambiguous`) and a `reason`
+  string.
+- `notes`: optional free-text diagnostic lines (e.g., "drift-audit.json is the
+  spec-001 Phase-2-pending placeholder").
+
+### `fresh-reader-audit.json` schema (spec 010)
+
+Operator-authored per `observations/kpi-rollup/WORKFLOW.md` §A. `peer-session
+tally` reads but never modifies this file; `peer-session rollup` refuses to
+produce a per-run file when this artifact is missing from any counted bundle.
+
+```
+{
+  "session_id": "<matches meta.json.session_id>",
+  "audited_at": "<ISO-8601 UTC timestamp, seconds precision>",
+  "auditor": "<fresh reader's handle or identity>",
+  "verdict": "<pass | fail | inconclusive>",
+  "reasoning": "<free-text operator note>"
+}
+```
+
+Fields:
+- `session_id`: MUST match the enclosing directory name and `meta.json.session_id`.
+- `audited_at`: ISO-8601 UTC timestamp when the fresh reader's review completed.
+- `auditor`: the fresh reader's handle, identity, or anonymised role (e.g.
+  `"vesper (Phase 3 reviewer)"`).
+- `verdict`: one of `pass`, `fail`, `inconclusive`.
+- `reasoning`: short free-text note explaining what the reader could and
+  couldn't reconstruct from the preserved bundle.
+
 ## How to fill the template
 
 1. `cp -r observations/sessions/_template/ observations/sessions/<session-id>/`

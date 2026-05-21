@@ -1,0 +1,12 @@
+[
+  {
+    "id": "iv-001",
+    "taxonomy_version": "poc-v1",
+    "at": "2026-04-21T15:10:00Z",
+    "type": "invented_type_not_in_taxonomy",
+    "reason": "operator asked beta to restate their position",
+    "attribution": "operator_directed",
+    "actor": "zoe",
+    "target": { "kind": "turn", "turn_ref": "2026-04-21T15:09:30Z" }
+  }
+]

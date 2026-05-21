@@ -1,0 +1,15 @@
+{
+  "session_id": "session-minimal",
+  "opened_at": "2026-04-21T15:00:00Z",
+  "closed_at": null,
+  "close_reason": "operator_close",
+  "participants": [
+    { "handle": "alpha", "role": "peer" },
+    { "handle": "beta", "role": "peer" },
+    { "handle": "zoe", "role": "operator" }
+  ],
+  "pinned_rules_ref": "deadbeefcafebabe1234567890abcdef12345678",
+  "substrate": "discord",
+  "channel_id": "111111111111111111",
+  "transcript_source": "export"
+}
